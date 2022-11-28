@@ -1,0 +1,155 @@
+parameters:
+- name: buildConfiguration
+  type: string
+  default: 'Release'
+- name: testDatabasename
+  type: string
+  default: TodoItemsDB
+- name: postBuildSteps
+  type: stepList
+  default: []
+
+resources:
+  containers:
+  - container: mssql
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    env:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: $(SA_PASSWORD)
+      MSSQL_PID: Developer
+    ports: 
+      - 1433:1433
+    options: --name mssql
+
+variables:
+  #Used for SQL Server password, placed in variable group. Comment group and uncomment SA_PASSWORD variable
+#- name: SA_PASSWORD
+#  value: '<<SECRET VALUE>>'
+- group: TodoItemsApi-Build
+- name: DOTNET_SKIP_FIRST_TIME_EXPERIENCE 
+  value: true
+  readonly: true
+  #Override to create env variable to have control where the global packages are stored for caching: https://learn.microsoft.com/en-us/nuget/consume-packages/managing-the-global-packages-and-cache-folders
+- name: NUGET_PACKAGES
+  value: '$(Pipeline.Workspace)/.nuget/packages/'
+  readonly: true
+- name: dotNetVersion
+  value: '7.0.x'
+  readonly: true
+
+jobs:
+  - job: Job
+    services:
+      mssql:
+        alias: mssql
+    steps:
+    - task: PowerShell@2
+      displayName: 'Determine if dotnet ${{variables.dotNetVersion}} is installed'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $installedSdks = dotnet --list-sdks
+          $dotnetVersionVariable = '${{variables.dotNetVersion}}'.Replace('x', '')
+          $match = $installedSdks -like ($dotnetVersionVariable + "*")
+          if($match){
+            Write-Host "##vso[task.setvariable variable=isDotNetVersionInstalled;]true"
+          }
+        pwsh: true
+
+    - task: UseDotNet@2
+      displayName: 'Install ${{variables.dotNetVersion}}'
+      condition: and(succeeded(), ne(variables['isDotNetVersionInstalled'], 'true'))
+      inputs:
+        version: $(dotNetVersion)
+        includePreviewVersions: false
+  
+    - task: Cache@2
+      displayName: 'Restore cache for NuGet'
+      inputs:
+        key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,!**/bin/**,!**/obj/**'
+        path: '$(NUGET_PACKAGES)'
+        cacheHitVar: 'CACHE_RESTORED'
+        restoreKeys: |
+          nuget | "$(Agent.OS)"
+          nuget
+
+    - task: DotNetCoreCLI@2
+      displayName: Dotnet restore '**/*.csproj'
+      condition: ne(variables.CACHE_RESTORED, true)
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
+        restoreArguments: '--locked-mode --nologo'
+        feedsToUse: 'select'
+
+    - task: DotNetCoreCLI@2
+      displayName: Dotnet build '**/*.csproj'
+      inputs:
+        command: 'build'
+        projects: '**/*.csproj'
+        ${{ if eq(variables.CACHE_RESTORED, true) }}:
+          arguments: '--no-restore --configuration ${{parameters.buildConfiguration}} --nologo'
+        ${{ else }}:
+          arguments: '--configuration ${{parameters.buildConfiguration}} --nologo'
+
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'custom'
+        custom: 'tool'
+        arguments: 'restore'
+        workingDirectory: '$(Build.SourcesDirectory)/TodoItems.Api'
+      displayName: 'Restore dotnet tools'
+
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'custom'
+        custom: 'ef'
+        arguments: 'migrations script --output $(Build.ArtifactStagingDirectory)/SQL/db.sql --idempotent --project TodoItems.Api.csproj --context TodoDb --no-build --verbose --configuration ${{parameters.buildConfiguration}}'
+        workingDirectory: '$(Build.SourcesDirectory)/TodoItems.Api'
+      displayName: 'Create idempotent SQL'
+      env:
+        #Pass environment variable dummy. So the migration script will not be created against the InMemory database.
+        ASPNETCORE_ENVIRONMENT: 'DUMMY'
+
+    - script: |
+          sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -Q 'CREATE DATABASE ${{parameters.testDatabasename}}' -b
+          sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -i db.sql -d ${{parameters.testDatabasename}} -b
+      workingDirectory: '$(Build.ArtifactStagingDirectory)/SQL'
+      displayName: 'Create database and tables for unit tests'
+      timeoutInMinutes: 1
+
+    - task: DotNetCoreCLI@2
+      displayName: Dotnet test '**/*Tests.csproj'
+      inputs:
+        command: 'test'
+        projects: '**/*Tests.csproj'
+        arguments: '--no-restore --nologo --configuration ${{parameters.buildConfiguration}}'
+      env:
+        integrationtests_ConnectionStrings__TodoDb: 'Server=127.0.0.1,1433;Database=${{parameters.testDatabasename}};User Id=SA;Password=$(SA_PASSWORD);TrustServerCertificate=true;'
+    
+    - task: DotNetCoreCLI@2
+      displayName: Dotnet publish '**/TodoItems.Api.csproj' 
+      inputs:
+        command: 'publish'
+        publishWebProjects: false
+        projects: '**/TodoItems.Api.csproj' 
+        arguments: '--no-restore --configuration ${{parameters.buildConfiguration}} --nologo --no-build --output $(Build.ArtifactStagingDirectory)/todoItemsApi'
+        modifyOutputPath: false
+        zipAfterPublish: false
+
+    - task: PublishPipelineArtifact@1
+      displayName: Publish pipeline artifact 'SQL'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/SQL'
+        artifact: 'database'
+        publishLocation: 'pipeline'
+
+    - task: PublishPipelineArtifact@1
+      displayName: Publish pipeline artifact 'Deployment'
+      inputs:
+        targetPath: '$(Build.SourcesDirectory)/Deployment'
+        artifact: 'infraCode'
+        publishLocation: 'pipeline'
+      
+    - ${{ each step in parameters.postBuildSteps }}:
+      - ${{ step }}

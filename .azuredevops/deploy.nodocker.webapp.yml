@@ -1,0 +1,49 @@
+trigger:
+- master
+
+pool:
+  vmImage: windows-latest
+
+resources:
+  pipelines:
+  - pipeline: webApp
+    source: TodoItems.Build
+    trigger: 
+      branches:
+      - bicep
+
+stages:
+ - stage: O
+   jobs:
+   - deployment: 
+     variables:
+     - group: TodoItemsApi-O
+     environment: TodoItem-O
+     strategy:
+      runOnce:
+        deploy:
+          steps:
+            - download: webApp
+              artifact: todoItemsApi
+              displayName: Download API
+            
+            - task: AzureRmWebAppDeployment@4
+              inputs:
+                ConnectionType: 'AzureRM'
+                azureSubscription: 'MSN Azure'
+                appType: 'webAppLinux'
+                WebAppName: 'todoitems-O'
+                packageForLinux: '$(Pipeline.Workspace)/webApp/todoItemsApi'
+                RuntimeStack: 'DOTNETCORE|6.0'
+                StartupCommand: 'dotnet TodoItems.Api.dll'
+            - task: SqlAzureDacpacDeployment@1
+              inputs:
+                azureSubscription: 'MSN Azure'
+                AuthenticationType: 'server'
+                ServerName: 'todoitems-sqlserver-o.database.windows.net,1433'
+                DatabaseName: 'todoItems'
+                SqlUsername: 'AdminUserO'
+                SqlPassword: '$(todoItemsSqlAdminpassword-O)'
+                deployType: 'SqlTask'
+                SqlFile: '$(Pipeline.Workspace)/webApp/database/db.sql'
+                IpDetectionMethod: 'AutoDetect'

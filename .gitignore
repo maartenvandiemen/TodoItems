@@ -1,0 +1,12 @@
+﻿# User-specific files
+*.user
+
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio cache/options directory
+.vs/
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
