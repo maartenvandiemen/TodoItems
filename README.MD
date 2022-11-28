@@ -4,11 +4,6 @@
 Demo project of an ASP.NET Core 7 minimal API's. Inspired by the demo from Daniel Roth that has been given at [dotnetconf](https://www.dotnetconf.net). See the original presentation below:<br>
 [![YoutubePreview](http://img.youtube.com/vi/gNyEpkJMmcM/0.jpg)](http://www.youtube.com/watch?v=gNyEpkJMmcM)
 
-
-
-
-
-
 ## Prerequisites Azure Devops
 The following prerequisites are required before performing the labs:
 
@@ -27,5 +22,7 @@ The following prerequisites are required before performing the labs:
 1. Import build.nodocker.yml
 
 ### CI build (docker)
-1. Follow the steps in [CI build](#Prerequisites-Azure-Devops)
-###CI-build-(nodocker)
+1. Follow the steps in [CI build](#CI-build-(nodocker))
+1. Create a Azure Container registry
+   - TODO: Optional use the Bicep script for this
+1. TODO: Configure variables XXX and YYY in variable group: _TodoItemsApi-Build_.
