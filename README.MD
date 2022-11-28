@@ -1,4 +1,4 @@
-![Github CI](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+![Github CI](https://github.com/mvdiemen/TodoItems/actions/workflows/main.yml/badge.svg)
 
 # Prerequisites
 
