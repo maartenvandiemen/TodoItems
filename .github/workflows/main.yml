@@ -1,6 +1,8 @@
 name: Build TodoItems
 on: 
   push:
+    paths-ignore:
+      - '.azuredevops/**'
   workflow_dispatch:
     inputs:
       buildConfiguration:
