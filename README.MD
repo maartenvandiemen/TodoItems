@@ -1,3 +1,5 @@
+![Github CI](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+
 # Prerequisites
 
 The following prerequisites are required before performing the labs:
