@@ -27,5 +27,5 @@ The following prerequisites are required before performing the labs:
 1. Import build.nodocker.yml
 
 ### CI build (docker)
-1. Follow the steps in [CI build](##Prerequisites-Azure-Devops)
+1. Follow the steps in [CI build](#Prerequisites-Azure-Devops)
 ###CI-build-(nodocker)
