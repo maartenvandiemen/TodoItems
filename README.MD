@@ -1,5 +1,10 @@
 ![Github CI](https://github.com/mvdiemen/TodoItems/actions/workflows/main.yml/badge.svg)
 
+
+Demo project of an ASP.NET Core 7 minimal API 
+[![YoutubePreview](http://img.youtube.com/vi/gNyEpkJMmcM/0.jpg)](http://www.youtube.com/watch?v=gNyEpkJMmcM)
+
+
 # Prerequisites
 
 The following prerequisites are required before performing the labs:
