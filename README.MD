@@ -22,7 +22,7 @@ The following prerequisites are required before performing the labs:
 1. Import build.nodocker.yml
 
 ### CI build (docker)
-1. Follow the steps in [CI build](#CI-build-(nodocker))
+1. Follow the steps in [CI build](#ci-build-nodocker)
 1. Create a Azure Container registry
    - TODO: Optional use the Bicep script for this
 1. TODO: Configure variables XXX and YYY in variable group: _TodoItemsApi-Build_.
