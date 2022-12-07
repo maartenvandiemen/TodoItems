@@ -1,5 +1,7 @@
 name: Build TodoItems
 on: 
+  schedule:
+    - cron:  '0 0 * * 3'
   push:
     paths-ignore:
       - '.azuredevops/**'
