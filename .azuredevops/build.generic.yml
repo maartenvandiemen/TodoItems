@@ -26,6 +26,9 @@ variables:
 #- name: SA_PASSWORD
 #  value: '<<SECRET VALUE>>'
 - group: TodoItemsApi-Build
+- name: DOTNET_NOLOGO
+  value: false
+  readonly: true
 - name: DOTNET_SKIP_FIRST_TIME_EXPERIENCE 
   value: true
   readonly: true
@@ -79,18 +82,24 @@ jobs:
       inputs:
         command: 'restore'
         projects: '**/*.csproj'
-        restoreArguments: '--locked-mode --nologo'
+        restoreArguments: '--locked-mode'
         feedsToUse: 'select'
-
+         
     - task: DotNetCoreCLI@2
-      displayName: Dotnet build '**/*.csproj'
+      displayName: Dotnet build pipeline cache not restored
+      condition: eq(variables.CACHE_RESTORED, true)
       inputs:
         command: 'build'
         projects: '**/*.csproj'
-        ${{ if eq(variables.CACHE_RESTORED, true) }}:
-          arguments: '--no-restore --configuration ${{parameters.buildConfiguration}} --nologo'
-        ${{ else }}:
-          arguments: '--configuration ${{parameters.buildConfiguration}} --nologo'
+        arguments: '--no-restore --configuration ${{parameters.buildConfiguration}}'
+    
+    - task: DotNetCoreCLI@2
+      displayName: Dotnet build pipeline cache restored
+      condition: ne(variables.CACHE_RESTORED, true)
+      inputs:
+        command: 'build'
+        projects: '**/*.csproj'
+        arguments: '--configuration ${{parameters.buildConfiguration}}' 
 
     - task: DotNetCoreCLI@2
       inputs:
