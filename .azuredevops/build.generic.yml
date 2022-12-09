@@ -86,7 +86,7 @@ jobs:
         feedsToUse: 'select'
          
     - task: DotNetCoreCLI@2
-      displayName: Dotnet build pipeline cache not restored
+      displayName: Dotnet build - pipeline cache restored
       condition: eq(variables.CACHE_RESTORED, true)
       inputs:
         command: 'build'
@@ -94,7 +94,7 @@ jobs:
         arguments: '--no-restore --configuration ${{parameters.buildConfiguration}}'
     
     - task: DotNetCoreCLI@2
-      displayName: Dotnet build pipeline cache restored
+      displayName: Dotnet build - pipeline cache not restored
       condition: ne(variables.CACHE_RESTORED, true)
       inputs:
         command: 'build'
