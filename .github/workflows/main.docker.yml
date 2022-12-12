@@ -1,1 +1,41 @@
-
+name: Build TodoItems Docker
+on: 
+  schedule:
+    - cron:  '0 0 * * 3'
+  push:
+    paths-ignore:
+      - '.azuredevops/**'
+  workflow_dispatch:
+    inputs:
+      buildConfiguration:
+        description: 'Build configuration'
+        required: true
+        default: 'Release' 
+        type: choice
+        options:
+        - Debug
+        - Release
+defaults:
+  run:
+    shell: pwsh
+jobs:
+  determine_variables:
+    runs-on: ubuntu-latest
+    outputs:
+      buildConfiguration: ${{ steps.setupVars.outputs.buildConfiguration }}
+    steps:
+    - name: Setup variables
+      id: setupVars
+      run: |
+        if("${{github.event.inputs.buildConfiguration}}"){
+          echo "buildConfiguration=${{github.event.inputs.buildConfiguration}}" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+        }
+        else{
+          echo "buildConfiguration=Release" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+        }
+  build:  
+    needs: [determine_variables]
+    uses: ./.github/workflows/build.yml
+    with:
+      buildConfiguration: ${{needs.determine_variables.outputs.buildConfiguration}}
+    secrets: inherit
