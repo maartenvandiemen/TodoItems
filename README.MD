@@ -1,5 +1,7 @@
-![Github CI](https://github.com/mvdiemen/TodoItems/actions/workflows/main.yml/badge.svg)
-
+| Build | Status |
+| ------------- | ------------- |
+| Github Actions no docker  | ![Github CI](https://github.com/mvdiemen/TodoItems/actions/workflows/main.yml/badge.svg)  |
+| Azure Devops no docker | [![Build Status](https://dev.azure.com/maartenvandiemen/GithubPipelines/_apis/build/status/TodoItems/TodoItems.NoDocker?branchName=refs%2Fpull%2F1%2Fmerge)](https://dev.azure.com/maartenvandiemen/GithubPipelines/_build/latest?definitionId=31&branchName=refs%2Fpull%2F1%2Fmerge)  |
 
 Demo project of an ASP.NET Core 7 minimal API's. Inspired by the demo from Daniel Roth that has been given at [dotnetconf](https://www.dotnetconf.net). See the original presentation below:<br>
 [![YoutubePreview](http://img.youtube.com/vi/gNyEpkJMmcM/0.jpg)](http://www.youtube.com/watch?v=gNyEpkJMmcM)
