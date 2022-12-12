@@ -1,6 +1,13 @@
 trigger:
 - master
 
+schedules:
+- cron: "0 0 * * 3"
+  always: true
+  branches:
+    include:
+    - main
+
 pool:
   vmImage: ubuntu-latest
 
