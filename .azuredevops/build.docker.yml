@@ -8,10 +8,13 @@ extends:
    template: build.generic.yml
    parameters:
      postBuildSteps: 
-       - task: Docker@2
-         inputs:
-           containerRegistry: 'Github Packages'
-           repository: 'mvdiemen/todoitemsapi'
-           command: 'buildAndPush'
-           Dockerfile: '**/Dockerfile'
-           buildContext: '$(Build.ArtifactStagingDirectory)/todoItemsApi'
+      - task: CmdLine@2
+        inputs:
+          script: 'echo $(Build.Repository.Name)'
+       #- task: Docker@2
+       #  inputs:
+       #    containerRegistry: 'Github Packages'
+       #    repository: 'mvdiemen/todoitemsapi'
+       #    command: 'buildAndPush'
+       #    Dockerfile: '**/Dockerfile'
+       #    buildContext: '$(Build.ArtifactStagingDirectory)/todoItemsApi'
