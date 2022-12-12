@@ -8,6 +8,14 @@
 Demo project of an ASP.NET Core 7 minimal API's. Inspired by the demo from Daniel Roth that has been given at [dotnetconf](https://www.dotnetconf.net). See the original presentation below:<br>
 [![YoutubePreview](http://img.youtube.com/vi/gNyEpkJMmcM/0.jpg)](http://www.youtube.com/watch?v=gNyEpkJMmcM)
 
+# Prerequisites
+## Prerequisites Github
+The following prerequisites are required before performing the labs:
+
+1. Ensure you have a Github account
+1. Create a [new public repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository)
+1. Create a new [Action Secret for the repository](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository) with the name: `SA_PASSWORD`. The value of this field should be a [complex password according to SQL Server](https://learn.microsoft.com/en-us/sql/relational-databases/security/password-policy).
+
 ## Prerequisites Azure Devops
 The following prerequisites are required before performing the labs:
 
