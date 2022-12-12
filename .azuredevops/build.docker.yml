@@ -11,7 +11,7 @@ extends:
        - task: Docker@2
          inputs:
            containerRegistry: 'Private Docker registry'
-           repository: todoItemsApi
+           repository: mvdiemen
            command: 'buildAndPush'
            Dockerfile: '**/Dockerfile'
            buildContext: '$(Build.ArtifactStagingDirectory)/todoItemsApi'
