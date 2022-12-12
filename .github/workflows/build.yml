@@ -1,20 +1,12 @@
-name: Build TodoItems
-on: 
-  schedule:
-    - cron:  '0 0 * * 3'
-  push:
-    paths-ignore:
-      - '.azuredevops/**'
-  workflow_dispatch:
+on:
+  workflow_call:
     inputs:
       buildConfiguration:
-        description: 'Build configuration'
         required: true
-        default: 'Release' 
-        type: choice
-        options:
-        - Debug
-        - Release
+        type: string
+    secrets:
+      SA_PASSWORD:
+        required: true
 defaults:
   run:
     shell: pwsh
@@ -34,16 +26,7 @@ jobs:
     env:
       NUGET_PACKAGES: '${{github.workspace}}/.nuget/packages'
       testDatabasename: 'TodoItemDB'
-    steps:
-    - name: Setup variables
-      run: |
-        if("${{github.event.inputs.buildConfiguration}}"){
-          echo "buildConfiguration=${{github.event.inputs.buildConfiguration}}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-        }
-        else{
-          echo "buildConfiguration=Release" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-        }
-    
+    steps:    
     - uses: actions/checkout@v3
     
     - uses: actions/setup-dotnet@v3
@@ -58,7 +41,7 @@ jobs:
       #If the cache has been restored, the deps.json isn't generated. In order to generate this we will do a dotnet build.
     - name: Dotnet build - cache restored
       if: ${{steps.cache.outputs.cache-hit == 'true'}}
-      run: dotnet build --configuration ${{env.buildConfiguration}}
+      run: dotnet build --configuration ${{inputs.buildConfiguration}}
     
     - name: Dotnet restore
       if: ${{steps.cache.outputs.cache-hit != 'true'}}
@@ -66,14 +49,14 @@ jobs:
     
     - name: Dotnet build - no cache
       if: ${{steps.cache.outputs.cache-hit != 'true'}}
-      run: dotnet build --no-restore --configuration ${{env.buildConfiguration}}
+      run: dotnet build --no-restore --configuration ${{inputs.buildConfiguration}}
     
     - name: Restore tools
       run: dotnet tool restore
       working-directory: ${{github.workspace}}/TodoItems.Api
     
     - name: Create idempotent SQL scripts
-      run: dotnet ef migrations script --output '${{github.workspace}}/artifacts/SQL/db.sql' --idempotent --project TodoItems.Api.csproj --context TodoDb --no-build --configuration ${{env.buildConfiguration}} 
+      run: dotnet ef migrations script --output '${{github.workspace}}/artifacts/SQL/db.sql' --idempotent --project TodoItems.Api.csproj --context TodoDb --no-build --configuration ${{inputs.buildConfiguration}} 
       working-directory: ${{github.workspace}}/TodoItems.Api
       env:
         #Pass environment variable dummy. So the migration script will not be created against the InMemory database.
@@ -87,12 +70,12 @@ jobs:
       timeout-minutes: 1  
     
     - name: Run tests
-      run: dotnet test --no-build --configuration ${{env.buildConfiguration}} --logger:"console;verbosity=detailed"
+      run: dotnet test --no-build --configuration ${{inputs.buildConfiguration}} --logger:"console;verbosity=detailed"
       env:
         integrationtests_ConnectionStrings__TodoDb: 'Server=127.0.0.1,1433;Database=${{env.testDatabasename}};User Id=SA;Password=${{secrets.SA_PASSWORD}};TrustServerCertificate=true;'
     
     - name: Publish API
-      run: dotnet publish ${{github.workspace}}/TodoItems.Api/TodoItems.Api.csproj --configuration ${{env.buildConfiguration}} --no-build --output ${{github.workspace}}/artifacts/TodoItems.Api
+      run: dotnet publish ${{github.workspace}}/TodoItems.Api/TodoItems.Api.csproj --configuration ${{inputs.buildConfiguration}} --no-build --output ${{github.workspace}}/artifacts/TodoItems.Api
     
     - name: Publish SQL artifact
       uses: actions/upload-artifact@v3

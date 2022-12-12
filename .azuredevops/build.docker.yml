@@ -10,8 +10,8 @@ extends:
      postBuildSteps: 
        - task: Docker@2
          inputs:
-           containerRegistry: 'Private Docker registry'
-           repository: mvdiemen
+           containerRegistry: 'Github Packages'
+           repository: $(Build.Repository.Name)
            command: 'buildAndPush'
            Dockerfile: '**/Dockerfile'
            buildContext: '$(Build.ArtifactStagingDirectory)/todoItemsApi'
