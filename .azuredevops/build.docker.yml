@@ -11,6 +11,7 @@ extends:
        - task: Docker@2
          inputs:
            containerRegistry: 'Github Packages'
+           repository: 'mvdiemen/todoitemsapi'
            command: 'buildAndPush'
            Dockerfile: '**/Dockerfile'
            buildContext: '$(Build.ArtifactStagingDirectory)/todoItemsApi'
