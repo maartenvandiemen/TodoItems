@@ -10,7 +10,7 @@ extends:
      postBuildSteps: 
        - task: Docker@2
          inputs:
-           containerRegistry: 'Private Docker registry'
+           containerRegistry: 'Github Packages'
            repository: todoItemsApi
            command: 'buildAndPush'
            Dockerfile: '**/Dockerfile'
