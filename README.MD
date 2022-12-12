@@ -35,6 +35,6 @@ The following prerequisites are required before performing the labs:
 
 ### CI build (docker)
 1. Follow the steps in [CI build](#ci-build-nodocker)
-1. Create a Azure Container registry
-   - TODO: Optional use the Bicep script for this
-1. TODO: Configure variables XXX and YYY in variable group: _TodoItemsApi-Build_.
+1. Create a Github Account
+   - Create a PAT token. Enable the scopes `write:packages`.
+1. Create a new Service Connection with the following content <br> ![Docker service connection](./.images/Prerequisites_DockerServiceConnection.png)
