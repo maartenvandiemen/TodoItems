@@ -39,3 +39,31 @@ jobs:
     with:
       buildConfiguration: ${{needs.determine_variables.outputs.buildConfiguration}}
     secrets: inherit
+  push_docker_image:
+    runs-on: ubuntu-latetst
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+    permissions:
+      contents: read
+      packages: write
+    needs: [build]
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+            name: todoItemsApi
+      - uses: docker/login-action@v2.1.0
+         with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v4.1.1
+        id: meta
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      - uses: docker/build-push-action@v3.2.0
+        with:
+          context: .
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
