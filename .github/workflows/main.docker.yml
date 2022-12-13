@@ -15,6 +15,11 @@ on:
         options:
         - Debug
         - Release
+      pushImage:
+        description: 'Push image to registry'
+        required: true 
+        type: boolean 
+        default: false
 defaults:
   run:
     shell: pwsh
@@ -33,6 +38,8 @@ jobs:
         else{
           echo "buildConfiguration=Release" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
+        
+        Write-Host "Test: ${{inputs.pushImage}}"
   dockerfile_artifact:
     runs-on: ubuntu-latest
     steps:
@@ -85,6 +92,6 @@ jobs:
         with:
           context: ${{github.workspace}}/api
           file: ${{github.workspace}}/dockerFile/Dockerfile
-          push: false
+          push: ${{input}}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
