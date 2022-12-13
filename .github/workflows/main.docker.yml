@@ -28,18 +28,24 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       buildConfiguration: ${{ steps.setupVars.outputs.buildConfiguration }}
+      pushImage: ${{ steps.setupVars.outputs.pushImage }}
     steps:
     - name: Setup variables
       id: setupVars
       run: |
-        if("${{github.event.inputs.buildConfiguration}}"){
-          echo "buildConfiguration=${{github.event.inputs.buildConfiguration}}" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+        if("${{inputs.buildConfiguration}}"){
+          echo "buildConfiguration=${{inputs.buildConfiguration}}" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
         else{
           echo "buildConfiguration=Release" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
         
-        Write-Host "Test: ${{inputs.pushImage}}"
+        if("${{inputs.pushImage}}"){
+          echo "pushImage=${{inputs.pushImage}}" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+        }
+        else{
+          echo "pushImage=false" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+        }
   dockerfile_artifact:
     runs-on: ubuntu-latest
     steps:
@@ -65,7 +71,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs: [build, dockerfile_artifact]
+    needs: [build, dockerfile_artifact, determine_variables]
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -90,8 +96,8 @@ jobs:
           
       - uses: docker/build-push-action@v3.2.0
         with:
-          context: ${{github.workspace}}/api
+          context: ${{ github.workspace }}/api
           file: ${{github.workspace}}/dockerFile/Dockerfile
-          push: true
+          push: ${{ needs.determine_variables.outputs.pushImage }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
