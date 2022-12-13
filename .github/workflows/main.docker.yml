@@ -92,6 +92,6 @@ jobs:
         with:
           context: ${{github.workspace}}/api
           file: ${{github.workspace}}/dockerFile/Dockerfile
-          push: ${{input}}
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
