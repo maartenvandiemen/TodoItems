@@ -1,7 +1,7 @@
 | Build | Status |
 | ------------- | ------------- |
-| Github Actions no docker  | ![Github CI](https://github.com/mvdiemen/TodoItems/actions/workflows/main.yml/badge.svg) |
-| Github Actions docker | WIP |
+| Github Actions no docker  | [![Build TodoItems](https://github.com/mvdiemen/TodoItems/actions/workflows/main.nodocker.yml/badge.svg)](https://github.com/mvdiemen/TodoItems/actions/workflows/main.nodocker.yml) |
+| Github Actions docker | [![Build TodoItems Docker](https://github.com/mvdiemen/TodoItems/actions/workflows/main.docker.yml/badge.svg)](https://github.com/mvdiemen/TodoItems/actions/workflows/main.docker.yml) |
 | Azure Devops no docker | [![Build Status](https://dev.azure.com/maartenvandiemen/GithubPipelines/_apis/build/status/TodoItems/TodoItems.NoDocker?branchName=main)](https://dev.azure.com/maartenvandiemen/GithubPipelines/_build/latest?definitionId=31&branchName=main) |
 | Azure Devops docker | WIP |
 
