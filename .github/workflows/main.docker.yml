@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v3.1.1
         with:
           name: dockerFile
-          path: ${{github.workspace}}/TodoItems.Api
+          path: ${{github.workspace}}/TodoItems.Api/Dockerfile
           if-no-files-found: error
   build:  
     needs: [determine_variables]
@@ -63,10 +63,12 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
             name: todoItemsApi
+            path: ${{github.workspace}}/api
             
       - uses: actions/download-artifact@v3
         with:
             name: dockerFile
+            path: ${{github.workspace}}/dockerFile
             
       - uses: docker/login-action@v2.1.0
         with:
@@ -81,7 +83,8 @@ jobs:
           
       - uses: docker/build-push-action@v3.2.0
         with:
-          context: .
+          context: ${{github.workspace}}/api
+          file: ${{github.workspace}}/dockerFile/Dockerfile
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
