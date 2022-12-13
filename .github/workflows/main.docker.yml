@@ -40,7 +40,7 @@ jobs:
       buildConfiguration: ${{needs.determine_variables.outputs.buildConfiguration}}
     secrets: inherit
   push_docker_image:
-    runs-on: ubuntu-latetst
+    runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: ${{ github.repository }}
