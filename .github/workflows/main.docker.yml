@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v3.1.1
         with:
           name: dockerFile
-          path: ${{github.workspace}}/TodoItems.Api/DockerFile
+          path: ${{github.workspace}}/TodoItems.Api
           if-no-files-found: error
   build:  
     needs: [determine_variables]
