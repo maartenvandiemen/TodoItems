@@ -15,6 +15,11 @@ on:
         options:
         - Debug
         - Release
+      pushImage:
+        description: 'Push image to registry'
+        required: true 
+        type: boolean 
+        default: false
 defaults:
   run:
     shell: pwsh
@@ -23,19 +28,76 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       buildConfiguration: ${{ steps.setupVars.outputs.buildConfiguration }}
+      pushImage: ${{ steps.setupVars.outputs.pushImage }}
     steps:
     - name: Setup variables
       id: setupVars
       run: |
-        if("${{github.event.inputs.buildConfiguration}}"){
-          echo "buildConfiguration=${{github.event.inputs.buildConfiguration}}" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+        if("${{inputs.buildConfiguration}}"){
+          echo "buildConfiguration=${{inputs.buildConfiguration}}" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
         else{
           echo "buildConfiguration=Release" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
+        
+        if("${{inputs.pushImage}}"){
+          echo "pushImage=${{inputs.pushImage}}" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+        }
+        else{
+          echo "pushImage=false" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+        }
+  dockerfile_artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          name: dockerFile
+          path: ${{github.workspace}}/TodoItems.Api/Dockerfile
+          if-no-files-found: error
   build:  
     needs: [determine_variables]
     uses: ./.github/workflows/build.yml
     with:
       buildConfiguration: ${{needs.determine_variables.outputs.buildConfiguration}}
     secrets: inherit
+  push_docker_image:
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+    permissions:
+      contents: read
+      packages: write
+    needs: [build, dockerfile_artifact, determine_variables]
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+            name: todoItemsApi
+            path: ${{github.workspace}}/api
+            
+      - uses: actions/download-artifact@v3
+        with:
+            name: dockerFile
+            path: ${{github.workspace}}/dockerFile
+            
+      - uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - uses: docker/metadata-action@v4.1.1
+        id: meta
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          
+      - uses: docker/build-push-action@v3.2.0
+        with:
+          context: ${{ github.workspace }}/api
+          file: ${{github.workspace}}/dockerFile/Dockerfile
+          push: ${{ needs.determine_variables.outputs.pushImage }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

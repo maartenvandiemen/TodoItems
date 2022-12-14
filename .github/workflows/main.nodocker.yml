@@ -27,8 +27,8 @@ jobs:
     - name: Setup variables
       id: setupVars
       run: |
-        if("${{github.event.inputs.buildConfiguration}}"){
-          echo "buildConfiguration=${{github.event.inputs.buildConfiguration}}" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+        if("${{inputs.buildConfiguration}}"){
+          echo "buildConfiguration=${{inputs.buildConfiguration}}" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
         else{
           echo "buildConfiguration=Release" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
