@@ -1,20 +1,13 @@
 param location string
 
-@allowed([
-  'O'
-  'T'
-  'A'
-  'P'
-])
-param stage string
 
 @secure ()
 param sqlAdministratorLoginPassword string
 
 param applicationname string
 
-var sqlAdministratorLogin = 'AdminUser${stage}'
-var sqlserverName = '${toLower(applicationname)}-sqlserver-${toLower(stage)}'
+var sqlAdministratorLogin = 'AdminUser'
+var sqlserverName = 'sqlserver-${toLower(applicationname)}-${uniqueString(resourceGroup().id)}'
 
 resource sqlServer 'Microsoft.Sql/servers@2021-11-01-preview' = {
    name: sqlserverName
@@ -25,7 +18,7 @@ resource sqlServer 'Microsoft.Sql/servers@2021-11-01-preview' = {
   }
 }
 
-resource database 'Microsoft.Sql/servers/databases@2021-11-01-preview' = {
+resource database 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
   name: '${sqlServer.name}/${applicationname}'
   location: location
   sku: {
@@ -41,7 +34,7 @@ resource database 'Microsoft.Sql/servers/databases@2021-11-01-preview' = {
   }
 }
 
-resource sqlserverName_AllowAllWindowsAzureIps 'Microsoft.Sql/servers/firewallRules@2014-04-01' = {
+resource sqlserverName_AllowAllWindowsAzureIps 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
   name: '${sqlServer.name}/AllowAllWindowsAzureIps'
   properties: {
     endIpAddress: '0.0.0.0'

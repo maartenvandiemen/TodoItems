@@ -1,57 +1,44 @@
 param location string = resourceGroup().location
 
-@allowed([
-  'O'
-  'T'
-  'A'
-  'P'
-])
-param stage string
-
 param applicationname string
 
 @secure()
 param sqlAdministratorLoginPassword string
 
-var utc string = utcNow()
+param dateTime string = utcNow()
 
 module sql 'sql.bicep' = {
-  name: 'sql-${uniqueString(utc)}'
+  name: 'sql-${dateTime}'
   params: {
     location: location
     sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
-    stage: stage
     applicationname: applicationname
   }
 }
 
 module appInsights 'applicationInsights.bicep' ={
-  name: 'appInsights-${uniqueString(utc)}'
+  name: 'appInsights-${dateTime}'
   params: {
     location: location
     applicationname: applicationname
-    stage: stage
   }
 }
 
 module appService 'appService/appService.nodocker.bicep' = {
-  name: 'appService-${uniqueString(utc)}'
+  name: 'appService-${dateTime}'
   params: {
     location: location
-    stage: stage
     applicationname: applicationname
-    sqlServerData: sql.outputs.sqlServerDatabase
-    sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
-    applicationInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
+    applicationInsightsConnectionString: appInsights.outputs.connectionString
   }
 }
 
 module keyVault 'keyVault.bicep' = {
-  name: 'keyVault-${uniqueString(utc)}'
+  name: 'keyVault-${dateTime}'
   params: {
     location: location
-    stage: stage
     appServicePrincipalId: appService.outputs.principalId
-    applicationname: applicationname
+    sqlServerData: sql.outputs.sqlServerDatabase
+    sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
   }
 }

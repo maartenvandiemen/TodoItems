@@ -1,30 +1,17 @@
 param location string
 
-@allowed([
-  'O'
-  'T'
-  'A'
-  'P'
-])
-param stage string
-
-param sqlServerData object
 param applicationname string
 
-@secure ()
-param sqlAdministratorLoginPassword string
+param applicationInsightsConnectionString string
 
-param applicationInsightsInstrumentationKey string
-
-var appServiceAppName = '${applicationname}-${stage}'
-var appServicePlanName = '${applicationname}-${stage}-plan'
-var appServicePlanSkuName = (stage == 'P') ? 'B2' : 'B1'
+var appServiceAppName = 'site-${applicationname}-${uniqueString(resourceGroup().id)}'
+var appServicePlanName = 'sitePlan-${applicationname}-${uniqueString(resourceGroup().id)}'
 
 resource appServicePlan 'Microsoft.Web/serverFarms@2020-06-01' = {
   name: appServicePlanName
   location: location
   sku: {
-    name: appServicePlanSkuName
+    name: 'B1'
   }
   properties:{
     reserved: true
@@ -48,8 +35,8 @@ resource appServiceApp 'Microsoft.Web/sites@2021-02-01' = {
         linuxFxVersion: ''
         appSettings: [
           {
-            'name': 'APPINSIGHTS_INSTRUMENTATIONKEY'
-            'value': applicationInsightsInstrumentationKey
+            name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+            value: applicationInsightsConnectionString
           }   
         ]
       }
@@ -59,7 +46,7 @@ resource appServiceApp 'Microsoft.Web/sites@2021-02-01' = {
       name: 'connectionstrings'
       properties:{
         TodoDb:{
-        value: 'Data Source=tcp:${sqlServerData.fullyQualifiedDomainName},1433;Initial Catalog=${sqlServerData.databaseName};Persist Security Info=False;User Id=${sqlServerData.sqlAdministratorLogin};Password=${sqlAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+        value: '@Microsoft.KeyVault(VaultName=myvault;SecretName=ConnectionString)'
         type: 'SQLAzure'
       }
     }
