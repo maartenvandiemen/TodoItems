@@ -50,7 +50,7 @@ jobs:
         id: setupResourcegroup
         run: |
             $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
-            echo "resourcegroup=todoItems+$randomNumber" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+            echo "resourcegroup=todoItems-$randomNumber" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
             
       - name: Download a Build Artifact
         uses: actions/download-artifact@v3
