@@ -39,3 +39,24 @@ jobs:
     with:
       buildConfiguration: ${{needs.determine_variables.outputs.buildConfiguration}}
     secrets: inherit
+  deploy_bicep:
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment: Azure
+    steps:
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: infraCode
+          path: ${{github.workspace}}/artifacts/bicep
+
+      - uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.CREDENTIALS }}
+
+      - uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.SUBSCRIPTION }}
+          resourceGroupName: 'Temp1'
+          template: ${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.bicep
+          parameters: '${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.parameters.json sqlAdministratorLoginPassword=${{secrets.AZURE_SQL_PASSWORD}}'
