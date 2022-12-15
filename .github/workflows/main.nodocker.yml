@@ -42,8 +42,16 @@ jobs:
   deploy_bicep:
     needs: [build]
     runs-on: ubuntu-latest
+    outputs:
+      resourcegroup: ${{ steps.setupResourcegroup.outputs.resourcegroup }}
     environment: Azure
     steps:
+      - name: Setup variables
+        id: setupResourcegroup
+        run: |
+            $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
+            echo "resourcegroup=todoItems+$randomNumber" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+            
       - name: Download a Build Artifact
         uses: actions/download-artifact@v3
         with:
@@ -54,10 +62,13 @@ jobs:
         with:
           creds: ${{ secrets.CREDENTIALS }}
 
+      - uses: azure/CLI@v1
+        with:
+          inlineScript: az deployment group create --resource-group ${{ steps.setupResourcegroup.outputs.resourcegroup }}
+
       - uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ secrets.SUBSCRIPTION }}
           resourceGroupName: 'Temp1'
           template: ${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.bicep
           parameters: '${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.parameters.json sqlAdministratorLoginPassword=${{secrets.AZURE_SQL_PASSWORD}}'
-
