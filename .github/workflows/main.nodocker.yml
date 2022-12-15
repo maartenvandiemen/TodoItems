@@ -69,6 +69,6 @@ jobs:
       - uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ secrets.SUBSCRIPTION }}
-          resourceGroupName: 'Temp1'
+          resourceGroupName: ${{ steps.setupResourcegroup.outputs.resourcegroup }}
           template: ${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.bicep
           parameters: '${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.parameters.json sqlAdministratorLoginPassword=${{secrets.AZURE_SQL_PASSWORD}}'
