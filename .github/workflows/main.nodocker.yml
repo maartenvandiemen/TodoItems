@@ -39,7 +39,7 @@ jobs:
     with:
       buildConfiguration: ${{needs.determine_variables.outputs.buildConfiguration}}
     secrets: inherit
-  deploy_bicep:
+  create_env:
     needs: [build]
     runs-on: ubuntu-latest
     outputs:
@@ -64,7 +64,7 @@ jobs:
 
       - uses: azure/CLI@v1
         with:
-          inlineScript: az deployment group create --resource-group ${{ steps.setupResourcegroup.outputs.resourcegroup }}
+          inlineScript: az group create --location ${{ secrets.DATACENTER }} --name ${{ steps.setupResourcegroup.outputs.resourcegroup }}
 
       - uses: azure/arm-deploy@v1
         with:
@@ -72,3 +72,11 @@ jobs:
           resourceGroupName: ${{ steps.setupResourcegroup.outputs.resourcegroup }}
           template: ${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.bicep
           parameters: '${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.parameters.json sqlAdministratorLoginPassword=${{secrets.AZURE_SQL_PASSWORD}}'
+  delete_env:
+    runs-on: ubuntu-latest
+    needs: [create_env]
+    environment: AzureRemove
+    steps:
+      - uses: azure/CLI@v1
+        with:
+          inlineScript: az group delete --name ${{needs.create_env.outputs.resourcegroup}} --yes
