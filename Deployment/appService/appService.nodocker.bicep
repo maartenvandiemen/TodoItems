@@ -32,7 +32,7 @@ resource appServiceApp 'Microsoft.Web/sites@2021-02-01' = {
     resource siteConfig 'config' ={
       name: 'web'
       properties: {
-        linuxFxVersion: ''
+        linuxFxVersion: 'DOTNETCORE|7.0'
         appSettings: [
           {
             name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'

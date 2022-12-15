@@ -2,7 +2,7 @@ param location string
 
 param applicationname string
 
-var applicationInsightsName = 'Insights-${applicationname}-${uniqueString(resourceGroup().id)}'
+var applicationInsightsName = 'insights-${applicationname}-${uniqueString(resourceGroup().id)}'
 
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: applicationInsightsName

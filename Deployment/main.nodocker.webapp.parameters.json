@@ -4,9 +4,6 @@
   "parameters": {
     "applicationname": {
       "value": "todoitems"
-    },
-    "sqlAdministratorLoginPassword": {
-       "value": "P2ssw0rdP2ssw0rd"
     }
   }
 }

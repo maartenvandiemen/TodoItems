@@ -22,12 +22,13 @@ resource database 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
   name: '${sqlServer.name}/${applicationname}'
   location: location
   sku: {
-    name: 'Basic'
-    tier: 'Basic'
+    name: 'GP_S_Gen5_1'
+    tier: 'GeneralPurpose'
   }
   properties: {
     collation: 'SQL_Latin1_General_CP1_CI_AS'
-    maxSizeBytes: 524288000 //500MB
+    maxSizeBytes: 1073741824 //1GB
+    autoPauseDelay: 60
     zoneRedundant: false
     requestedBackupStorageRedundancy: 'Local'
     isLedgerOn: false
