@@ -97,3 +97,4 @@ jobs:
                   $restUrl = "https://$_.management.azure.com/subscriptions/${{secrets.SUBSCRIPTION}}/resourceGroups/${{inputs.resourcegroupName}}/providers/Microsoft.Web/sites/${{steps.arm.outputs.webAppName}}?api-version=2022-03-01";
                   Invoke-RestMethod -Uri $restUrl -Method Get -Headers $authHeader
               }
+          azPSVersion: "latest"
