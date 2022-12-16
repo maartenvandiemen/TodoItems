@@ -51,35 +51,14 @@ jobs:
 
   create_env:
     needs: [determine_variables_deploy, artifact_bicep]
-    runs-on: ubuntu-latest
-    outputs:
-      webAppName: ${{ steps.arm.outputs.webAppName }}
-      sqlServerFQDN: ${{ steps.arm.outputs.sqlServerFQDN }}
-      databaseName: ${{ steps.arm.outputs.databaseName }}
-    environment: AzureProvision
-    steps:
-      - name: Download a Build Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: infraCode
-          path: ${{github.workspace}}/artifacts/bicep
+    uses: ./.github/workflows/create_env.yml
+    with:
+      resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
+      region: 'westeurope'
+      template: ${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.bicep
+      parameters: '${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.parameters.json sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}'
+    secrets: inherit
 
-      - uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - uses: azure/CLI@v1
-        with:
-          inlineScript: az group create --location ${{ secrets.DATACENTER }} --name ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
-
-      - uses: azure/arm-deploy@v1
-        id: arm
-        with:
-          subscriptionId: ${{ secrets.SUBSCRIPTION }}
-          resourceGroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
-          template: ${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.bicep
-          parameters: '${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.parameters.json sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}'
-  
   deploy_app:
     needs: [build, determine_variables_deploy, create_env]
     runs-on: ubuntu-latest
