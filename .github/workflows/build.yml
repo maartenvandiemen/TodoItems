@@ -84,13 +84,6 @@ jobs:
         path: '${{github.workspace}}/artifacts/SQL'
         if-no-files-found: error
     
-    - name: Publish Bicep artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: infraCode
-        path: '${{github.workspace}}/Deployment/**'
-        if-no-files-found: error
-    
     - name: Publish API artifact
       uses: actions/upload-artifact@v3
       with:
