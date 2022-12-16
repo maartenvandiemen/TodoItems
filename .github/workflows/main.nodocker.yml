@@ -90,9 +90,9 @@ jobs:
           name: todoItemsApi
           path: ${{github.workspace}}/artifacts/api
           
-      - uses: azure/CLI@v1
+      - uses: Azure/login@v1
         with:
-          inlineScript: az group create --location ${{ secrets.DATACENTER }} --name ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
           
       - uses: Azure/webapps-deploy@v2.2.5
         with:
