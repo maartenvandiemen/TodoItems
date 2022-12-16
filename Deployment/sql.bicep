@@ -1,19 +1,19 @@
 param location string
 
+param sqlAdministratorLoginUser string
 
 @secure ()
 param sqlAdministratorLoginPassword string
 
 param applicationname string
 
-var sqlAdministratorLogin = 'AdminUser'
 var sqlserverName = 'sqlserver-${toLower(applicationname)}-${uniqueString(resourceGroup().id)}'
 
 resource sqlServer 'Microsoft.Sql/servers@2021-11-01-preview' = {
    name: sqlserverName
    location: location
   properties: {
-    administratorLogin: sqlAdministratorLogin
+    administratorLogin: sqlAdministratorLoginUser
     administratorLoginPassword: sqlAdministratorLoginPassword
   }
 }
@@ -46,5 +46,4 @@ resource sqlserverName_AllowAllWindowsAzureIps 'Microsoft.Sql/servers/firewallRu
 output sqlServerDatabase object = {
   fullyQualifiedDomainName : sqlServer.properties.fullyQualifiedDomainName
   databaseName: applicationname
-  sqlAdministratorLogin: sqlAdministratorLogin
 }

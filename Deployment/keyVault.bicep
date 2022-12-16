@@ -2,6 +2,9 @@ param location string
 param appServicePrincipalId string
 
 param sqlServerData object
+
+param sqlAdministratorLoginUser string
+
 @secure ()
 param sqlAdministratorLoginPassword string
 
@@ -24,7 +27,7 @@ resource secret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: 'ConnectionString'
   parent: key_vault
   properties: {
-    value: '${length('Data Source=tcp:${sqlServerData.fullyQualifiedDomainName},1433;Initial Catalog=${sqlServerData.databaseName};Persist Security Info=False;User Id=${sqlServerData.sqlAdministratorLogin};Password=${sqlAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')}'
+    value: '${length('Data Source=tcp:${sqlServerData.fullyQualifiedDomainName},1433;Initial Catalog=${sqlServerData.databaseName};Persist Security Info=False;User Id=${sqlAdministratorLoginUser};Password=${sqlAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')}'
   }
 }
 

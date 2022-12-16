@@ -2,6 +2,8 @@ param location string = resourceGroup().location
 
 param applicationname string
 
+param sqlAdministratorLoginUser string
+
 @secure()
 param sqlAdministratorLoginPassword string
 
@@ -11,6 +13,7 @@ module sql 'sql.bicep' = {
   name: 'sql-${dateTime}'
   params: {
     location: location
+    sqlAdministratorLoginUser: sqlAdministratorLoginUser
     sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
     applicationname: applicationname
   }
@@ -39,8 +42,11 @@ module keyVault 'keyVault.bicep' = {
     location: location
     appServicePrincipalId: appService.outputs.principalId
     sqlServerData: sql.outputs.sqlServerDatabase
+    sqlAdministratorLoginUser: sqlAdministratorLoginUser
     sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
   }
 }
 
 output webAppName string = appService.outputs.webAppName
+output sqlServerFQDN string = sql.outputs.sqlServerDatabase.fullyQualifiedDomainName
+output databaseName string = sql.outputs.sqlServerDatabase.databaseName
