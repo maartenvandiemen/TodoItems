@@ -55,7 +55,6 @@ jobs:
     with:
       resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
       region: 'westeurope'
-      workspace: ${{github.workspace}}
       template: /artifacts/bicep/main.nodocker.webapp.bicep
       additionalParameters: /artifacts/bicep/main.nodocker.webapp.parameters.json
     secrets: inherit
