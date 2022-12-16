@@ -19,7 +19,7 @@ defaults:
   run:
     shell: pwsh
 jobs:
-  determine_variables:
+  determine_variables_build:
     runs-on: ubuntu-latest
     outputs:
       buildConfiguration: ${{ steps.setupVars.outputs.buildConfiguration }}
@@ -34,24 +34,29 @@ jobs:
           echo "buildConfiguration=Release" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
   build:  
-    needs: [determine_variables]
+    needs: [determine_variables_build]
     uses: ./.github/workflows/build.yml
     with:
-      buildConfiguration: ${{needs.determine_variables.outputs.buildConfiguration}}
+      buildConfiguration: ${{needs.determine_variables_build.outputs.buildConfiguration}}
     secrets: inherit
+  determine_variables_deploy:
+    runs-on: ubuntu-latest
+    outputs:
+      resourcegroup: ${{ steps.setupResourcegroup.outputs.resourcegroup }}
+    steps:
+       - name: Setup variables
+         id: setupResourcegroup
+         run: |
+            $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
+            echo "resourcegroup=todoItems-$randomNumber" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+
   create_env:
-    needs: [build]
+    needs: [build, determine_variables_deploy]
     runs-on: ubuntu-latest
     outputs:
       resourcegroup: ${{ steps.setupResourcegroup.outputs.resourcegroup }}
     environment: Azure
     steps:
-      - name: Setup variables
-        id: setupResourcegroup
-        run: |
-            $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
-            echo "resourcegroup=todoItems-$randomNumber" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
-            
       - name: Download a Build Artifact
         uses: actions/download-artifact@v3
         with:
@@ -64,17 +69,17 @@ jobs:
 
       - uses: azure/CLI@v1
         with:
-          inlineScript: az group create --location ${{ secrets.DATACENTER }} --name ${{ steps.setupResourcegroup.outputs.resourcegroup }}
+          inlineScript: az group create --location ${{ secrets.DATACENTER }} --name ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
 
       - uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ secrets.SUBSCRIPTION }}
-          resourceGroupName: ${{ steps.setupResourcegroup.outputs.resourcegroup }}
+          resourceGroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
           template: ${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.bicep
           parameters: '${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.parameters.json sqlAdministratorLoginPassword=${{secrets.AZURE_SQL_PASSWORD}}'
   delete_env:
     runs-on: ubuntu-latest
-    needs: [create_env]
+    needs: [create_env, determine_variables_deploy]
     environment: AzureRemove
     steps:
       - uses: Azure/login@v1
@@ -83,4 +88,4 @@ jobs:
 
       - uses: azure/CLI@v1
         with:
-          inlineScript: az group delete --name ${{needs.create_env.outputs.resourcegroup}} --yes
+          inlineScript: az group delete --name ${{ needs.determine_variables_deploy.outputs.resourcegroup }} --yes
