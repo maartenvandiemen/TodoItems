@@ -1,18 +1,14 @@
 param location string
 param appServicePrincipalId string
 
-@allowed([
-  'O'
-  'T'
-  'A'
-  'P'
-])
-param stage string
+param sqlServerData object
 
-@maxLength(16)
-param applicationname string
+param sqlAdministratorLoginUser string
 
-var keyVaultName = '${applicationname}-vault-${stage}'
+@secure ()
+param sqlAdministratorLoginPassword string
+
+var keyVaultName = 'vault-${uniqueString(resourceGroup().id)}'
 
 resource key_vault 'Microsoft.KeyVault/vaults@2019-09-01' = {
   name: keyVaultName
@@ -27,11 +23,19 @@ resource key_vault 'Microsoft.KeyVault/vaults@2019-09-01' = {
   }
 }
 
-resource roleAssignment 'Microsoft.Authorization/roleAssignments@2018-09-01-preview' = {
+resource secret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'ConnectionString'
+  parent: key_vault
+  properties: {
+    value: '${length('Data Source=tcp:${sqlServerData.fullyQualifiedDomainName},1433;Initial Catalog=${sqlServerData.databaseName};Persist Security Info=False;User Id=${sqlAdministratorLoginUser};Password=${sqlAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')}'
+  }
+}
+
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: key_vault
   name: guid(keyVaultName, resourceGroup().id, appServicePrincipalId, 'Key Vault Secrets User')
   properties: {
-    roleDefinitionId: '4633458b-17de-408a-b874-0445c86b69e6'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
     principalId: appServicePrincipalId
   }
 }

@@ -1,0 +1,20 @@
+on:
+  workflow_call:
+    outputs:
+      resourcegroup:
+        description: "Random generated resource group name"
+        value: ${{jobs.variables_release.outputs.resourcegroup}}
+defaults:
+  run:
+    shell: pwsh
+jobs:
+  variables_release:
+    runs-on: ubuntu-latest
+    outputs:
+      resourcegroup: ${{ steps.setupResourcegroup.outputs.resourcegroup }}
+    steps:
+       - name: Setup variables
+         id: setupResourcegroup
+         run: |
+            $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
+            echo "resourcegroup=todoItems-$randomNumber" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append

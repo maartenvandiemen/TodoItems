@@ -1,18 +1,10 @@
 param location string
 
-@allowed([
-  'O'
-  'T'
-  'A'
-  'P'
-])
-param stage string
-
 param applicationname string
 
-var applicationInsightsName = '${applicationname}-Insights-${stage}'
+var applicationInsightsName = 'insights-${applicationname}-${uniqueString(resourceGroup().id)}'
 
-resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: applicationInsightsName
   location: location
   kind: 'web'
@@ -22,4 +14,4 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
     publicNetworkAccessForQuery: 'Enabled'
   }
 }
-output instrumentationKey string = appInsights.properties.InstrumentationKey
+output connectionString string = appInsights.properties.ConnectionString
