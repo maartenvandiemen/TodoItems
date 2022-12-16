@@ -35,7 +35,7 @@ jobs:
         }
   
   artifact_bicep:
-    if: github.event == 'workflow_dispatch'
+    if: inputs.buildConfiguration != ''
     uses: ./.github/workflows/artifact_bicep.yml
   
   build:  
@@ -46,7 +46,7 @@ jobs:
     secrets: inherit
   
   determine_variables_deploy:
-    if: github.event == 'workflow_dispatch'
+    if: inputs.buildConfiguration != ''
     uses: ./.github/workflows/variables_release.yml
 
   create_env:
