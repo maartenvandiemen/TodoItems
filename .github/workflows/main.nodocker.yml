@@ -47,15 +47,7 @@ jobs:
   
   determine_variables_deploy:
     if: github.event == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    outputs:
-      resourcegroup: ${{ steps.setupResourcegroup.outputs.resourcegroup }}
-    steps:
-       - name: Setup variables
-         id: setupResourcegroup
-         run: |
-            $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
-            echo "resourcegroup=todoItems-$randomNumber" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+    uses: ./.github/workflows/variables_release.yml
 
   create_env:
     needs: [determine_variables_deploy, artifact_bicep]
