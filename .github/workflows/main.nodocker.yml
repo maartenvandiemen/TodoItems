@@ -55,7 +55,7 @@ jobs:
     needs: [build, determine_variables_deploy]
     runs-on: ubuntu-latest
     outputs:
-      resourcegroup: ${{ steps.setupResourcegroup.outputs.resourcegroup }}
+      webAppName: ${{ steps.arm.outputs.webAppName }}
     environment: AzureProvision
     steps:
       - name: Download a Build Artifact
@@ -73,6 +73,7 @@ jobs:
           inlineScript: az group create --location ${{ secrets.DATACENTER }} --name ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
 
       - uses: azure/arm-deploy@v1
+        id: arm
         with:
           subscriptionId: ${{ secrets.SUBSCRIPTION }}
           resourceGroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
@@ -88,10 +89,15 @@ jobs:
         with:
           name: todoItemsApi
           path: ${{github.workspace}}/artifacts/api
+          
+      - uses: azure/CLI@v1
+        with:
+          inlineScript: az group create --location ${{ secrets.DATACENTER }} --name ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
+          
       - uses: Azure/webapps-deploy@v2.2.5
         with:
-          app-name: 
-
+          app-name: ${{ needs.create_env.outputs.webAppName }} 
+          package: ${{github.workspace}}/artifacts/api
   delete_env:
     runs-on: ubuntu-latest
     needs: [create_env, determine_variables_deploy]
