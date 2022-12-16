@@ -42,3 +42,5 @@ module keyVault 'keyVault.bicep' = {
     sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
   }
 }
+
+output webAppName string = appService.outputs.webAppName
