@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: AzureDeploy
     steps:
-      - run: echo ${{ github.event }}
+      - run: echo ${{ toJSON(github.event) }}
 
   deploy_app:
     needs: [build, determine_variables_deploy, create_env]
