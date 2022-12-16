@@ -39,6 +39,7 @@ jobs:
     with:
       buildConfiguration: ${{needs.determine_variables_build.outputs.buildConfiguration}}
     secrets: inherit
+  
   determine_variables_deploy:
     runs-on: ubuntu-latest
     outputs:
@@ -77,6 +78,7 @@ jobs:
           resourceGroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
           template: ${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.bicep
           parameters: '${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.parameters.json sqlAdministratorLoginPassword=${{secrets.AZURE_SQL_PASSWORD}}'
+  
   delete_env:
     runs-on: ubuntu-latest
     needs: [create_env, determine_variables_deploy]
