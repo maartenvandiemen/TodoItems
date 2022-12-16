@@ -17,6 +17,9 @@ on:
         type: string
         required: false
         description: Arguments for the ARM or BICEP template
+      workspace:
+        type: string
+        required: true
     secrets:
       AZURE_CREDENTIALS:
         required: true
