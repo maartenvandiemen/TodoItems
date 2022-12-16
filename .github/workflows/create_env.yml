@@ -66,5 +66,5 @@ jobs:
           subscriptionId: ${{ secrets.SUBSCRIPTION }}
           resourceGroupName: ${{ inputs.resourcegroupName }}
           template: ${{github.workspace}}${{ inputs.template }}
-          parameters: ${{github.workspace}}${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
+          parameters: ${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
   
