@@ -56,7 +56,7 @@ jobs:
       resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
       region: 'westeurope'
       template: ${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.bicep
-      parameters: '${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.parameters.json sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}'
+      additionalParameters: '${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.parameters.json'
     secrets: inherit
 
   deploy_app:
