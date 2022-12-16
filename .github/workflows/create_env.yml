@@ -17,9 +17,6 @@ on:
         type: string
         required: false
         description: Arguments for the ARM or BICEP template
-      workspace:
-        type: string
-        required: true
     secrets:
       AZURE_CREDENTIALS:
         required: true
@@ -68,6 +65,6 @@ jobs:
         with:
           subscriptionId: ${{ secrets.SUBSCRIPTION }}
           resourceGroupName: ${{ inputs.resourcegroupName }}
-          template: ${{inputs.workspace}}${{ inputs.template}}
-          parameters: ${{inputs.workspace}}${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
+          template: ${{github.workspace}}${{ inputs.template }}
+          parameters: ${{github.workspace}}${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
   
