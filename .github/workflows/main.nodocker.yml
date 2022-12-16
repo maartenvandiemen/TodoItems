@@ -36,15 +36,7 @@ jobs:
   
   artifact_bicep:
     if: github.event == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Publish Bicep artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: infraCode
-          path: '${{github.workspace}}/Deployment/**'
-          if-no-files-found: error
+    uses: ./.github/artifact_bicep.yml
   
   build:  
     needs: [determine_variables_build]
