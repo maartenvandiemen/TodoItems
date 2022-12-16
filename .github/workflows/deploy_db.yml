@@ -9,6 +9,13 @@ on:
         type: string
         required: true
         description: Databasename
+    secrets:
+      AZURE_SQL_USER:
+        required: true
+        description: username to login with on Azure SQL
+      SA_PASSWORD:
+        required: true
+        description: password of the username to login with on Azure SQL
 defaults:
   run:
     shell: pwsh
