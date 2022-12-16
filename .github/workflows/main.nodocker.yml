@@ -36,7 +36,7 @@ jobs:
   
   artifact_bicep:
     if: github.event == 'workflow_dispatch'
-    uses: ./.github/artifact_bicep.yml
+    uses: ./.github/workflows/artifact_bicep.yml
   
   build:  
     needs: [determine_variables_build]
