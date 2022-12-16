@@ -60,12 +60,6 @@ jobs:
       additionalParameters: /artifacts/bicep/main.nodocker.webapp.parameters.json
     secrets: inherit
 
-  dummy:
-    runs-on: ubuntu-latest
-    environment: AzureDeploy
-    steps:
-      - run: echo ${{ toJSON(github.event) }}
-
   deploy_app:
     needs: [build, determine_variables_deploy, create_env]
     runs-on: ubuntu-latest
