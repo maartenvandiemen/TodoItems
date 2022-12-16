@@ -87,7 +87,6 @@ jobs:
       - uses: Azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - uses: azure/CLI@v1
         with:
           inlineScript: az group delete --name ${{ needs.determine_variables_deploy.outputs.resourcegroup }} --yes
