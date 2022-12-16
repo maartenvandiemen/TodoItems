@@ -56,7 +56,7 @@ jobs:
       resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
       region: 'westeurope'
       template: /artifacts/bicep/main.nodocker.webapp.bicep
-      additionalParameters: /artifacts/bicep/main.nodocker.webapp.parameters.json
+      additionalParameters: applicationname=todoitems
     secrets: inherit
 
   deploy_app:
