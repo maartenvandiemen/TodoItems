@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       resourcegroup: ${{ steps.setupResourcegroup.outputs.resourcegroup }}
-    environment: Azure
+    environment: AzureProvision
     steps:
       - name: Download a Build Artifact
         uses: actions/download-artifact@v3
@@ -78,7 +78,20 @@ jobs:
           resourceGroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
           template: ${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.bicep
           parameters: '${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.parameters.json sqlAdministratorLoginPassword=${{secrets.AZURE_SQL_PASSWORD}}'
-  
+  deploy_app:
+    needs: [build, determine_variables_deploy, create_env]
+    runs-on: ubuntu-latest
+    environment: AzureDeploy
+    steps:
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: todoItemsApi
+          path: ${{github.workspace}}/artifacts/api
+      - uses: Azure/webapps-deploy@v2.2.5
+        with:
+          app-name: 
+
   delete_env:
     runs-on: ubuntu-latest
     needs: [create_env, determine_variables_deploy]
