@@ -1,5 +1,9 @@
 on:
   workflow_call:
+    outputs:
+      resourcegroup:
+        description: "Random generated resource group name"
+        value: ${{jobs.variables_release.outputs.resourcegroup}}
 defaults:
   run:
     shell: pwsh
