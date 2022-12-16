@@ -100,7 +100,7 @@ jobs:
           package: ${{github.workspace}}/artifacts/api
   delete_env:
     runs-on: ubuntu-latest
-    needs: [create_env, determine_variables_deploy]
+    needs: [determine_variables_deploy, deploy_app]
     environment: AzureRemove
     steps:
       - uses: Azure/login@v1
