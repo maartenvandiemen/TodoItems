@@ -1,0 +1,70 @@
+on:
+  workflow_call: 
+    inputs:
+      resourcegroupName:
+        type: string
+        required: true
+        description: Name of the resourcegroup where the information should be deployed to
+      region:
+        type: string
+        required: true
+        description: Azure region where the resource should be deployed
+      template:
+        type: string
+        required: true
+        description: location of the ARM or BICEP template
+      parameters:
+        type: string
+        required: false
+        description: Arguments for the ARM or BICEP template
+    secrets:
+      AZURE_CREDENTIALS:
+        required: true
+        description: Azure Service Principal credentials
+      SUBSCRIPTION:
+        required: true
+        description: ID (Guid) of the subscription
+    outputs:
+      webAppName:
+        description: "Created webApp"
+        value: ${{jobs.create_env.outputs.webAppName}}
+      sqlServerFQDN: 
+         description: Fully Qualified DomainName of the created Azure SQL Server
+         value: ${{jobs.create_env.outputs.sqlServerFQDN}}
+      databaseName:
+         description: Created database
+         value: ${{jobs.create_env.outputs.databaseName}}
+defaults:
+  run:
+    shell: pwsh
+jobs:
+  create_env:
+    runs-on: ubuntu-latest
+    outputs:
+      webAppName: ${{ steps.arm.outputs.webAppName }}
+      sqlServerFQDN: ${{ steps.arm.outputs.sqlServerFQDN }}
+      databaseName: ${{ steps.arm.outputs.databaseName }}
+    environment: AzureProvision
+    steps:
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: infraCode
+          path: ${{github.workspace}}/artifacts/bicep
+
+      - uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - uses: azure/CLI@v1
+        with:
+          inlineScript: az group create --location ${{ inputs.region }} --name ${{ inputs.resourcegroupName }}
+
+      - uses: azure/arm-deploy@v1
+        id: arm
+        with:
+          subscriptionId: ${{ secrets.SUBSCRIPTION }}
+          resourceGroupName: ${{ inputs.resourcegroupName }}
+          template: ${{ inputs.template}}
+          parameters: ${{ inputs.parameters }}
+  
