@@ -68,6 +68,6 @@ jobs:
         with:
           subscriptionId: ${{ secrets.SUBSCRIPTION }}
           resourceGroupName: ${{ inputs.resourcegroupName }}
-          template: ${{ inputs.template}}
-          parameters: ${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
+          template: ${{inputs.workspace}}${{ inputs.template}}
+          parameters: ${{inputs.workspace}}${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
   
