@@ -46,6 +46,25 @@ jobs:
         else{
           echo "pushImage=false" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
+        
+  artifact_bicep:
+    if: inputs.buildConfiguration != ''
+    uses: ./.github/workflows/artifact_bicep.yml
+    
+  determine_variables_deploy:
+    if: inputs.buildConfiguration != ''
+    uses: ./.github/workflows/variables_release.yml
+    
+  create_env:
+    needs: [determine_variables_deploy, artifact_bicep]
+    uses: ./.github/workflows/create_env.yml
+    with:
+      resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
+      region: 'westeurope'
+      template: /artifacts/bicep/main.docker.webapp.bicep
+      additionalParameters: applicationname=todoitems
+    secrets: inherit
+        
   dockerfile_artifact:
     runs-on: ubuntu-latest
     steps:
@@ -101,3 +120,23 @@ jobs:
           push: ${{ needs.determine_variables.outputs.pushImage }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  deploy_app:
+    needs: [build, determine_variables_deploy, create_env]
+    runs-on: ubuntu-latest
+    environment: AzureDeploy
+
+  deploy_db:
+    needs: [build, create_env]
+    uses: ./.github/workflows/deploy_db.yml
+    with:
+      sqlServerFQDN: ${{needs.create_env.outputs.sqlServerFQDN}}
+      databaseName: ${{needs.create_env.outputs.databaseName}}
+    secrets: inherit
+    
+  delete_env:
+    needs: [determine_variables_deploy, deploy_app, deploy_db]
+    uses: ./.github/workflows/delete_env.yml
+    with:
+      resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
+    secrets: inherit
