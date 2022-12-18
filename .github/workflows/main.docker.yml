@@ -123,15 +123,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  deploy_app:
-    needs: [build, determine_variables_deploy, create_env, push_docker_image]
-    runs-on: ubuntu-latest
-    environment: AzureDeploy
-    steps:
-      - uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
   deploy_db:
     needs: [build, create_env]
     uses: ./.github/workflows/deploy_db.yml
@@ -141,7 +132,7 @@ jobs:
     secrets: inherit
     
   delete_env:
-    needs: [determine_variables_deploy, deploy_app, deploy_db]
+    needs: [determine_variables_deploy, deploy_db]
     uses: ./.github/workflows/delete_env.yml
     with:
       resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
