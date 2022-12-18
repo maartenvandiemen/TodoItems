@@ -56,7 +56,7 @@ jobs:
     uses: ./.github/workflows/variables_release.yml
     
   create_env:
-    needs: [determine_variables_deploy, artifact_bicep]
+    needs: [determine_variables_deploy, artifact_bicep, push_docker_image]
     uses: ./.github/workflows/create_env.yml
     with:
       resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
