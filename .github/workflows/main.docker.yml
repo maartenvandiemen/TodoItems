@@ -76,12 +76,14 @@ jobs:
           name: dockerFile
           path: ${{github.workspace}}/TodoItems.Api/Dockerfile
           if-no-files-found: error
+  
   build:  
     needs: [determine_variables]
     uses: ./.github/workflows/build.yml
     with:
       buildConfiguration: ${{needs.determine_variables.outputs.buildConfiguration}}
     secrets: inherit
+  
   push_docker_image:
     runs-on: ubuntu-latest
     env:
@@ -125,6 +127,10 @@ jobs:
     needs: [build, determine_variables_deploy, create_env]
     runs-on: ubuntu-latest
     environment: AzureDeploy
+    steps:
+      - uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
   deploy_db:
     needs: [build, create_env]
