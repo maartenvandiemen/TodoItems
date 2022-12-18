@@ -124,7 +124,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   deploy_app:
-    needs: [build, determine_variables_deploy, create_env]
+    needs: [build, determine_variables_deploy, create_env, push_docker_image]
     runs-on: ubuntu-latest
     environment: AzureDeploy
     steps:
