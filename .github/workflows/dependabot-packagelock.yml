@@ -9,7 +9,7 @@ on:
 jobs:
   update-lockfiles:
     #if: ${{ github.actor == 'dependabot[bot]' && contains(github.head_ref, 'dependabot/') && contains(github.event.pull_request.labels.*.name, '.NET') }}
-    if: ${{ contains(github.head_ref, 'dependabot/') && contains(github.event.pull_request.labels.*.name, '.NET') }}
+    if: contains(github.head_ref, 'dependabot/') && contains(github.event.pull_request.labels.*.name, '.NET')
     permissions: 
       contents: write
     runs-on: ubuntu-latest
