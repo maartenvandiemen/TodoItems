@@ -1,15 +1,13 @@
 #By default the package.lock.json isn't updated by Dependabot, with this workflow we force an update for all the package.lock.json files
 name: Update NuGet lockfiles
 on:
-  push:
-  #pull_request:
-  #  types: 
-  #   - opened
+  pull_request:
+    types: 
+     - opened
 
 jobs:
   update-lockfiles:
-    #if: ${{ github.actor == 'dependabot[bot]' && startsWith(github.head_ref, 'dependabot/') && contains(github.event.pull_request.labels.*.name, '.NET') }}
-    #if: ${{ startsWith(github.head_ref, 'dependabot/') && contains(github.event.pull_request.labels.*.name, '.NET') }}
+    if: github.actor == 'dependabot[bot]' && contains(github.head_ref, 'dependabot/') && contains(github.event.pull_request.labels.*.name, '.NET')
     permissions: 
       contents: write
     runs-on: ubuntu-latest
@@ -17,8 +15,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
-      - run: echo ${{ github.head_ref }}
-      - run: echo ${{ github.event.pull_request.labels }}
       - uses: actions/setup-dotnet@v3
       - name: Restore dependencies
         run: dotnet restore --force-evaluate
@@ -27,4 +23,4 @@ jobs:
           commit_message: Update lockfiles
           commit_user_name: github-actions[bot]
           commit_user_email: github-actions[bot]@users.noreply.github.com
-          file_pattern: '**/package.lock.json'
+          file_pattern: '**/packages.lock.json'
