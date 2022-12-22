@@ -1,30 +1,17 @@
 param location string
 
-@allowed([
-  'O'
-  'T'
-  'A'
-  'P'
-])
-param stage string
-
-param sqlServerData object
 param applicationname string
 
-@secure ()
-param sqlAdministratorLoginPassword string
-
-param applicationInsightsInstrumentationKey string
+param applicationInsightsConnectionString string
 
 param acrLoginServer string
 param dockerRepositoryAndVersion string
 
-var appServiceAppName = '${applicationname}-${stage}'
-var appServicePlanName = '${applicationname}-${stage}-plan'
-var appServicePlanSkuName = (stage == 'P') ? 'B2' : 'B1'
+var appServiceAppName = 'site-${applicationname}-${uniqueString(resourceGroup().id)}'
+var appServicePlanName = 'sitePlan-${applicationname}-${uniqueString(resourceGroup().id)}'
 
 resource websiteUserManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2021-09-30-preview' = {
-  name: 'webAppUserManagedIdentity-${stage}'
+  name: 'webAppUserManagedIdentity-${appServiceAppName}'
   location: location
  }
 
@@ -32,7 +19,7 @@ resource appServicePlan 'Microsoft.Web/serverFarms@2020-06-01' = {
   name: appServicePlanName
   location: location
   sku: {
-    name: appServicePlanSkuName
+    name: 'B1'
   }
   properties:{
     reserved: true
@@ -63,8 +50,8 @@ resource appServiceApp 'Microsoft.Web/sites@2021-02-01' = {
         linuxFxVersion: 'DOCKER|${toLower(acrLoginServer)}/${toLower(dockerRepositoryAndVersion)}'
         appSettings: [
           {
-            'name': 'APPINSIGHTS_INSTRUMENTATIONKEY'
-            'value': applicationInsightsInstrumentationKey
+            name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+            value: applicationInsightsConnectionString
           }   
         ]
       }
@@ -74,11 +61,12 @@ resource appServiceApp 'Microsoft.Web/sites@2021-02-01' = {
       name: 'connectionstrings'
       properties:{
         TodoDb:{
-        value: 'Data Source=tcp:${sqlServerData.fullyQualifiedDomainName},1433;Initial Catalog=${sqlServerData.databaseName};Persist Security Info=False;User Id=${sqlServerData.sqlAdministratorLogin};Password=${sqlAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-        type: 'SQLAzure'
+          value: '@Microsoft.KeyVault(VaultName=myvault;SecretName=ConnectionString)'
+          type: 'SQLAzure'
       }
     }
   }
 }
 
 output principalId string = websiteUserManagedIdentity.properties.principalId
+output webAppName string = appServiceApp.name

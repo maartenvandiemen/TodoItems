@@ -1,65 +1,59 @@
 param location string = resourceGroup().location
 
-@allowed([
-  'O'
-  'T'
-  'A'
-  'P'
-])
-param stage string
-
 param applicationname string
 
 param dockerRepositoryAndVersion string
 
+param sqlAdministratorLoginUser string
 @secure()
 param sqlAdministratorLoginPassword string
 
-param currentTime string = utcNow()
+param dateTime string = utcNow()
 
 module acr 'containerRegistry.bicep' = {
   name:'acr'
 }
 
 module sql 'sql.bicep' = {
-  name: 'sql-${uniqueString(currentTime)}'
+  name: 'sql-${dateTime}'
   params: {
     location: location
+    sqlAdministratorLoginUser: sqlAdministratorLoginUser
     sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
-    stage: stage
     applicationname: applicationname
   }
 }
 
 module appInsights 'applicationInsights.bicep' ={
-  name: 'appInsights-${uniqueString(currentTime)}'
+  name: 'appInsights-${dateTime}'
   params: {
     location: location
     applicationname: applicationname
-    stage: stage
   }
 }
 
 module appService 'appService/appService.docker.bicep' = {
-  name: 'appService-${uniqueString(currentTime)}'
+  name: 'appService-${dateTime}'
   params: {
     location: location
-    stage: stage
     applicationname: applicationname
-    sqlServerData: sql.outputs.sqlServerDatabase
-    sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
-    applicationInsightsInstrumentationKey: appInsights.outputs.instrumentationKey
+    applicationInsightsConnectionString: appInsights.outputs.connectionString
     acrLoginServer: acr.outputs.loginServer
     dockerRepositoryAndVersion: dockerRepositoryAndVersion
   }
 }
 
 module keyVault 'keyVault.bicep' = {
-  name: 'keyVault-${uniqueString(currentTime)}'
+  name: 'keyVault-${dateTime}'
   params: {
     location: location
-    stage: stage
     appServicePrincipalId: appService.outputs.principalId
-    applicationname: applicationname
+    sqlServerData: sql.outputs.sqlServerDatabase
+    sqlAdministratorLoginUser: sqlAdministratorLoginUser
+    sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
   }
 }
+
+output webAppName string = appService.outputs.webAppName
+output sqlServerFQDN string = sql.outputs.sqlServerDatabase.fullyQualifiedDomainName
+output databaseName string = sql.outputs.sqlServerDatabase.databaseName
