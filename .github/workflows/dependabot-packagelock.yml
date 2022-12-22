@@ -3,11 +3,11 @@ name: Update NuGet lockfiles
 on:
   pull_request:
     types: 
-      - opened
+     - opened
 
 jobs:
   update-lockfiles:
-    if: ${{ github.actor == 'dependabot[bot]' && startsWith(github.head_ref, 'dependabot/') && contains(github.event.pull_request.labels.*.name, '.NET') }}
+    if: github.actor == 'dependabot[bot]' && contains(github.head_ref, 'dependabot/') && contains(github.event.pull_request.labels.*.name, '.NET')
     permissions: 
       contents: write
     runs-on: ubuntu-latest
@@ -23,4 +23,4 @@ jobs:
           commit_message: Update lockfiles
           commit_user_name: github-actions[bot]
           commit_user_email: github-actions[bot]@users.noreply.github.com
-          file_pattern: '**/package.lock.json'
+          file_pattern: '**/packages.lock.json'
