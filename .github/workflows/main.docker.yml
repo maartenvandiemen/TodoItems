@@ -94,7 +94,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           
-      - uses: docker/build-push-action@v3.2.0
+      - uses: docker/build-push-action@v3.3.0
         with:
           context: ${{ github.workspace }}/api
           file: ${{github.workspace}}/dockerFile/Dockerfile
