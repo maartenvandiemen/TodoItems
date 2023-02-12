@@ -2,5 +2,17 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:base"
+  ],
+  "azure-pipelines": {
+    "enabled": true
+  },
+  //Source for the below packageRules: https://jessehouwing.net/azure-pipelines-enable-renovatebot/
+  // If you only want to get pull requests for updates from @1 to @2 add:
+  "packageRules": [ 
+    {
+      // Only extract major versions for Pipeline Tasks
+      "matchDatasources": ["azure-pipelines-tasks"],
+      "extractVersion": "^(?<version>\\d+)"
+    }
   ]
 }
