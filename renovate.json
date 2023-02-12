@@ -8,7 +8,6 @@
   },
   "packageRules": [ 
     {
-      // Only extract major versions for Pipeline Tasks
       "matchDatasources": ["azure-pipelines-tasks"],
       "extractVersion": "^(?<version>\\d+)"
     }
