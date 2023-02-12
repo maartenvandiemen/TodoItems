@@ -76,7 +76,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           
-      - uses: Azure/webapps-deploy@v2.2.5
+      - uses: Azure/webapps-deploy@v2
         with:
           app-name: ${{ needs.create_env.outputs.webAppName }} 
           package: ${{github.workspace}}/artifacts/api
