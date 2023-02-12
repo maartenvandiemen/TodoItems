@@ -11,10 +11,3 @@ updates:
       interval: "weekly"
     labels:
       - "dependencies"
-  - package-ecosystem: "nuget"
-    directory: "/" # Location of package manifests
-    schedule:
-      interval: "weekly"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
