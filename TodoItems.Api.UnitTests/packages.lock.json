@@ -31,15 +31,15 @@
       },
       "MSTest.TestAdapter": {
         "type": "Direct",
-        "requested": "[3.0.1, )",
-        "resolved": "3.0.1",
-        "contentHash": "QcGOttirgLRLyWqWyn/kZElUQrDu5aOXLxiVrchithODwUk4hpXubvGKf6I7uW9LurhBYuiHvnMU2Fu4qY9Rjg=="
+        "requested": "[3.0.2, )",
+        "resolved": "3.0.2",
+        "contentHash": "K1hhtevCzbogylmAnCluV/M1/Ajr5EKfxWq3nv+iYxt+gHLN4gSqT6B3tPnNqUbE4aWT1aUHagcRMnARt45NzQ=="
       },
       "MSTest.TestFramework": {
         "type": "Direct",
-        "requested": "[3.0.1, )",
-        "resolved": "3.0.1",
-        "contentHash": "S8ErX2PC/+pRMEb9tcRAPMYAi7EhwTGKoU1QAZWiFOeDw4/e8pUdQ3cLM4/s8LboAKNpJysmhq578Jxvuly4RA=="
+        "requested": "[3.0.2, )",
+        "resolved": "3.0.2",
+        "contentHash": "cuCE5PXK0mX0FIfY3yzDNKFqCf2FTxZhdH/Bxg4662MAWZg4TnG3rYsFzNpPECrvn8Ry6lG8TaT2Ltg1NZkC6Q=="
       },
       "Azure.Core": {
         "type": "Transitive",
