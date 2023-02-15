@@ -2,17 +2,13 @@ param location string = resourceGroup().location
 
 param applicationname string
 
-param dockerRepositoryAndVersion string
+param dockerImageNameAndTag string
 
 param sqlAdministratorLoginUser string
 @secure()
 param sqlAdministratorLoginPassword string
 
 param dateTime string = utcNow()
-
-module acr 'containerRegistry.bicep' = {
-  name:'acr'
-}
 
 module sql 'sql.bicep' = {
   name: 'sql-${dateTime}'
@@ -32,14 +28,13 @@ module appInsights 'applicationInsights.bicep' ={
   }
 }
 
-module appService 'appService/appService.docker.bicep' = {
+module appService 'appService.bicep' = {
   name: 'appService-${dateTime}'
   params: {
     location: location
     applicationname: applicationname
     applicationInsightsConnectionString: appInsights.outputs.connectionString
-    acrLoginServer: acr.outputs.loginServer
-    dockerRepositoryAndVersion: dockerRepositoryAndVersion
+    dockerImageNameAndTag: dockerImageNameAndTag
   }
 }
 

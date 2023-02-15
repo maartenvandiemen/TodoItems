@@ -27,7 +27,7 @@ module appInsights 'applicationInsights.bicep' ={
   }
 }
 
-module appService 'appService/appService.nodocker.bicep' = {
+module appService 'appService.bicep' = {
   name: 'appService-${dateTime}'
   params: {
     location: location
