@@ -95,7 +95,6 @@ jobs:
                 "australiaeast", "centralindia", "japaneast", "koreacentral", "southeastasia", "eastasia",
                 #Other
                 "eastus2euap",
-                "asiapacific",
                 "eastusstg",
                 "northcentralus",
                 "westus",
