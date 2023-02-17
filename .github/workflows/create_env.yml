@@ -92,7 +92,31 @@ jobs:
                 # Africa
                 "southafricanorth",
                 # Asia Pacific
-                "australiaeast", "centralindia", "japaneast", "koreacentral", "southeastasia", "eastasia"
+                "australiaeast", "centralindia", "japaneast", "koreacentral", "southeastasia", "eastasia",
+                #Other
+                "eastus2euap",
+                "asiapacific",
+                "eastusstg",
+                "northcentralus",
+                "westus",
+                "jioindiawest",
+                "centraluseuap",
+                "westcentralus",
+                "southafricawest",
+                "australiacentral",
+                "australiacentral2",
+                "australiasoutheast",
+                "japanwest",
+                "jioindiacentral",
+                "koreasouth",
+                "southindia",
+                "westindia",
+                "canadaeast",
+                "germanynorth",
+                "norwaywest",
+                "switzerlandwest",
+                "uaecentral",
+                "brazilsoutheast"
               )
               $locations | foreach-Object {
                   $restUrl = "https://$_.management.azure.com/subscriptions/${{secrets.SUBSCRIPTION}}/resourceGroups/${{inputs.resourcegroupName}}/providers/Microsoft.Web/sites/${{steps.arm.outputs.webAppName}}?api-version=2022-03-01";
