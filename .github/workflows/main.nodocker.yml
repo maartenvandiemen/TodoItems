@@ -54,7 +54,7 @@ jobs:
     uses: ./.github/workflows/create_env.yml
     with:
       resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
-      region: 'westeurope'
+      region: 'eastus'
       template: /artifacts/bicep/main.nodocker.webapp.bicep
       additionalParameters: applicationname=todoitems
     secrets: inherit
