@@ -10,6 +10,7 @@ jobs:
   variables: 
   - group: AzureSecrets
   steps:
+  - checkout: none
   - download: current
     artifact: infraCode
     displayName: Download Bicep files
