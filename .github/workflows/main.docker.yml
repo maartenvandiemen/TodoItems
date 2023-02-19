@@ -62,7 +62,7 @@ jobs:
       resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
       region: 'eastus'
       template: /artifacts/bicep/main.docker.webapp.bicep
-      additionalParameters: applicationname=todoitems
+      additionalParameters: applicationname=todoitems dockerImageNameAndTag=${{needs.push_docker_image.outputs.dockerTag}}
     secrets: inherit
         
   dockerfile_artifact:
@@ -86,6 +86,8 @@ jobs:
   
   push_docker_image:
     runs-on: ubuntu-latest
+    outputs:
+      dockerTag: ${{ steps.meta.outputs.tags }}
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: ${{ github.repository }}
