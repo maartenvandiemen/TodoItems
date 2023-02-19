@@ -184,7 +184,7 @@ stages:
   dependsOn: [Build, PipelineVariables]
   variables:
   - name: resourcegroupName
-    value: $[stageDependencies.PipelineVariables.DetermineVariables.outputs['DetermineVariables.DetermineResourcegroupName.resourcegroupName']]
+    value: $[stageDependencies.PipelineVariables.DetermineVariables.outputs['DetermineResourcegroupName.resourcegroupName']]
   jobs:
   - template: create_env.yml
     parameters:
