@@ -62,7 +62,7 @@ stages:
         pwsh: true
 
     - task: UseDotNet@2
-      displayName: 'Install ${{variables.dotNetVersion}}'
+      displayName: 'Install dotnet'
       condition: and(succeeded(), ne(variables['isDotNetVersionInstalled'], 'true'))
       inputs:
         packageType: 'sdk'
