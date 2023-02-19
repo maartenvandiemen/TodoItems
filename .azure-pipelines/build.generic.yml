@@ -38,7 +38,7 @@ variables:
   readonly: true
 
 stages:
-- stage: Variables
+- stage: PipelineVariables
   dependsOn: []
   jobs:
     - job: DetermineVariables
@@ -184,7 +184,7 @@ stages:
   dependsOn: [Build, Variables]
   variables:
   - name: resourcegroupName
-    value: $[stageDependencies.Variables.DetermineVariables.outputs['DetermineVariables.DetermineResourcegroupName.resourcegroupName']]
+    value: $[stageDependencies.PipelineVariables.DetermineVariables.outputs['DetermineVariables.DetermineResourcegroupName.resourcegroupName']]
   jobs:
   - template: create_env.yml
     parameters:
