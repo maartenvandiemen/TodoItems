@@ -21,7 +21,7 @@ jobs:
       targetType: 'inline'
       script: |
         $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
-        Write-Host "##vso[task.setvariable variable=resourcegroup;isoutput=true;isreadonly=true]todoItems-$randomNumber"
+        echo "##vso[task.setvariable variable=resourcegroup;isoutput=true]todoItems-$randomNumber"
       pwsh: true
   - task: AzureResourceManagerTemplateDeployment@3
     inputs:
