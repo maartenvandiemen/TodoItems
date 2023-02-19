@@ -1,0 +1,36 @@
+parameters:
+- name: template
+  type: string
+- name: additionalParameters
+  type: string
+  default: ''
+
+jobs:
+- job: Create_Env
+  variables: 
+  - group: AzureSecrets
+  steps:
+    steps:
+    - download: webApp
+      artifact: infraCode
+      displayName: Download Bicep files
+    - task: PowerShell@2
+      displayName: Create resource group name
+      inputs:
+        targetType: 'inline'
+        script: |
+          $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
+          Write-Host "##vso[task.setvariable variable=resourcegroup;isoutput=true;isreadonly=true]todoItems-$randomNumber"
+       pwsh: true
+    - task: AzureResourceManagerTemplateDeployment@3
+      inputs:
+       deploymentScope: 'Resource Group'
+       azureResourceManagerConnection: $(serviceConnection)
+       subscriptionId: $(subscriptionId)
+       action: 'Create Or Update Resource Group'
+       resourceGroupName: $(resourcegroup)
+       location: 'East US'
+       templateLocation: 'Linked artifact'
+       csmFile: '$(Pipeline.Workspace)/webApp/infraCode/${{ parameters.template }}
+       overrideParameters: '-applicationame todoitems -sqlAdministratorLoginUser $(todoItemsSqlAdminpassword) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
+       deploymentMode: 'Incremental'
