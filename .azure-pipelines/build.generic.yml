@@ -43,6 +43,7 @@ stages:
   jobs:
     - job: DetermineVariables
       steps:
+      - checkout: none
       - task: PowerShell@2
         displayName: Create resource group name
         inputs:
