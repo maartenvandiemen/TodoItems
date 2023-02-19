@@ -16,6 +16,7 @@ jobs:
   - task: PowerShell@2
     displayName: Create resource group name
     inputs:
+      name: setResourceGroupname
       targetType: 'inline'
       script: |
         $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
@@ -27,7 +28,7 @@ jobs:
      azureResourceManagerConnection: 'Azure'
      subscriptionId: $(subscriptionId)
      action: 'Create Or Update Resource Group'
-     resourceGroupName: $(resourcegroup)
+     resourceGroupName: $(setResourceGroupname.resourcegroup)
      location: 'East US'
      templateLocation: 'Linked artifact'
      csmFile: '$(Pipeline.Workspace)/webApp/infraCode/${{ parameters.template }}'
