@@ -87,10 +87,9 @@ jobs:
   push_docker_image:
     runs-on: ubuntu-latest
     outputs:
-      dockerTag: ${{ steps.meta.outputs.tags }}
+      dockerTag: ${{ steps.createTag.outputs.dockerTag }}
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}
     permissions:
       contents: read
       packages: write
@@ -112,12 +111,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           
+      - name: Create docker tag
+        id: createTag
+        run: |
+          $lowercaseRepo = "${{ github.repository }}".ToLower()
+          echo "dockerTag=${{ env.REGISTRY }}/$lowercaseRepo}:${{ github.sha }}" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
       - uses: docker/build-push-action@v4
         with:
           context: ${{ github.workspace }}/api
           file: ${{github.workspace}}/dockerFile/Dockerfile
           push: ${{ needs.determine_variables.outputs.pushImage }}
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          tags: ${{ steps.createTag.outputs.dockerTag }}
 
   deploy_db:
     needs: [build, create_env]
