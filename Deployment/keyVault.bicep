@@ -27,7 +27,7 @@ resource secret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: 'ConnectionString'
   parent: key_vault
   properties: {
-    value: 'Data Source=tcp:${sqlServerData.fullyQualifiedDomainName},1433;Initial Catalog=${sqlServerData.databaseName};Persist Security Info=False;User Id=${sqlAdministratorLoginUser};Password=${sqlAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+    value: 'Data Source=tcp:${sqlServerData.fullyQualifiedDomainName},1433;Initial Catalog=${sqlServerData.databaseName};Persist Security Info=False;User Id=${sqlAdministratorLoginUser};Password=${sqlAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;'
   }
 }
 
