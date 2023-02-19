@@ -168,30 +168,6 @@ stages:
 - stage: Create_Env
   dependsOn: [Build]
   jobs:
-  - job: Create_Env
-    steps:
-    - download: webApp
-      artifact: infraCode
-      displayName: Download Bicep files
-    - task: PowerShell@2
-      displayName: Create resource group name
-      inputs:
-        targetType: 'inline'
-        script: |
-          $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
-          Write-Host "##vso[task.setvariable variable=resourcegroup;isoutput=true;isreadonly=true]todoItems-$randomNumber"
-        pwsh: true
-    - task: AzureResourceManagerTemplateDeployment@3
-      inputs:
-        deploymentScope: 'Resource Group'
-        azureResourceManagerConnection: 'MSN Azure'
-        subscriptionId: '052513ff-2610-4a3d-a8b1-c17241db3e38'
-        action: 'Create Or Update Resource Group'
-        resourceGroupName: 'BicepDemo'
-        location: 'East US'
-        templateLocation: 'Linked artifact'
-        csmFile: '$(Pipeline.Workspace)/webApp/infraCode/main.nodocker.webapp.bicep'
-        overrideParameters: '-applicationame todoitems -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword-O)'
-        deploymentMode: 'Incremental'
-      env:
-        sqlAdministratorLoginPassword: $(todoItemsSqlAdminpassword-O)
+  - template: create_env.yml
+    parameters:
+      template: main.nodocker.webapp.bicep
