@@ -1,6 +1,4 @@
 parameters:
-- name: resourcegroupName
-  type: string
 - name: template
   type: string
 - name: additionalParameters
