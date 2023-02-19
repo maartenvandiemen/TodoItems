@@ -36,12 +36,12 @@ variables:
 - name: NUGET_PACKAGES
   value: '$(Pipeline.Workspace)/.nuget/packages/'
   readonly: true
-- name: dotNetVersion
-  value: '7.0.x'
-  readonly: true
 
-jobs:
-  - job: Job
+stages:
+- stage: Build
+  dependsOn: []
+  jobs:
+  - job: Build
     services:
       mssql:
         alias: mssql
