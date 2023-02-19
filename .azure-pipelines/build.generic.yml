@@ -182,8 +182,8 @@ stages:
 - stage: Create_Env
   dependsOn: [Build]
   variables:
-    -name: resourcegroupName
-     value:  $[stageDependencies.Variables.DetermineVariables.outputs['DetermineVariables.DetermineResourcegroupName.resourcegroupName']]
+  - name: resourcegroupName
+    value: $[stageDependencies.Variables.DetermineVariables.outputs['DetermineVariables.DetermineResourcegroupName.resourcegroupName']]
   jobs:
   - template: create_env.yml
     parameters:
