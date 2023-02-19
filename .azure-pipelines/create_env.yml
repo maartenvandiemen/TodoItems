@@ -24,8 +24,8 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     inputs:
      deploymentScope: 'Resource Group'
-     azureResourceManagerConnection: $(serviceConnection)
-     subscriptionId: $(subscriptionId)
+     azureResourceManagerConnection: ${{variables.serviceConnection}}
+     subscriptionId: ${{variables.subscriptionId}}
      action: 'Create Or Update Resource Group'
      resourceGroupName: $(resourcegroup)
      location: 'East US'
