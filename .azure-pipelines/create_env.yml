@@ -30,6 +30,6 @@ jobs:
      resourceGroupName: $(resourcegroup)
      location: 'East US'
      templateLocation: 'Linked artifact'
-     csmFile: '$(Pipeline.Workspace)/webApp/infraCode/${{ parameters.template }}
+     csmFile: '$(Pipeline.Workspace)/webApp/infraCode/${{ parameters.template }}'
      overrideParameters: '-applicationame todoitems -sqlAdministratorLoginUser $(todoItemsSqlAdminUser) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
      deploymentMode: 'Incremental'
