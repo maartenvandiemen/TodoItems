@@ -21,7 +21,7 @@ jobs:
       targetType: 'inline'
       script: |
         $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
-        echo "##vso[task.setvariable variable=resourcegroup;isoutput=true]todoItems-$randomNumber"
+        Write-Host "##vso[task.setvariable variable=resourcegroupName;isoutput=true]todoItems-$randomNumber"
       pwsh: true
   - task: AzureResourceManagerTemplateDeployment@3
     inputs:
@@ -29,7 +29,7 @@ jobs:
      azureResourceManagerConnection: 'Azure'
      subscriptionId: $(subscriptionId)
      action: 'Create Or Update Resource Group'
-     resourceGroupName: $(setResourceGroupname.resourcegroup)
+     resourceGroupName: $(setResourceGroupname.resourcegroupName)
      location: 'East US'
      templateLocation: 'Linked artifact'
      csmFile: '$(Pipeline.Workspace)/webApp/infraCode/${{ parameters.template }}'
