@@ -181,7 +181,7 @@ stages:
       - ${{ step }}
 
 - stage: Create_Env
-  dependsOn: [Build, Variables]
+  dependsOn: [Build, PipelineVariables]
   variables:
   - name: resourcegroupName
     value: $[stageDependencies.PipelineVariables.DetermineVariables.outputs['DetermineVariables.DetermineResourcegroupName.resourcegroupName']]
