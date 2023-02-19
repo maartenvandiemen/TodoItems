@@ -180,7 +180,7 @@ stages:
       - ${{ step }}
 
 - stage: Create_Env
-  dependsOn: [Build]
+  dependsOn: [Build, Variables]
   variables:
   - name: resourcegroupName
     value: $[stageDependencies.Variables.DetermineVariables.outputs['DetermineVariables.DetermineResourcegroupName.resourcegroupName']]
@@ -188,4 +188,4 @@ stages:
   - template: create_env.yml
     parameters:
       template: main.nodocker.webapp.bicep
-      resourcegroupName: $(resourcegroupName)
+      resourcegroup: $(resourcegroupName)
