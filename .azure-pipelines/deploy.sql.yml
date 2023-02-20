@@ -1,5 +1,7 @@
 jobs:
 - job: Deploy_DB
+  pool:
+    vmImage: windows-latest
   dependsOn: [Create_Env]
   variables: 
   - group: AzureSecrets
