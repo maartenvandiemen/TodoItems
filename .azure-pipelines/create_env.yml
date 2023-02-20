@@ -29,5 +29,5 @@ jobs:
      location: 'East US'
      templateLocation: 'Linked artifact'
      csmFile: '$(Pipeline.Workspace)/infraCode/${{ parameters.template }}'
-     overrideParameters: '-applicationame todoitems -sqlAdministratorLoginUser $(todoItemsSqlAdminUser) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
+     overrideParameters: '-applicationname todoitems -sqlAdministratorLoginUser $(todoItemsSqlAdminUser) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
      deploymentMode: 'Incremental'
