@@ -180,7 +180,8 @@ stages:
   - deployment: Delete
     environment: todoItems-teardown
     variables:
-      resourcegroupName: $[ stageDependencies.Deploy.Create_Env.outputs['Create_Env.DetermineResourcegroupName.resourcegroupName'] ]
+      - name: resourcegroupName
+        value: $[ stageDependencies.Deploy.Create_Env.outputs['Create_Env.DetermineResourcegroupName.resourcegroupName'] ]
     strategy:
       runOnce:
         deploy:
@@ -190,5 +191,5 @@ stages:
               azureSubscription: 'Azure'
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
-              inlineScript: 'az group delete --name $(resourcegroupName) --yes'
+              inlineScript: 'az group delete --n $(resourcegroupName) --yes'
   
