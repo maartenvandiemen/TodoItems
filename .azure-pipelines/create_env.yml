@@ -32,3 +32,11 @@ jobs:
       overrideParameters: '-applicationname todoitems -sqlAdministratorLoginUser $(todoItemsSqlAdminUser) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
       deploymentMode: 'Incremental'
     deploymentOutputs: deploymentOutputs
+  - bash: |
+        echo "##vso[task.setvariable variable=appServiceAppName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.webAppName.value')"
+        echo "##vso[task.setvariable variable=sqlServerFQDN;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.sqlServerFQDN.value')"
+        echo "##vso[task.setvariable variable=databaseName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.databaseName.value')"
+    name: SaveDeploymentOutputs
+    displayName: Save deployment outputs into variables
+    env:
+      DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
