@@ -1,1 +1,25 @@
-
+jobs:
+- job: Deploy_DB
+  dependsOn: [Create_Env]
+  variables: 
+  - group: AzureSecrets
+  - name: sqlServerFQDN
+    value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.sqlServerFQDN'] ]
+  - name: databaseName
+    value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.databaseName'] ]  
+  steps:
+  - checkout: none
+  - download: current
+    artifact: database
+    displayName: Download database
+  - task: SqlAzureDacpacDeployment@1
+    inputs:
+      azureSubscription: 'Azure'
+      AuthenticationType: 'server'
+      ServerName: '$(sqlServerFQDN),1433'
+      DatabaseName: $(databaseName)
+      SqlUsername: $(todoItemsSqlAdminUser)
+      SqlPassword: $(todoItemsSqlAdminpassword)
+      deployType: 'SqlTask'
+      SqlFile: '$(Pipeline.Workspace)/database/db.sql'
+      IpDetectionMethod: 'AutoDetect'
