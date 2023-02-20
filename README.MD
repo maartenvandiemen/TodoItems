@@ -10,14 +10,14 @@ Demo project of an ASP.NET Core 7 minimal API's. Inspired by the demo from [Dani
 
 # Prerequisites
 ## Prerequisites Github
-The following prerequisites are required before performing the labs:
+The following prerequisites are required before executing the pipelines:
 
 1. Ensure you have a Github account
 1. Create a [new public repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository)
 1. Create a new [Action Secret for the repository](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository) with the name: `SA_PASSWORD`. The value of this field should be a [complex password according to SQL Server](https://learn.microsoft.com/en-us/sql/relational-databases/security/password-policy).
 
 ## Prerequisites Azure Devops
-The following prerequisites are required before performing the labs:
+The following prerequisites are required before executing the pipelines:
 
 1. Ensure you have a Microsoft account
    - If you don't have a Microsoft account signup [here](https://account.microsoft.com) for a new one.
@@ -30,11 +30,20 @@ The following prerequisites are required before performing the labs:
 ### CI build (nodocker)
 1. [Import the code](https://learn.microsoft.com/en-us/azure/devops/repos/git/import-git-repository) of this repo in Azure Devops.
 1. [Create a variable group](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/variable-groups) with the name: _TodoItemsApi-Build_.
-1. Create in this variable group a variable named: `SA_PASSWORD`. The value of this field should be a [complex password according to SQL Server](https://learn.microsoft.com/en-us/sql/relational-databases/security/password-policy). Make this field a secret.
-1. Import build.nodocker.yml
+   - Create in this variable group a variable named: `SA_PASSWORD`. The value of this field should be a [complex password according to SQL Server](https://learn.microsoft.com/en-us/sql/relational-databases/security/password-policy). Make this field a secret.
+1. Create an [Azure Resource Manager Service Connection](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/connect-to-azure) (Service Principal)
+   - Name the service connection: _Azure_
+   - Grant the service principal the _owner_ role on subscription level
+   - Grant the service principal the _User Account Administrator_ role on subscription level
+1. [Create a variable group](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/variable-groups) with the name: _AzureSecrets_. And create the following variables:
+   - _subscriptionId_: value the subscription id of the Azure subscription for which a service connection is created in the steps above.
+   - _todoItemsSqlAdminpassword_: The value of this field should be a [complex password according to SQL Server](https://learn.microsoft.com/en-us/sql/relational-databases/security/password-policy). Make this field a secret.
+   - _todoItemsSqlAdminUser_: Name of the admin user for SQL Server.
+3. Import nodocker.yml
 
 ### CI build (docker)
 1. Follow the steps in [CI build](#ci-build-nodocker)
 1. Create a Github Account
    - Create a PAT token. Enable the scopes `write:packages`.
 1. Create a new Service Connection with the following content <br> ![Docker service connection](./.images/Prerequisites_DockerServiceConnection.png)
+1. Import docker.yml
