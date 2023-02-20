@@ -16,6 +16,6 @@ jobs:
         azureSubscription: 'Azure'
         appType: 'webAppLinux'
         WebAppName: $(appServiceAppName)
-        packageForLinux: '$(Pipeline.Workspace)/todoItemsApi'
+        packageForLinux: '$(Pipeline.Workspace)/todoItemsAPI'
         RuntimeStack: 'DOTNETCORE|7.0'
         StartupCommand: 'dotnet TodoItems.Api.dll'
