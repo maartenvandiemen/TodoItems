@@ -172,3 +172,4 @@ stages:
     parameters:
       template: main.nodocker.webapp.bicep
   - template: deploy.nodocker.yml
+  - template: deploy.sql.yml
