@@ -1,5 +1,5 @@
 param location string
-
+param keyVaultName string
 param applicationname string
 
 param applicationInsightsConnectionString string
@@ -50,7 +50,7 @@ resource appServiceApp 'Microsoft.Web/sites@2021-02-01' = {
       name: 'connectionstrings'
       properties:{
         TodoDb:{
-          value: '@Microsoft.KeyVault(VaultName=myvault;SecretName=ConnectionString)'
+          value: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=ConnectionString)'
           type: 'SQLAzure'
       }
     }
