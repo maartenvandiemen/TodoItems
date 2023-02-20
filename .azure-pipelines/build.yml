@@ -2,6 +2,12 @@ parameters:
 - name: postBuildSteps
   type: stepList
   default: []
+- name: buildConfiguration
+  type: string
+  default: 'Release'
+- name: testDatabasename
+  type: string
+  default: TodoItemsDB
 
 jobs: 
 - job: Build
@@ -28,7 +34,7 @@ jobs:
         
   steps:
   - task: PowerShell@2
-    displayName: 'Determine if dotnet ${{variables.dotNetVersion}} is installed'
+    displayName: 'Determine if dotnet is installed'
     inputs:
       targetType: 'inline'
       script: |
