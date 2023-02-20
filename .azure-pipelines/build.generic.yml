@@ -17,6 +17,7 @@ resources:
     image: mcr.microsoft.com/mssql/server:2022-latest
     env:
       ACCEPT_EULA: Y
+      #SA_PASSWORD defined in Build stage
       SA_PASSWORD: $(SA_PASSWORD)
       MSSQL_PID: Developer
     ports: 
@@ -57,6 +58,7 @@ stages:
       runOnce:
         deploy:
           steps:
+          - download: none
           - task: AzureCLI@2
             inputs:
               azureSubscription: 'Azure'
