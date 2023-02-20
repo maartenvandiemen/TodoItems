@@ -21,13 +21,14 @@ jobs:
     name: DetermineResourcegroupName
   - task: AzureResourceManagerTemplateDeployment@3
     inputs:
-     deploymentScope: 'Resource Group'
-     azureResourceManagerConnection: 'Azure'
-     subscriptionId: $(subscriptionId)
-     action: 'Create Or Update Resource Group'
-     resourceGroupName: $(DetermineResourcegroupName.resourcegroupName)
-     location: 'East US'
-     templateLocation: 'Linked artifact'
-     csmFile: '$(Pipeline.Workspace)/infraCode/${{ parameters.template }}'
-     overrideParameters: '-applicationname todoitems -sqlAdministratorLoginUser $(todoItemsSqlAdminUser) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
-     deploymentMode: 'Incremental'
+      deploymentScope: 'Resource Group'
+      azureResourceManagerConnection: 'Azure'
+      subscriptionId: $(subscriptionId)
+      action: 'Create Or Update Resource Group'
+      resourceGroupName: $(DetermineResourcegroupName.resourcegroupName)
+      location: 'East US'
+      templateLocation: 'Linked artifact'
+      csmFile: '$(Pipeline.Workspace)/infraCode/${{ parameters.template }}'
+      overrideParameters: '-applicationname todoitems -sqlAdministratorLoginUser $(todoItemsSqlAdminUser) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
+      deploymentMode: 'Incremental'
+    deploymentOutputs: deploymentOutputs
