@@ -8,6 +8,7 @@ extends:
    template: build.generic.yml
    parameters:
      bicepTemplate: main.docker.webapp.bicep
+     bicepAdditionalParameters: '-dockerImageNameAndTag ghcr.io/mvdiemen/todoitems:$(Build.SourceVersion)'
      postBuildSteps: 
        - task: Docker@2
          inputs:
