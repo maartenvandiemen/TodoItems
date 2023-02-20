@@ -5,6 +5,8 @@ parameters:
 - name: postBuildSteps
   type: stepList
   default: []
+- name: bicepTemplate
+  type: string
 
 resources:
   containers:
@@ -32,7 +34,7 @@ stages:
   jobs:
   - template: create_env.yml
     parameters:
-      template: main.nodocker.webapp.bicep
+      template: ${{parameters.bicepTemplate}}
   - template: deploy.nodocker.yml
   - template: deploy.sql.yml
 
