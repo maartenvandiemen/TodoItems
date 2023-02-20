@@ -1,5 +1,6 @@
 jobs:
 - job: Deploy_App
+  dependsOn: [Create_Env]
   variables: 
   - group: AzureSecrets
   - name: appServiceAppName
