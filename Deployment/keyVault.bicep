@@ -1,4 +1,5 @@
 param location string
+param keyVaultName string
 param appServicePrincipalId string
 
 param sqlServerData object
@@ -7,8 +8,6 @@ param sqlAdministratorLoginUser string
 
 @secure ()
 param sqlAdministratorLoginPassword string
-
-var keyVaultName = 'vault-${uniqueString(resourceGroup().id)}'
 
 resource key_vault 'Microsoft.KeyVault/vaults@2019-09-01' = {
   name: keyVaultName
