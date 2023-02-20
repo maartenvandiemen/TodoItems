@@ -2,9 +2,6 @@ parameters:
 - name: buildConfiguration
   type: string
   default: 'Release'
-- name: testDatabasename
-  type: string
-  default: TodoItemsDB
 - name: postBuildSteps
   type: stepList
   default: []
@@ -41,129 +38,10 @@ stages:
 - stage: Build
   dependsOn: []
   jobs:
-  - job: Build
-    services:
-      mssql:
-        alias: mssql
-    steps:
-    - task: PowerShell@2
-      displayName: 'Determine if dotnet ${{variables.dotNetVersion}} is installed'
-      inputs:
-        targetType: 'inline'
-        script: |
-          $installedSdks = dotnet --list-sdks
-          $globalJsonLocation = Join-Path -Path "$(System.DefaultWorkingDirectory)" -ChildPath "global.json"
-          $globalJson = Get-Content $globalJsonLocation -Raw | ConvertFrom-Json 
-          $dotnetVersionGlobalJson = $globalJson.sdk.version
-          $match = $installedSdks -like ($dotnetVersionGlobalJson + "*")
-          if($match){
-            Write-Host "##vso[task.setvariable variable=isDotNetVersionInstalled;]true"
-          }
-        pwsh: true
-
-    - task: UseDotNet@2
-      displayName: 'Install dotnet'
-      condition: and(succeeded(), ne(variables['isDotNetVersionInstalled'], 'true'))
-      inputs:
-        packageType: 'sdk'
-        useGlobalJson: true
-  
-    - task: Cache@2
-      displayName: 'Restore cache for NuGet'
-      inputs:
-        key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,!**/bin/**,!**/obj/**'
-        path: '$(NUGET_PACKAGES)'
-        cacheHitVar: 'CACHE_RESTORED'
-        restoreKeys: |
-          nuget | "$(Agent.OS)"
-          nuget
-
-    - task: DotNetCoreCLI@2
-      displayName: Dotnet restore '**/*.csproj'
-      condition: ne(variables.CACHE_RESTORED, true)
-      inputs:
-        command: 'restore'
-        projects: '**/*.csproj'
-        restoreArguments: '--locked-mode'
-        feedsToUse: 'select'
-         
-    - task: DotNetCoreCLI@2
-      displayName: Dotnet build - pipeline cache restored
-      condition: eq(variables.CACHE_RESTORED, true)
-      inputs:
-        command: 'build'
-        projects: '**/*.csproj'
-        arguments: '--configuration ${{parameters.buildConfiguration}}'
-    
-    - task: DotNetCoreCLI@2
-      displayName: Dotnet build - pipeline cache not restored
-      condition: ne(variables.CACHE_RESTORED, true)
-      inputs:
-        command: 'build'
-        projects: '**/*.csproj'
-        arguments: '--no-restore --configuration ${{parameters.buildConfiguration}}' 
-
-    - task: DotNetCoreCLI@2
-      inputs:
-        command: 'custom'
-        custom: 'tool'
-        arguments: 'restore'
-        workingDirectory: '$(Build.SourcesDirectory)/TodoItems.Api'
-      displayName: 'Restore dotnet tools'
-
-    - task: DotNetCoreCLI@2
-      inputs:
-        command: 'custom'
-        custom: 'ef'
-        arguments: 'migrations script --output $(Build.ArtifactStagingDirectory)/SQL/db.sql --idempotent --project TodoItems.Api.csproj --context TodoDb --no-build --verbose --configuration ${{parameters.buildConfiguration}}'
-        workingDirectory: '$(Build.SourcesDirectory)/TodoItems.Api'
-      displayName: 'Create idempotent SQL'
-      env:
-        #Pass environment variable dummy. So the migration script will not be created against the InMemory database.
-        ASPNETCORE_ENVIRONMENT: 'DUMMY'
-
-    - script: |
-          sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -Q 'CREATE DATABASE ${{parameters.testDatabasename}}' -b
-          sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -i db.sql -d ${{parameters.testDatabasename}} -b
-      workingDirectory: '$(Build.ArtifactStagingDirectory)/SQL'
-      displayName: 'Create database and tables for unit tests'
-      timeoutInMinutes: 1
-
-    - task: DotNetCoreCLI@2
-      displayName: Dotnet test '**/*Tests.csproj'
-      inputs:
-        command: 'test'
-        projects: '**/*Tests.csproj'
-        arguments: '--no-restore --nologo --configuration ${{parameters.buildConfiguration}}'
-      env:
-        integrationtests_ConnectionStrings__TodoDb: 'Server=127.0.0.1,1433;Database=${{parameters.testDatabasename}};User Id=SA;Password=$(SA_PASSWORD);TrustServerCertificate=true;'
-    
-    - task: DotNetCoreCLI@2
-      displayName: Dotnet publish '**/TodoItems.Api.csproj' 
-      inputs:
-        command: 'publish'
-        publishWebProjects: false
-        projects: '**/TodoItems.Api.csproj' 
-        arguments: '--no-restore --configuration ${{parameters.buildConfiguration}} --nologo --no-build --output $(Build.ArtifactStagingDirectory)/todoItemsApi'
-        modifyOutputPath: false
-        zipAfterPublish: false
-
-    - task: PublishPipelineArtifact@1
-      displayName: Publish pipeline artifact 'SQL'
-      inputs:
-        targetPath: '$(Build.ArtifactStagingDirectory)/SQL'
-        artifact: 'database'
-        publishLocation: 'pipeline'
-
-    - task: PublishPipelineArtifact@1
-      displayName: Publish pipeline artifact 'Deployment'
-      inputs:
-        targetPath: '$(Build.SourcesDirectory)/Deployment'
-        artifact: 'infraCode'
-        publishLocation: 'pipeline'
-      
-    - ${{ each step in parameters.postBuildSteps }}:
-      - ${{ step }}
+  - template: build.yml
+    parameters:
+      postBuildSteps: ${{parameters.postBuildSteps}}
+      buildConfiguration: ${{parameters.buildConfiguration}}
 
 - stage: Deploy
   dependsOn: [Build]
@@ -177,15 +55,19 @@ stages:
 - stage: Delete
   dependsOn: [Deploy]
   jobs:
-  - job: Delete
+  - deployment: Delete
+    environment: todoItems-teardown
     variables:
       - name: resourcegroupName
         value: $[ stageDependencies.Deploy.Create_Env.outputs['Create_Env.DetermineResourcegroupName.resourcegroupName'] ]
-    steps:
-    - task: AzureCLI@2
-      inputs:
-        azureSubscription: 'Azure'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: 'az group delete --resource-group $(resourcegroupName) --yes'
-  
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'Azure'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: 'az group delete --resource-group $(resourcegroupName) --yes'
+ 
