@@ -38,21 +38,6 @@ variables:
   readonly: true
 
 stages:
-- stage: PipelineVariables
-  dependsOn: []
-  jobs:
-    - job: DetermineVariables
-      steps:
-      - checkout: none
-      - task: PowerShell@2
-        displayName: Create resource group name
-        inputs:
-          name: DetermineResourcegroupName
-          targetType: 'inline'
-          script: |
-            $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
-            Write-Host "##vso[task.setvariable variable=resourcegroupName;isOutput=true]todoItems-$randomNumber"
-          pwsh: true
 - stage: Build
   dependsOn: []
   jobs:
@@ -182,11 +167,7 @@ stages:
 
 - stage: Create_Env
   dependsOn: [Build, PipelineVariables]
-  variables:
-  - name: resourcegroupName
-    value: $[stageDependencies.PipelineVariables.DetermineVariables.outputs['DetermineResourcegroupName.resourcegroupName']]
   jobs:
   - template: create_env.yml
     parameters:
       template: main.nodocker.webapp.bicep
-      resourcegroup: $(resourcegroupName)
