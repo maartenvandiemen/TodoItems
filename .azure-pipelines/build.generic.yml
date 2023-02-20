@@ -173,3 +173,22 @@ stages:
       template: main.nodocker.webapp.bicep
   - template: deploy.nodocker.yml
   - template: deploy.sql.yml
+
+- stage: Delete
+  dependsOn: [Deploy]
+  jobs:
+  - deployment: Delete
+    environment: todoItems-teardown
+    variables:
+      resourcegroupName: $[ stageDependencies.Deploy.Create_Env.outputs['Create_Env.DetermineResourcegroupName.resourcegroupName'] ]
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'Azure'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: 'az group delete --name $(resourcegroupName) --yes'
+  
