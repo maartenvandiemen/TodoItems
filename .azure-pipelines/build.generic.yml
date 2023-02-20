@@ -166,7 +166,7 @@ stages:
       - ${{ step }}
 
 - stage: Create_Env
-  dependsOn: [Build, PipelineVariables]
+  dependsOn: [Build]
   jobs:
   - template: create_env.yml
     parameters:
