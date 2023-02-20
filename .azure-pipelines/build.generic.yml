@@ -7,6 +7,9 @@ parameters:
   default: []
 - name: bicepTemplate
   type: string
+- name: bicepAdditionalParameters
+  type: string
+  default: ''
 
 resources:
   containers:
@@ -35,7 +38,11 @@ stages:
   - template: create_env.yml
     parameters:
       template: ${{parameters.bicepTemplate}}
-  - template: deploy.nodocker.yml
+      additionalParameters: ${{parameters.bicepAdditionalParameters}}
+  #bicepAdditionalParameters are only passed for Docker
+  #https://stackoverflow.com/questions/60098737/checking-for-null-object-type-parameter-in-azure-yaml
+  - ${{if not(parameters.bicepAdditionalParameters)}}:
+    - template: deploy.nodocker.yml
   - template: deploy.sql.yml
 
 - stage: Delete
