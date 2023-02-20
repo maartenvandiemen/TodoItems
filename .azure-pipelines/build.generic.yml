@@ -191,5 +191,5 @@ stages:
               azureSubscription: 'Azure'
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
-              inlineScript: 'az group delete --n $(resourcegroupName) --yes'
+              inlineScript: 'az group delete --resource-group $(resourcegroupName) --yes'
   
