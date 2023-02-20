@@ -10,6 +10,8 @@ param sqlAdministratorLoginPassword string
 
 param dateTime string = utcNow()
 
+var keyVaultName = 'vault-${uniqueString(resourceGroup().id)}'
+
 module sql 'sql.bicep' = {
   name: 'sql-${dateTime}'
   params: {
@@ -31,6 +33,7 @@ module appInsights 'applicationInsights.bicep' ={
 module appService 'appService.bicep' = {
   name: 'appService-${dateTime}'
   params: {
+    keyVaultName: keyVaultName
     location: location
     applicationname: applicationname
     applicationInsightsConnectionString: appInsights.outputs.connectionString
@@ -41,6 +44,7 @@ module appService 'appService.bicep' = {
 module keyVault 'keyVault.bicep' = {
   name: 'keyVault-${dateTime}'
   params: {
+    keyVaultName: keyVaultName
     location: location
     appServicePrincipalId: appService.outputs.principalId
     sqlServerData: sql.outputs.sqlServerDatabase
