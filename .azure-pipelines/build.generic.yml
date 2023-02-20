@@ -165,9 +165,10 @@ stages:
     - ${{ each step in parameters.postBuildSteps }}:
       - ${{ step }}
 
-- stage: Create_Env
+- stage: Deploy
   dependsOn: [Build]
   jobs:
   - template: create_env.yml
     parameters:
       template: main.nodocker.webapp.bicep
+  - template: deploy.nodocker.yml
