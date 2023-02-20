@@ -36,9 +36,9 @@ The following prerequisites are required before executing the pipelines:
    - Grant the service principal the _owner_ role on subscription level
    - Grant the service principal the _User Account Administrator_ role on subscription level
 1. [Create a variable group](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/variable-groups) with the name: _AzureSecrets_. And create the following variables:
-   - _subscriptionId_: value the subscription id of the Azure subscription for which a service connection is created in the steps above.
-   - _todoItemsSqlAdminpassword_: The value of this field should be a [complex password according to SQL Server](https://learn.microsoft.com/en-us/sql/relational-databases/security/password-policy). Make this field a secret.
-   - _todoItemsSqlAdminUser_: Name of the admin user for SQL Server.
+   - `subscriptionId` value the subscription id of the Azure subscription for which a service connection is created in the steps above.
+   - `todoItemsSqlAdminpassword` The value of this field should be a [complex password according to SQL Server](https://learn.microsoft.com/en-us/sql/relational-databases/security/password-policy). Make this field a secret.
+   - `todoItemsSqlAdminUser` Name of the admin user for SQL Server.
 3. Import nodocker.yml
 
 ### CI build (docker)
