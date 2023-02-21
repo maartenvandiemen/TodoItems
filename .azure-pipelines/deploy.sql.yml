@@ -3,12 +3,14 @@ jobs:
   pool:
     vmImage: windows-latest
   dependsOn: [Create_Env]
+  
   variables: 
   - group: AzureSecrets
   - name: sqlServerFQDN
     value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.sqlServerFQDN'] ]
   - name: databaseName
-    value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.databaseName'] ]  
+    value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.databaseName'] ]
+    
   steps:
   - checkout: none
   - download: current
