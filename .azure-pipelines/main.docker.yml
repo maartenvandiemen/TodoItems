@@ -1,5 +1,17 @@
+parameters:
+- name: pushDockerImage
+  type: boolean
+  default: false
+
 trigger:
-- master
+- main
+
+schedules:
+- cron: "0 0 * * 3"
+  always: true
+  branches:
+    include:
+    - main
 
 pool:
   vmImage: ubuntu-latest
@@ -7,14 +19,17 @@ pool:
 extends:
    template: build.generic.yml
    parameters:
-     bicepTemplate: main.docker.webapp.bicep
+     bicepTemplate: docker.webapp.bicep
      bicepAdditionalParameters: '-dockerImageNameAndTag ghcr.io/mvdiemen/todoitems:$(Build.SourceVersion)'
      postBuildSteps: 
        - task: Docker@2
          inputs:
            containerRegistry: 'Github Packages'
            repository: $(Build.Repository.Name)
-           command: 'buildAndPush'
+           ${{ if eq(parameters.test, true) }}:
+             command: 'buildAndPush'
+           ${{ else }}:
+             command: 'build'
            Dockerfile: '**/Dockerfile'
            buildContext: '$(Build.ArtifactStagingDirectory)/todoItemsApi'
            tags: '$(Build.SourceVersion)'

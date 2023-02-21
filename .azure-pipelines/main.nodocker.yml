@@ -1,5 +1,5 @@
 trigger:
-- master
+- main
 
 schedules:
 - cron: "0 0 * * 3"
@@ -12,7 +12,7 @@ pool:
   vmImage: ubuntu-latest
 
 extends:
-   template: build.generic.yml
+   template: generic.yml
    parameters:
      bicepTemplate: main.nodocker.webapp.bicep
      postBuildSteps: 

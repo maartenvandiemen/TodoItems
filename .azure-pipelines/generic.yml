@@ -35,6 +35,7 @@ stages:
 
 - stage: Deploy
   dependsOn: [Build]
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual'))
   jobs:
   - template: create_env.yml
     parameters:
@@ -65,4 +66,3 @@ stages:
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: 'az group delete --resource-group $(resourcegroupName) --yes'
- 
