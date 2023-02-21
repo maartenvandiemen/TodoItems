@@ -41,7 +41,7 @@ jobs:
     env:
       DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
   #See: https://github.com/microsoft/azure-pipelines-tasks/issues/15532
-  - task: AzurePowerShell@4
+  - task: AzurePowerShell@5
     displayName: InitResource
     inputs:
       azureSubscription: 'Azure'
