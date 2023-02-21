@@ -1,0 +1,41 @@
+on:
+  workflow_call:
+    inputs:
+      sqlServerFQDN:
+        type: string
+        required: true
+        description: SQL Server Fully Qualified Domain Name
+      databaseName:
+        type: string
+        required: true
+        description: Databasename
+    secrets:
+      AZURE_SQL_USER:
+        required: true
+        description: username to login with on Azure SQL
+      SA_PASSWORD:
+        required: true
+        description: password of the username to login with on Azure SQL
+defaults:
+  run:
+    shell: pwsh
+jobs:
+  deploy_db:
+    runs-on: ubuntu-latest
+    environment: AzureDeploy
+    steps:
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: database
+          path: ${{github.workspace}}/artifacts/database
+          
+      - uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - name: Azure SQL Deploy
+        uses: Azure/sql-action@v2
+        with:
+          connection-string: 'Data Source=tcp:${{ inputs.sqlServerFQDN }},1433;Initial Catalog=${{ inputs.databaseName }};Persist Security Info=False;User Id=${{secrets.AZURE_SQL_USER}};Password=${{secrets.SA_PASSWORD}};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+          path: ${{github.workspace}}/artifacts/database/*.sql

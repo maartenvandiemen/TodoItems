@@ -1,5 +1,13 @@
 trigger:
-- master
+  branches:
+    include:
+    - master
+    - main
+  paths:
+    exclude:
+    - .github/**
+    - .devcontainer/**
+    - .vscode/**
 
 schedules:
 - cron: "0 0 * * 3"
@@ -7,13 +15,15 @@ schedules:
   branches:
     include:
     - main
+    - master
 
 pool:
   vmImage: ubuntu-latest
 
 extends:
-   template: build.generic.yml
+   template: generic.yml
    parameters:
+     bicepTemplate: main.nodocker.webapp.bicep
      postBuildSteps: 
        - task: PublishPipelineArtifact@1
          displayName: Publish pipeline artifact 'todoItemsApi'

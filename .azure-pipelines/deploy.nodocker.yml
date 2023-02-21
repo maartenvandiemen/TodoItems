@@ -1,0 +1,21 @@
+jobs:
+- job: Deploy_App
+  dependsOn: [Create_Env]
+  variables: 
+  - group: AzureSecrets
+  - name: appServiceAppName
+    value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appServiceAppName'] ]  
+  steps:
+  - checkout: none
+  - download: current
+    artifact: todoItemsAPI
+    displayName: Download API
+  - task: AzureRmWebAppDeployment@4
+    inputs:
+        ConnectionType: 'AzureRM'
+        azureSubscription: 'Azure'
+        appType: 'webAppLinux'
+        WebAppName: $(appServiceAppName)
+        packageForLinux: '$(Pipeline.Workspace)/todoItemsAPI'
+        RuntimeStack: 'DOTNETCORE|7.0'
+        StartupCommand: 'dotnet TodoItems.Api.dll'

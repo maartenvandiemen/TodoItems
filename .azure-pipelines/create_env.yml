@@ -1,0 +1,77 @@
+parameters:
+- name: template
+  type: string
+- name: additionalParameters
+  type: string
+  default: ''
+
+jobs:
+- job: Create_Env
+  variables: 
+  - group: AzureSecrets
+  steps:
+  - checkout: none
+  - download: current
+    artifact: infraCode
+    displayName: Download Bicep files
+  - powershell: |
+      $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
+      $resourcegroupname="todoItems-$randomNumber"
+      Write-Host "##vso[task.setvariable variable=resourcegroupName;isoutput=true]$resourcegroupname"
+    name: DetermineResourcegroupName
+  - task: AzureResourceManagerTemplateDeployment@3
+    inputs:
+      deploymentScope: 'Resource Group'
+      azureResourceManagerConnection: 'Azure'
+      subscriptionId: $(subscriptionId)
+      action: 'Create Or Update Resource Group'
+      resourceGroupName: $(DetermineResourcegroupName.resourcegroupName)
+      location: 'East US'
+      templateLocation: 'Linked artifact'
+      csmFile: '$(Pipeline.Workspace)/infraCode/${{ parameters.template }}'
+      overrideParameters: '-applicationname todoitems -sqlAdministratorLoginUser $(todoItemsSqlAdminUser) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
+      deploymentMode: 'Incremental'
+      deploymentOutputs: deploymentOutputs
+  - bash: |
+        echo "##vso[task.setvariable variable=appServiceAppName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.webAppName.value')"
+        echo "##vso[task.setvariable variable=sqlServerFQDN;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.sqlServerFQDN.value')"
+        echo "##vso[task.setvariable variable=databaseName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.databaseName.value')"
+    name: SaveDeploymentOutputs
+    displayName: Save deployment outputs into variables
+    env:
+      DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
+  #See: https://github.com/microsoft/azure-pipelines-tasks/issues/15532
+  - task: AzurePowerShell@4
+    displayName: InitResource
+    inputs:
+      azureSubscription: 'Azure'
+      ScriptType: 'inlineScript'
+      Inline: |
+        $context = Get-AzContext
+        $token = Get-AzAccessToken
+        $authHeader = @{
+            'Content-Type'='application/json'
+            'Authorization'='Bearer ' + $token.Token
+        }
+        $locations = @(
+          # https://learn.microsoft.com/en-us/azure/availability-zones/az-overview#azure-regions-with-availability-zones
+          # Europe
+          "westeurope", "northeurope", "francesouth", "francecentral", "ukwest", "uksouth", "germanywestcentral", "norwayeast", "swedencentral", "switzerlandnorth",
+          # Americas
+          "brazilsouth", "canadacentral", "centralus", "eastus", "eastus2", "southcentralus", "westus2", "westus3",
+          # Middle East
+          "qatarcentral", "uaenorth",
+          # Africa
+          "southafricanorth",
+          # Asia Pacific
+          "australiaeast", "centralindia", "japaneast", "koreacentral", "southeastasia", "eastasia",
+          #Other
+          "eastus2euap", "eastusstg", "northcentralus","westus", "jioindiawest", "centraluseuap", "westcentralus", "southafricawest", 
+          "australiacentral", "australiacentral2", "australiasoutheast", "japanwest", "jioindiacentral", "koreasouth", "southindia", "westindia", "canadaeast", 
+          "germanynorth", "norwaywest", "switzerlandwest", "uaecentral", "brazilsoutheast"
+        )
+        $locations | foreach-Object {
+            $restUrl = "https://$_.management.azure.com/subscriptions/$(subscriptionId)/resourceGroups/$(DetermineResourcegroupName.resourcegroupName)/providers/Microsoft.Web/sites/$(SaveDeploymentOutputs.appServiceAppName)?api-version=2022-03-01";
+            Invoke-RestMethod -Uri $restUrl -Method Get -Headers $authHeader
+        }
+      azurePowerShellVersion: 'LatestVersion'

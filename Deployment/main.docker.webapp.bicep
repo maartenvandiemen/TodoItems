@@ -2,7 +2,7 @@ param location string = resourceGroup().location
 
 param applicationname string
 
-param dockerRepositoryAndVersion string
+param dockerImageNameAndTag string
 
 param sqlAdministratorLoginUser string
 @secure()
@@ -10,9 +10,7 @@ param sqlAdministratorLoginPassword string
 
 param dateTime string = utcNow()
 
-module acr 'containerRegistry.bicep' = {
-  name:'acr'
-}
+var keyVaultName = 'vault-${uniqueString(resourceGroup().id)}'
 
 module sql 'sql.bicep' = {
   name: 'sql-${dateTime}'
@@ -32,20 +30,21 @@ module appInsights 'applicationInsights.bicep' ={
   }
 }
 
-module appService 'appService/appService.docker.bicep' = {
+module appService 'appService.bicep' = {
   name: 'appService-${dateTime}'
   params: {
+    keyVaultName: keyVaultName
     location: location
     applicationname: applicationname
     applicationInsightsConnectionString: appInsights.outputs.connectionString
-    acrLoginServer: acr.outputs.loginServer
-    dockerRepositoryAndVersion: dockerRepositoryAndVersion
+    dockerImageNameAndTag: dockerImageNameAndTag
   }
 }
 
 module keyVault 'keyVault.bicep' = {
   name: 'keyVault-${dateTime}'
   params: {
+    keyVaultName: keyVaultName
     location: location
     appServicePrincipalId: appService.outputs.principalId
     sqlServerData: sql.outputs.sqlServerDatabase

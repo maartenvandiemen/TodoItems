@@ -1,0 +1,26 @@
+on:
+  workflow_call:
+    inputs:
+      resourcegroupName:
+        type: string
+        required: true
+        description: Name of the resourcegroup where the information should be deployed to
+    secrets:
+      AZURE_CREDENTIALS:
+        required: true
+        description: Azure Service Principal credentials
+defaults:
+  run:
+    shell: pwsh
+jobs:
+  delete_env:
+    runs-on: ubuntu-latest
+    environment: AzureRemove
+    steps:
+      - uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - uses: azure/CLI@v1
+        with:
+          inlineScript: az group delete --name ${{ inputs.resourcegroupName }} --yes

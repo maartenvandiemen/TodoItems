@@ -1,8 +1,11 @@
 param location string
-
+param keyVaultName string
 param applicationname string
 
 param applicationInsightsConnectionString string
+
+@description('Full docker image name, including tag. Example: ghcr.io/mvdiemen/todoitems:docker')
+param dockerImageNameAndTag string = ''
 
 var appServiceAppName = 'site-${applicationname}-${uniqueString(resourceGroup().id)}'
 var appServicePlanName = 'sitePlan-${applicationname}-${uniqueString(resourceGroup().id)}'
@@ -11,7 +14,7 @@ resource appServicePlan 'Microsoft.Web/serverFarms@2020-06-01' = {
   name: appServicePlanName
   location: location
   sku: {
-    name: 'B1'
+    name: 'P1V3'
   }
   properties:{
     reserved: true
@@ -32,7 +35,8 @@ resource appServiceApp 'Microsoft.Web/sites@2021-02-01' = {
     resource siteConfig 'config' ={
       name: 'web'
       properties: {
-        linuxFxVersion: 'DOTNETCORE|7.0'
+        acrUseManagedIdentityCreds: false
+        linuxFxVersion: empty(dockerImageNameAndTag) ? 'DOTNETCORE|7.0' : 'DOCKER|${dockerImageNameAndTag}'
         appSettings: [
           {
             name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -46,8 +50,8 @@ resource appServiceApp 'Microsoft.Web/sites@2021-02-01' = {
       name: 'connectionstrings'
       properties:{
         TodoDb:{
-        value: '@Microsoft.KeyVault(VaultName=myvault;SecretName=ConnectionString)'
-        type: 'SQLAzure'
+          value: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=ConnectionString)'
+          type: 'SQLAzure'
       }
     }
   }

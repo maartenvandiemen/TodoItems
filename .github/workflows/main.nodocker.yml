@@ -4,7 +4,9 @@ on:
     - cron:  '0 0 * * 3'
   push:
     paths-ignore:
-      - '.azuredevops/**'
+      - .azure-pipelines/**
+      - .devcontainer/**
+      - .vscode/**
   workflow_dispatch:
     inputs:
       buildConfiguration:
@@ -35,7 +37,6 @@ jobs:
         }
   
   artifact_bicep:
-    #if empty the workflow is started manually
     if: inputs.buildConfiguration != ''
     uses: ./.github/workflows/artifact_bicep.yml
   
@@ -47,7 +48,6 @@ jobs:
     secrets: inherit
   
   determine_variables_deploy:
-    #if empty the workflow is started manually
     if: inputs.buildConfiguration != ''
     uses: ./.github/workflows/variables_release.yml
 
@@ -56,9 +56,9 @@ jobs:
     uses: ./.github/workflows/create_env.yml
     with:
       resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
-      region: 'westeurope'
-      template: ${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.bicep
-      additionalParameters: '${{github.workspace}}/artifacts/bicep/main.nodocker.webapp.parameters.json'
+      region: 'eastus'
+      template: /artifacts/bicep/main.nodocker.webapp.bicep
+      additionalParameters: applicationname=todoitems
     secrets: inherit
 
   deploy_app:
@@ -83,34 +83,15 @@ jobs:
   
   deploy_db:
     needs: [build, create_env]
-    runs-on: ubuntu-latest
-    environment: AzureDeploy
-    steps:
-      - name: Download a Build Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: database
-          path: ${{github.workspace}}/artifacts/database
-          
-      - uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-          
-      - name: Azure SQL Deploy
-        uses: Azure/sql-action@v2
-        with:
-          connection-string: 'Data Source=tcp:${{ needs.create_env.outputs.sqlServerFQDN }} ,1433;Initial Catalog=${{ needs.create_env.outputs.databaseName }};Persist Security Info=False;User Id=${{secrets.AZURE_SQL_USER}};Password=${{secrets.SA_PASSWORD}};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-          path: ${{github.workspace}}/artifacts/database/*.sql
+    uses: ./.github/workflows/deploy_db.yml
+    with:
+      sqlServerFQDN: ${{needs.create_env.outputs.sqlServerFQDN}}
+      databaseName: ${{needs.create_env.outputs.databaseName}}
+    secrets: inherit
     
   delete_env:
-    runs-on: ubuntu-latest
     needs: [determine_variables_deploy, deploy_app, deploy_db]
-    environment: AzureRemove
-    steps:
-      - uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-          
-      - uses: azure/CLI@v1
-        with:
-          inlineScript: az group delete --name ${{ needs.determine_variables_deploy.outputs.resourcegroup }} --yes
+    uses: ./.github/workflows/delete_env.yml
+    with:
+      resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
+    secrets: inherit
