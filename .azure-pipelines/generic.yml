@@ -32,37 +32,37 @@ stages:
     parameters:
       postBuildSteps: ${{parameters.postBuildSteps}}
       buildConfiguration: ${{parameters.buildConfiguration}}
+      
+- ${{ if eq(variables['Build.Reason'], 'Manual') }}:
+  - stage: Deploy
+    dependsOn: [Build]
+    jobs:
+    - template: create_env.yml
+      parameters:
+        template: ${{parameters.bicepTemplate}}
+        additionalParameters: ${{parameters.bicepAdditionalParameters}}
+    #bicepAdditionalParameters are only passed for Docker
+    #https://stackoverflow.com/questions/60098737/checking-for-null-object-type-parameter-in-azure-yaml
+    - ${{if not(parameters.bicepAdditionalParameters)}}:
+      - template: deploy.nodocker.yml
+    - template: deploy.sql.yml
 
-- stage: Deploy
-  dependsOn: [Build]
-  condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual'))
-  jobs:
-  - template: create_env.yml
-    parameters:
-      template: ${{parameters.bicepTemplate}}
-      additionalParameters: ${{parameters.bicepAdditionalParameters}}
-  #bicepAdditionalParameters are only passed for Docker
-  #https://stackoverflow.com/questions/60098737/checking-for-null-object-type-parameter-in-azure-yaml
-  - ${{if not(parameters.bicepAdditionalParameters)}}:
-    - template: deploy.nodocker.yml
-  - template: deploy.sql.yml
-
-- stage: Delete
-  dependsOn: [Deploy]
-  jobs:
-  - deployment: Delete
-    environment: todoItems-teardown
-    variables:
-      - name: resourcegroupName
-        value: $[ stageDependencies.Deploy.Create_Env.outputs['DetermineResourcegroupName.resourcegroupName'] ]
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - download: none
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'Azure'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: 'az group delete --resource-group $(resourcegroupName) --yes'
+  - stage: Delete
+    dependsOn: [Deploy]
+    jobs:
+    - deployment: Delete
+      environment: todoItems-teardown
+      variables:
+        - name: resourcegroupName
+          value: $[ stageDependencies.Deploy.Create_Env.outputs['DetermineResourcegroupName.resourcegroupName'] ]
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - download: none
+            - task: AzureCLI@2
+              inputs:
+                azureSubscription: 'Azure'
+                scriptType: 'bash'
+                scriptLocation: 'inlineScript'
+                inlineScript: 'az group delete --resource-group $(resourcegroupName) --yes'
