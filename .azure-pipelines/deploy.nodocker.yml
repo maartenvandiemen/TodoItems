@@ -1,10 +1,12 @@
 jobs:
 - job: Deploy_App
   dependsOn: [Create_Env]
+  
   variables: 
   - group: AzureSecrets
   - name: appServiceAppName
-    value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appServiceAppName'] ]  
+    value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appServiceAppName'] ]
+
   steps:
   - checkout: none
   - download: current
