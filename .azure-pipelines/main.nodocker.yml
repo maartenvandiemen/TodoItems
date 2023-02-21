@@ -1,7 +1,6 @@
 trigger:
   branches:
     include:
-    - master
     - main
   paths:
     exclude:
@@ -15,7 +14,6 @@ schedules:
   branches:
     include:
     - main
-    - master
 
 pool:
   vmImage: ubuntu-latest
