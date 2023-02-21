@@ -24,7 +24,7 @@ pool:
   vmImage: ubuntu-latest
 
 extends:
-   template: build.generic.yml
+   template: generic.yml
    parameters:
      bicepTemplate: docker.webapp.bicep
      bicepAdditionalParameters: '-dockerImageNameAndTag ghcr.io/mvdiemen/todoitems:$(Build.SourceVersion)'
