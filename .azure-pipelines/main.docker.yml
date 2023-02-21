@@ -4,7 +4,15 @@ parameters:
   default: false
 
 trigger:
-- main
+  branches:
+    include:
+    - master
+    - main
+  paths:
+    exclude:
+    - .github/**
+    - .devcontainer/**
+    - .vscode/**
 
 schedules:
 - cron: "0 0 * * 3"
@@ -12,6 +20,7 @@ schedules:
   branches:
     include:
     - main
+    - master
 
 pool:
   vmImage: ubuntu-latest
@@ -26,7 +35,7 @@ extends:
          inputs:
            containerRegistry: 'Github Packages'
            repository: $(Build.Repository.Name)
-           ${{ if eq(parameters.test, true) }}:
+           ${{ if eq(parameters.pushDockerImage, true) }}:
              command: 'buildAndPush'
            ${{ else }}:
              command: 'build'
