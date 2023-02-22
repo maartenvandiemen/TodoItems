@@ -18,7 +18,7 @@ jobs:
   #  value: '<<SECRET VALUE>>'
   - group: TodoItemsApi-Build
   - name: DOTNET_NOLOGO
-    value: false
+    value: true
     readonly: true
   - name: DOTNET_SKIP_FIRST_TIME_EXPERIENCE 
     value: true
