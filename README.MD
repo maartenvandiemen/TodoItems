@@ -2,8 +2,8 @@
 | ------------- | ------------- |
 | Github Actions no docker  | [![Build TodoItems](https://github.com/mvdiemen/TodoItems/actions/workflows/main.nodocker.yml/badge.svg)](https://github.com/mvdiemen/TodoItems/actions/workflows/main.nodocker.yml) |
 | Github Actions docker | [![Build TodoItems Docker](https://github.com/mvdiemen/TodoItems/actions/workflows/main.docker.yml/badge.svg)](https://github.com/mvdiemen/TodoItems/actions/workflows/main.docker.yml) |
-| Azure Devops no docker | [![Build Status](https://dev.azure.com/maartenvandiemen/GithubPipelines/_apis/build/status/TodoItems/TodoItems.NoDocker?branchName=main)](https://dev.azure.com/maartenvandiemen/GithubPipelines/_build/latest?definitionId=31&branchName=main) |
-| Azure Devops docker | [![Build Status](https://dev.azure.com/maartenvandiemen/GithubPipelines/_apis/build/status/TodoItems/TodoItems.Docker?branchName=main)](https://dev.azure.com/maartenvandiemen/GithubPipelines/_build/latest?definitionId=32&branchName=main) |
+| Azure Devops no docker | [![Build Status](https://dev.azure.com/maartenvandiemen/GithubPipelines/_apis/build/status/TodoItems/TodoItems.NoDocker?branchName=main)](https://dev.azure.com/maartenvandiemen/GithubPipelines/_build/latest?definitionId=37&branchName=main) |
+| Azure Devops docker | [![Build Status](https://dev.azure.com/maartenvandiemen/GithubPipelines/_apis/build/status/TodoItems/TodoItems.Docker?branchName=main)](https://dev.azure.com/maartenvandiemen/GithubPipelines/_build/latest?definitionId=40&branchName=main) |
 
 Demo project of an ASP.NET Core 7 minimal API's. Inspired by the demo from [Daniel Roth](https://twitter.com/danroth27) that has been given at [dotnetconf](https://www.dotnetconf.net). See the original presentation below:<br>
 [![YoutubePreview](http://img.youtube.com/vi/gNyEpkJMmcM/0.jpg)](http://www.youtube.com/watch?v=gNyEpkJMmcM)
