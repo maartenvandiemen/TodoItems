@@ -14,7 +14,7 @@ jobs:
       $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
       $resourcegroupname="todoItems-$randomNumber"
       Write-Host "##vso[task.setvariable variable=resourcegroupName;isoutput=true]$resourcegroupname"
-  name: DetermineResourcegroupName
+    name: DetermineResourcegroupName
 
 - job: Create_Env
   dependsOn: [Generate_ResourcegroupName]
