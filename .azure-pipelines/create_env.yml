@@ -10,6 +10,7 @@ jobs:
 #In case the deployment fails, the Create_Env job can be executed again and the same resourcegroup is used as in the previous attempt.
 - job: Generate_ResourcegroupName
   steps:
+  - checkout: none
   - powershell: |
       $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
       $resourcegroupname="todoItems-$randomNumber"
