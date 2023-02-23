@@ -6,6 +6,8 @@ parameters:
   default: ''
 
 jobs:
+#Seperate job for generating resourcegroupName. 
+#In case the deployment fails, the Create_Env job can be executed again and the same resourcegroup is used as in the previous attempt.
 - job: Generate_ResourcegroupName
   steps:
    - powershell: |
