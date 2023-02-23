@@ -26,7 +26,7 @@ pool:
 extends:
    template: generic.yml
    parameters:
-     bicepTemplate: docker.webapp.bicep
+     bicepTemplate: main.docker.webapp.bicep
      bicepAdditionalParameters: '-dockerImageNameAndTag ghcr.io/mvdiemen/todoitems:$(Build.SourceVersion)'
      postBuildSteps: 
        - task: Docker@2
