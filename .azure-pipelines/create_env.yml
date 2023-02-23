@@ -6,26 +6,31 @@ parameters:
   default: ''
 
 jobs:
+- job: Generate_ResourcegroupName
+  steps:
+   - powershell: |
+     $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
+     $resourcegroupname="todoItems-$randomNumber"
+     Write-Host "##vso[task.setvariable variable=resourcegroupName;isoutput=true]$resourcegroupname"
+   name: DetermineResourcegroupName
+
 - job: Create_Env
   variables: 
   - group: AzureSecrets
+  - name: resourcegroupName
+    value: $[ dependencies.Generate_ResourcegroupName.outputs['DetermineResourcegroupName.resourcegroupName'] ]
   steps:
   - checkout: none
   - download: current
     artifact: infraCode
     displayName: Download Bicep files
-  - powershell: |
-      $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
-      $resourcegroupname="todoItems-$randomNumber"
-      Write-Host "##vso[task.setvariable variable=resourcegroupName;isoutput=true]$resourcegroupname"
-    name: DetermineResourcegroupName
   - task: AzureResourceManagerTemplateDeployment@3
     inputs:
       deploymentScope: 'Resource Group'
       azureResourceManagerConnection: 'Azure'
       subscriptionId: $(subscriptionId)
       action: 'Create Or Update Resource Group'
-      resourceGroupName: $(DetermineResourcegroupName.resourcegroupName)
+      resourceGroupName: $(resourcegroupName)
       location: 'East US'
       templateLocation: 'Linked artifact'
       csmFile: '$(Pipeline.Workspace)/infraCode/${{ parameters.template }}'
@@ -71,7 +76,7 @@ jobs:
           "germanynorth", "norwaywest", "switzerlandwest", "uaecentral", "brazilsoutheast"
         )
         $locations | foreach-Object {
-            $restUrl = "https://$_.management.azure.com/subscriptions/$(subscriptionId)/resourceGroups/$(DetermineResourcegroupName.resourcegroupName)/providers/Microsoft.Web/sites/$(SaveDeploymentOutputs.appServiceAppName)?api-version=2022-03-01";
+            $restUrl = "https://$_.management.azure.com/subscriptions/$(subscriptionId)/resourceGroups/$(resourcegroupName)/providers/Microsoft.Web/sites/$(SaveDeploymentOutputs.appServiceAppName)?api-version=2022-03-01";
             Invoke-RestMethod -Uri $restUrl -Method Get -Headers $authHeader
         }
       azurePowerShellVersion: 'LatestVersion'
