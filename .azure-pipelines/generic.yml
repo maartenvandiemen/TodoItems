@@ -54,7 +54,7 @@ stages:
       environment: todoItems-teardown
       variables:
         - name: resourcegroupName
-          value: $[ stageDependencies.Deploy.Create_Env.outputs['DetermineResourcegroupName.resourcegroupName'] ]
+          value: $[ stageDependencies.Deploy.Generate_ResourcegroupName.outputs['DetermineResourcegroupName.resourcegroupName'] ]
       strategy:
         runOnce:
           deploy:
