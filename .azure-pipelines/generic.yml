@@ -33,8 +33,7 @@ stages:
       postBuildSteps: ${{parameters.postBuildSteps}}
       buildConfiguration: ${{parameters.buildConfiguration}}
 
-#Only run this if executed manually      
-- ${{ if or(and(eq(variables['Build.Reason'], 'Manual'), not(parameters.bicepAdditionalParameters)), eq(parameters.pushDockerImage, true)) }}:
+- ${{ if eq(variables['Build.Reason'], 'Manual') }}:
   - stage: Deploy
     dependsOn: [Build]
     jobs:
