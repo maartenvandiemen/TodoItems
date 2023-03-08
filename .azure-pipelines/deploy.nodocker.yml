@@ -20,7 +20,7 @@ jobs:
       azureSubscription: 'Azure'
       ScriptType: 'InlineScript'
       Inline: |
-        az webapp deployment source config-zip --src $(Pipeline.Workspace)\todoItemsAPI\api.zip -name $(appServiceAppName) --resource-group $(resourceGroupName)
+        az webapp deployment source config-zip --src $(Pipeline.Workspace)\todoItemsAPI\api.zip --name $(appServiceAppName) --resource-group $(resourceGroupName)
         az webapp config set --startup-file="dotnet TodoItems.Api.dll"
       azurePowerShellVersion: 'LatestVersion'
       pwsh: true
