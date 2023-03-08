@@ -17,7 +17,7 @@ jobs:
   - powershell: Compress-Archive -Path $(Pipeline.Workspace)/todoItemsAPI -DestinationPath $(Pipeline.Workspace)\todoItemsAPI\api.zip
   - task: AzurePowerShell@5
     inputs:
-      azureSubscription: 'AzureRM'
+      azureSubscription: 'Azure'
       ScriptType: 'InlineScript'
       Inline: |
         az webapp deployment source config-zip --src $(Pipeline.Workspace)\todoItemsAPI\api.zip -n $(appServiceAppName) -g $(resourceGroupName)
