@@ -15,12 +15,12 @@ jobs:
     artifact: todoItemsAPI
     displayName: Download API
   - powershell: Compress-Archive -Path $(Pipeline.Workspace)/todoItemsAPI -DestinationPath $(Pipeline.Workspace)\todoItemsAPI\api.zip
-  - task: AzurePowerShell@5
+
+  - task: AzureCLI@2
     inputs:
       azureSubscription: 'Azure'
-      ScriptType: 'InlineScript'
-      Inline: |
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
         az webapp deployment source config-zip --src $(Pipeline.Workspace)\todoItemsAPI\api.zip --name $(appServiceAppName) --resource-group $(resourceGroupName)
-        az webapp config set --startup-file="dotnet TodoItems.Api.dll"
-      azurePowerShellVersion: 'LatestVersion'
-      pwsh: true
+        az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name $(appServiceAppName) --resource-group $(resourceGroupName)
