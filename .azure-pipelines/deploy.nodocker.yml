@@ -14,7 +14,7 @@ jobs:
   - download: current
     artifact: todoItemsAPI
     displayName: Download API
-  - powershell: Compress-Archive -Path $(Pipeline.Workspace)/todoItemsAPI -DestinationPath $(Pipeline.Workspace)/todoItemsAPI/api.zip
+  - powershell: Compress-Archive -Path $(Pipeline.Workspace)/todoItemsAPI/* -DestinationPath $(Pipeline.Workspace)/todoItemsAPI/api.zip
 
   - task: AzureCLI@2
     inputs:
