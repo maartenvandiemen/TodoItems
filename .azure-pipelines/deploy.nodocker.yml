@@ -1,23 +1,25 @@
 jobs:
 - job: Deploy_App
-  dependsOn: [Create_Env]
+  dependsOn: [Create_Env, Generate_ResourcegroupName]
   
   variables: 
   - group: AzureSecrets
   - name: appServiceAppName
     value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appServiceAppName'] ]
+  - name: resourceGroupName
+    value: $[ dependencies.Generate_ResourcegroupName.outputs['DetermineResourcegroupName.resourcegroupName'] ]
 
   steps:
   - checkout: none
   - download: current
     artifact: todoItemsAPI
     displayName: Download API
-  - task: AzureRmWebAppDeployment@4
+  - powershell: Compress-Archive -Path $(Pipeline.Workspace)/todoItemsAPI/* -DestinationPath $(Pipeline.Workspace)/todoItemsAPI/api.zip
+  - task: AzureCLI@2
     inputs:
-        ConnectionType: 'AzureRM'
-        azureSubscription: 'Azure'
-        appType: 'webAppLinux'
-        WebAppName: $(appServiceAppName)
-        packageForLinux: '$(Pipeline.Workspace)/todoItemsAPI'
-        RuntimeStack: 'DOTNETCORE|7.0'
-        StartupCommand: 'dotnet TodoItems.Api.dll'
+      azureSubscription: 'Azure'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az webapp deployment source config-zip --src $(Pipeline.Workspace)/todoItemsAPI/api.zip --name $(appServiceAppName) --resource-group $(resourceGroupName)
+        az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name $(appServiceAppName) --resource-group $(resourceGroupName)
