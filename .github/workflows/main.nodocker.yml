@@ -71,15 +71,17 @@ jobs:
         with:
           name: todoItemsApi
           path: ${{github.workspace}}/artifacts/api
-          
       - uses: Azure/login@v1
+        name: Azure Login
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          
-      - uses: Azure/webapps-deploy@v2
+      - run: Compress-Archive -Path ${{github.workspace}}/artifacts/api/* -DestinationPath ${{github.workspace}}/artifacts/api/api.zip
+      - uses: azure/CLI@v1
+        name: Azure Deploy WebApp
         with:
-          app-name: ${{ needs.create_env.outputs.webAppName }} 
-          package: ${{github.workspace}}/artifacts/api
+          inlineScript: |
+             az webapp deployment source config-zip --src ${{github.workspace}}/artifacts/api/api.zip --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
+             az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
   
   deploy_db:
     needs: [build, create_env]
