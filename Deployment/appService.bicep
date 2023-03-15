@@ -10,7 +10,7 @@ param dockerImageNameAndTag string = ''
 var appServiceAppName = 'site-${applicationname}-${uniqueString(resourceGroup().id)}'
 var appServicePlanName = 'sitePlan-${applicationname}-${uniqueString(resourceGroup().id)}'
 
-resource appServicePlan 'Microsoft.Web/serverFarms@2020-06-01' = {
+resource appServicePlan 'Microsoft.Web/serverFarms@2022-03-01' = {
   name: appServicePlanName
   location: location
   sku: {
