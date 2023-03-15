@@ -22,7 +22,7 @@ resource key_vault 'Microsoft.KeyVault/vaults@2019-09-01' = {
   }
 }
 
-resource secret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource secret 'Microsoft.KeyVault/vaults/secrets@2022-11-01' = {
   name: 'ConnectionString'
   parent: key_vault
   properties: {
