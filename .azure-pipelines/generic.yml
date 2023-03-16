@@ -49,16 +49,14 @@ stages:
     - job: Test
       pool:
         vmImage: ubuntu-latest
+      container:
+        image: ghcr.io/anweber/httpyac:latest
       ${{if not(parameters.bicepAdditionalParameters)}}:
         dependsOn: [Deploy_DB, Deploy_App]
       ${{else }}:
         dependsOn: [Deploy_DB]
       steps:
-      - task: NodeTool@0
-        inputs:
-          versionSource: 'spec'
-          versionSpec: '18.x'
-      - bash: npm install -g httpyac
+      
       - bash: httpyac "test.http" --all -o short --var host=$()
 
   - stage: Delete
