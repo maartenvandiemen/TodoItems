@@ -92,7 +92,7 @@ jobs:
     secrets: inherit
     
   smoketests:
-    needs: [deploy_app, deploy_db]
+    needs: [deploy_app, create_env, deploy_db]
     uses: ./.github/workflows/smoketests.yml
     with:
       webAppUrl: ${{needs.create_env.outputs.webAppUrl}}
