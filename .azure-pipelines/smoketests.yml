@@ -1,1 +1,22 @@
-
+    jobs:
+    - job: SmokeTests
+      pool:
+        vmImage: ubuntu-latest
+      ${{if not(parameters.bicepAdditionalParameters)}}:
+        dependsOn: [Deploy_DB, Deploy_App]
+      ${{else }}:
+        dependsOn: [Deploy_DB]
+      variables:
+        - name: appServiceUrl
+          value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appServiceAppUrl'] ]
+      steps:
+      - checkout: none
+      - download: current
+        artifact: smoketests
+        displayName: Download smoketests
+      - task: NodeTool@0
+        inputs:
+          versionSource: 'spec'
+          versionSpec: '18.x'
+      - bash: npm install -g httpyac
+      - bash: httpyac "$(Pipeline.Workspace)/smoketests/test.http" --all -o short --var host=$(appServiceUrl) 
