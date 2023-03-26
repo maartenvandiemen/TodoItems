@@ -15,8 +15,11 @@
         artifact: smoketests
         displayName: Download smoketests
       - task: NodeTool@0
+        displayName: Download NodeJS
         inputs:
           versionSource: 'spec'
           versionSpec: '18.x'
       - bash: npm install -g httpyac
-      - bash: httpyac "$(Pipeline.Workspace)/smoketests/test.http" --all -o short --var host=$(appServiceUrl) 
+        displayName: Install HttpYac
+      - bash: httpyac "$(Pipeline.Workspace)/smoketests/test.http" --all -o short --var host=$(appServiceUrl)
+        displayName: Execute httpYac Tests
