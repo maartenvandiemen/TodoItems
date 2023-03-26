@@ -49,19 +49,15 @@ jobs:
           echo "pushImage=false" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
         
-  artifact_bicep:
+  artifacts_release:
     if: inputs.buildConfiguration != ''
-    uses: ./.github/workflows/artifact_bicep.yml
-    
-  determine_variables_deploy:
-    if: inputs.buildConfiguration != ''
-    uses: ./.github/workflows/variables_release.yml
+    uses: ./.github/workflows/artifacts_release.yml
     
   create_env:
-    needs: [determine_variables_deploy, artifact_bicep, push_docker_image]
+    needs: [artifacts_release, push_docker_image]
     uses: ./.github/workflows/create_env.yml
     with:
-      resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
+      resourcegroupName: ${{ needs.artifacts_release.outputs.resourcegroup }}
       region: 'eastus'
       template: /artifacts/bicep/main.docker.webapp.bicep
       additionalParameters: applicationname=todoitems dockerImageNameAndTag=${{needs.push_docker_image.outputs.dockerTag}}
@@ -141,8 +137,8 @@ jobs:
       webAppUrl: ${{needs.create_env.outputs.webAppUrl}}
 
   delete_env:
-    needs: [determine_variables_deploy, smoketests]
+    needs: [artifacts_release, smoketests]
     uses: ./.github/workflows/delete_env.yml
     with:
-      resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
+      resourcegroupName: ${{ needs.artifacts_release.outputs.resourcegroup }}
     secrets: inherit
