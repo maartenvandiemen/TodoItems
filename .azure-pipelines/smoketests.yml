@@ -8,7 +8,7 @@
         dependsOn: [Deploy_DB]
       variables:
         - name: appServiceUrl
-          value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appServiceAppUrl'] ]
+          value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.webAppUrl'] ]
       steps:
       - checkout: none
       - download: current
