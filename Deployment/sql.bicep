@@ -19,7 +19,8 @@ resource sqlServer 'Microsoft.Sql/servers@2021-11-01-preview' = {
 }
 
 resource database 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
-  name: '${sqlServer.name}/${applicationname}'
+  name: applicationname
+  parent: sqlServer
   location: location
   sku: {
     name: 'GP_S_Gen5_1'
@@ -36,7 +37,8 @@ resource database 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
 }
 
 resource sqlserverName_AllowAllWindowsAzureIps 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
-  name: '${sqlServer.name}/AllowAllWindowsAzureIps'
+  name: 'AllowAllWindowsAzureIPs'
+  parent: sqlServer
   properties: {
     endIpAddress: '0.0.0.0'
     startIpAddress: '0.0.0.0'
