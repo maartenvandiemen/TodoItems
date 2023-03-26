@@ -91,8 +91,14 @@ jobs:
       databaseName: ${{needs.create_env.outputs.databaseName}}
     secrets: inherit
     
+  smoketests:
+    needs: [deploy_app, deploy_db]
+    uses: ./.github/workflows/smoketests.yml
+    with:
+      webAppUrl: ${{needs.create_env.outputs.webAppUrl}}
+  
   delete_env:
-    needs: [determine_variables_deploy, deploy_app, deploy_db]
+    needs: [determine_variables_deploy, smoketests]
     uses: ./.github/workflows/delete_env.yml
     with:
       resourcegroupName: ${{ needs.determine_variables_deploy.outputs.resourcegroup }}
