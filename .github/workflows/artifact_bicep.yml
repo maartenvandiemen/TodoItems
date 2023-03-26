@@ -17,6 +17,6 @@ jobs:
       - name: Publish Smoketests artifact
         uses: actions/upload-artifact@v3
         with:
-          name: infraCode
+          name: smoketests
           path: '${{github.workspace}}/tests/**'
           if-no-files-found: error
