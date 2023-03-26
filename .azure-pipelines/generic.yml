@@ -53,13 +53,16 @@ stages:
         dependsOn: [Deploy_DB, Deploy_App]
       ${{else }}:
         dependsOn: [Deploy_DB]
+      variables:
+        - name: appServiceUrl
+          value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appServiceAppUrl'] ]
       steps:
       - task: NodeTool@0
         inputs:
           versionSource: 'spec'
           versionSpec: '18.x'
       - bash: npm install -g httpyac
-      - bash: httpyac "test.http" --all -o short --var host=$()
+      - bash: httpyac "test.http" --all -o short --var host=$(appServiceUrl)
 
   - stage: Delete
     dependsOn: [Deploy]
