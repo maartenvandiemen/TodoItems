@@ -34,6 +34,10 @@ on:
       databaseName:
          description: Created database
          value: ${{jobs.create_env.outputs.databaseName}}
+      webAppUrl:
+        description: "Created webApp url"
+        value: ${{jobs.create_env.outputs.webAppUrl}}
+      
 defaults:
   run:
     shell: pwsh
@@ -41,6 +45,7 @@ jobs:
   create_env:
     runs-on: ubuntu-latest
     outputs:
+      webAppUrl: ${{ steps.arm.outputs.webAppUrl }}
       webAppName: ${{ steps.arm.outputs.webAppName }}
       sqlServerFQDN: ${{ steps.arm.outputs.sqlServerFQDN }}
       databaseName: ${{ steps.arm.outputs.databaseName }}
