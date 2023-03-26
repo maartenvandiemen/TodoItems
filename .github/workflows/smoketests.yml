@@ -1,1 +1,35 @@
+on:
+  workflow_call: 
+    inputs:
+      webAppUrl:
+        type: string
+        required: true
+        description: Name of the webbApp on which the tests need to be executed
+defaults:
+  run:
+    shell: pwsh
+jobs:
+  create_env:
+    runs-on: ubuntu-latest
+    outputs:
+      webAppName: ${{ steps.arm.outputs.webAppName }}
+      sqlServerFQDN: ${{ steps.arm.outputs.sqlServerFQDN }}
+      databaseName: ${{ steps.arm.outputs.databaseName }}
+    environment: AzureProvision
+    steps:
+      - name: Download test files
+        uses: actions/download-artifact@v3
+        with:
+          name: smoketests
+          path: ${{github.workspace}}/artifacts/smoketests
 
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      
+      - name: Install httpYac
+        run: npm install -g httpyac
+
+      - name: Execute httpYac tests
+        run: httpyac "${{github.workspace}}/artifacts/smoketests/test.http" --all -o short --var host=${{ inputs.webAppUrl }}
