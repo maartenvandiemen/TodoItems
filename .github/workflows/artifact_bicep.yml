@@ -4,7 +4,7 @@ defaults:
   run:
     shell: pwsh
 jobs:
-  artifact_bicep:
+  release_artifacts:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -13,4 +13,10 @@ jobs:
         with:
           name: infraCode
           path: '${{github.workspace}}/Deployment/**'
+          if-no-files-found: error
+      - name: Publish Smoketests artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: infraCode
+          path: '${{github.workspace}}/tests/**'
           if-no-files-found: error
