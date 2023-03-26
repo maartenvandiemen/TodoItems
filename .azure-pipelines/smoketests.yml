@@ -3,9 +3,9 @@
       pool:
         vmImage: ubuntu-latest
       ${{if not(parameters.bicepAdditionalParameters)}}:
-        dependsOn: [Deploy_DB, Deploy_App]
+        dependsOn: [Create_Env, Deploy_DB, Deploy_App]
       ${{else }}:
-        dependsOn: [Deploy_DB]
+        dependsOn: [Create_Env, Deploy_DB]
       variables:
         - name: appServiceUrl
           value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appServiceAppUrl'] ]
