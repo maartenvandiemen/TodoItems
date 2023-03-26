@@ -147,5 +147,12 @@ jobs:
       artifact: 'infraCode'
       publishLocation: 'pipeline'
       
+  - task: PublishPipelineArtifact@1
+    displayName: Publish pipeline artifact 'Smoke tests'
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/tests'
+      artifact: 'smoketests'
+      publishLocation: 'pipeline'
+      
   - ${{ each step in parameters.postBuildSteps }}:
     - ${{ step }}

@@ -42,6 +42,7 @@ jobs:
       deploymentMode: 'Incremental'
       deploymentOutputs: deploymentOutputs
   - bash: |
+        echo "##vso[task.setvariable variable=appServiceAppUrl;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.webAppUrl.value')"
         echo "##vso[task.setvariable variable=appServiceAppName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.webAppName.value')"
         echo "##vso[task.setvariable variable=sqlServerFQDN;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.sqlServerFQDN.value')"
         echo "##vso[task.setvariable variable=databaseName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.databaseName.value')"

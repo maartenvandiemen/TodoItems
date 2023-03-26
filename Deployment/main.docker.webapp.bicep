@@ -53,6 +53,7 @@ module keyVault 'keyVault.bicep' = {
   }
 }
 
+output webAppUrl string = appService.outputs.webAppUrl
 output webAppName string = appService.outputs.webAppName
 output sqlServerFQDN string = sql.outputs.sqlServerDatabase.fullyQualifiedDomainName
 output databaseName string = sql.outputs.sqlServerDatabase.databaseName

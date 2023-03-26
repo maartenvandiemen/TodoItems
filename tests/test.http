@@ -1,0 +1,42 @@
+###
+
+{{
+  exports.defaultHeaders = {
+    'Content-Type': 'application/json',
+  };
+}}
+
+###
+# @name postIncomplete
+POST {{host}}/todoitems
+...defaultHeaders
+{
+  "name": "{{$random.alphabetic(50)}}",
+  "isComplete": false
+}
+
+??  status == 201
+
+###
+# @ref postIncomplete
+GET {{host}}/todoitems/{{postIncomplete.id}}
+...defaultHeaders
+
+??  status == 200
+
+###
+# @forceRef postIncomplete
+DELETE {{host}}/todoitems/{{postIncomplete.id}}
+
+??  status == 200
+
+###
+# @forceRef postIncomplete
+PUT {{host}}/todoitems/{{postIncomplete.id}}
+...defaultHeaders
+{
+  "name": "{{$random.alphabetic(50)}}",
+  "isComplete": true
+}
+
+?? status == 204
