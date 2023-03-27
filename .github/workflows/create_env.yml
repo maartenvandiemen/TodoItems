@@ -64,7 +64,7 @@ jobs:
           enable-AzPSSession: true
 
       - name: Create resourcegroup ${{ inputs.resourcegroupName }}
-        uses: azure/CLI@v1.0.7
+        uses: Azure/cli@v1.0.7
         with:
           inlineScript: az group create --location ${{ inputs.region }} --name ${{ inputs.resourcegroupName }}
 
