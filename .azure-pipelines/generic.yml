@@ -47,6 +47,11 @@ stages:
       - template: deploy.nodocker.yml
     - template: deploy.sql.yml
     - template: smoketests.yml
+      parameters:
+        ${{if not(parameters.bicepAdditionalParameters)}}:
+          dependsOn: [Create_Env, Deploy_DB, Deploy_App]
+        ${{else }}:
+          dependsOn: [Create_Env, Deploy_DB]
 
   - stage: Delete
     dependsOn: [Deploy]
