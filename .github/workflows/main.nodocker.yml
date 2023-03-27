@@ -48,7 +48,7 @@ jobs:
     secrets: inherit
 
   create_env:
-    needs: [artifacts_release, artifacts_release]
+    needs: [artifacts_release]
     uses: ./.github/workflows/create_env.yml
     with:
       resourcegroupName: ${{ needs.artifacts_release.outputs.resourcegroup }}
@@ -72,7 +72,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - run: Compress-Archive -Path ${{github.workspace}}/artifacts/api/* -DestinationPath ${{github.workspace}}/artifacts/api/api.zip
-      - uses: azure/CLI@v1
+      - uses: Azure/cli@v1.0.7
         name: Azure Deploy WebApp
         with:
           inlineScript: |
