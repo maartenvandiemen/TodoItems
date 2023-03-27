@@ -7,7 +7,7 @@ jobs:
   pool:
     vmImage: ubuntu-latest
   ${{ if parameters.dependsOn }}:
-    dependsOn: ${{parameters.DependsOn}}
+    dependsOn: ${{parameters.dependsOn}}
   variables:
   - name: appServiceUrl
     value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appServiceAppUrl'] ]
