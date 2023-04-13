@@ -133,6 +133,12 @@ jobs:
       modifyOutputPath: false
       zipAfterPublish: false
 
+  - script: |
+        az bicep build --file main.docker.webapp.bicep
+        az bicep build --file main.nodocker.webapp.bicep
+    displayName: Bicep linting
+    workingDirectory: Deployment
+
   - task: PublishPipelineArtifact@1
     displayName: Publish pipeline artifact 'SQL'
     inputs:

@@ -14,18 +14,27 @@ jobs:
       resourcegroup: ${{ steps.setupResourcegroup.outputs.resourcegroup }}
     steps:
       - uses: actions/checkout@v3
+
+      - name: Bicep Lint
+        run: |
+          az bicep build --file main.docker.webapp.bicep
+          az bicep build --file main.nodocker.webapp.bicep
+        working-directory: Deployment
+
       - name: Publish Bicep artifact
         uses: actions/upload-artifact@v3
         with:
           name: infraCode
-          path: '${{github.workspace}}/Deployment/**'
+          path: '${{github.workspace}}/Deployment/*.bicep'
           if-no-files-found: error
+
       - name: Publish Smoketests artifact
         uses: actions/upload-artifact@v3
         with:
           name: smoketests
           path: '${{github.workspace}}/tests/**'
           if-no-files-found: error
+
       - name: Setup variables
         id: setupResourcegroup
         run: |
