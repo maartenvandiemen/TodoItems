@@ -9,7 +9,7 @@ param applicationname string
 
 var sqlserverName = 'sqlserver-${toLower(applicationname)}-${uniqueString(resourceGroup().id)}'
 
-resource sqlServer 'Microsoft.Sql/servers@2021-11-01-preview' = {
+resource sqlServer 'Microsoft.Sql/servers@2021-11-01' = {
    name: sqlserverName
    location: location
   properties: {
@@ -18,7 +18,7 @@ resource sqlServer 'Microsoft.Sql/servers@2021-11-01-preview' = {
   }
 }
 
-resource database 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
+resource database 'Microsoft.Sql/servers/databases@2021-11-01' = {
   name: applicationname
   parent: sqlServer
   location: location
@@ -36,7 +36,7 @@ resource database 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
   }
 }
 
-resource sqlserverName_AllowAllWindowsAzureIps 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
+resource sqlserverName_AllowAllWindowsAzureIps 'Microsoft.Sql/servers/firewallRules@2021-11-01' = {
   name: 'AllowAllWindowsAzureIPs'
   parent: sqlServer
   properties: {
