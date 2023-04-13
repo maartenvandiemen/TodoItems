@@ -61,9 +61,7 @@ jobs:
       key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,!**/bin/**,!**/obj/**'
       path: '$(NUGET_PACKAGES)'
       cacheHitVar: 'CACHE_RESTORED'
-      restoreKeys: |
-        nuget | "$(Agent.OS)"
-        nuget
+
   - task: DotNetCoreCLI@2
     displayName: Dotnet restore '**/*.csproj'
     condition: ne(variables.CACHE_RESTORED, true)
