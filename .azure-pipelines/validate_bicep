@@ -1,0 +1,54 @@
+jobs:
+#Seperate job for generating resourcegroupName. 
+- job: Generate_ResourcegroupNameBicep
+  steps:
+  - checkout: none
+  - powershell: |
+      $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
+      $resourcegroupname="validate-$randomNumber"
+      Write-Host "##vso[task.setvariable variable=resourcegroupNameBicep;isoutput=true]$resourcegroupname"
+    name: DetermineResourcegroupName
+
+- job: Validate_Env
+  dependsOn: [Generate_ResourcegroupNameBicep]
+  variables: 
+  - group: AzureSecrets
+  - name: resourcegroupName
+    value: $[ dependencies.Generate_ResourcegroupNameBicep.outputs['DetermineResourcegroupName.resourcegroupName'] ]
+  steps:
+  - checkout: none
+  - download: current
+    artifact: infraCode
+    displayName: Download Bicep files
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: 'Azure'
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: 'az group create --location ''East US'' --name $(resourcegroupName)'
+  - task: AzureResourceManagerTemplateDeployment@3
+    inputs:
+      deploymentScope: 'Resource Group'
+      azureResourceManagerConnection: 'Azure'
+      subscriptionId: $(subscriptionId)
+      action: 'Create Or Update Resource Group'
+      resourceGroupName: $(resourcegroupName)
+      location: 'East US'
+      templateLocation: 'Linked artifact'
+      csmFile: '$(Pipeline.Workspace)/infraCode/${{ parameters.template }}'
+      overrideParameters: '-applicationname todoitems -sqlAdministratorLoginUser $(todoItemsSqlAdminUser) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
+      deploymentMode: 'Validation'
+
+- job: Delete_Resourcegroup
+  dependsOn: [Generate_ResourcegroupNameBicep, Validate_Env]
+  variables: 
+  - group: AzureSecrets
+  - name: resourcegroupName
+    value: $[ dependencies.Generate_ResourcegroupNameBicep.outputs['DetermineResourcegroupName.resourcegroupName'] ]
+  steps:
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: 'Azure'
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: 'az group delete --name $(resourcegroupName) --no-wait --y
