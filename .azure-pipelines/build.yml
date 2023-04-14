@@ -145,10 +145,17 @@ jobs:
       artifact: 'database'
       publishLocation: 'pipeline'
 
+  - task: CopyFiles@2
+    displayName: Copy Bicep files to artifact staging directory
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/Deployment'
+      Contents: '*.bicep'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/Deployment'
+
   - task: PublishPipelineArtifact@1
     displayName: Publish pipeline artifact 'Deployment'
     inputs:
-      targetPath: '$(Build.SourcesDirectory)/Deployment/*.bicep'
+      targetPath: '$(Build.ArtifactStagingDirectory)/Deployment'
       artifact: 'infraCode'
       publishLocation: 'pipeline'
       
