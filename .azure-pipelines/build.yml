@@ -8,6 +8,8 @@ parameters:
 - name: testDatabasename
   type: string
   default: TodoItemsDB
+- name: serviceContainerName
+  type: string
 
 jobs: 
 - job: Build
@@ -29,8 +31,7 @@ jobs:
     readonly: true
     
   services:
-    mssql:
-      alias: mssql
+    ${{parameters.serviceContainerName}}: ${{parameters.serviceContainerName}}
         
   steps:
   - task: PowerShell@2
