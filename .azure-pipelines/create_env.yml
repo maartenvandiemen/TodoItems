@@ -51,11 +51,11 @@ jobs:
       templateLocation: 'Linked artifact'
       csmFile: '$(Pipeline.Workspace)/infraCode/${{ parameters.template }}'
       overrideParameters: '-applicationname todoitems -sqlAdministratorLoginUser $(todoItemsSqlAdminUser) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
-      ${{ if eq( parameters.environment, 'deploy') }}:
+      ${{ if eq( parameters.modus, 'deploy') }}:
         deploymentMode: 'Incremental'
       ${{ else }}:
         deploymentMode: 'Validation'
-  - ${{ if eq( parameters.environment, 'deploy') }}:
+  - ${{ if eq( parameters.modus, 'deploy') }}:
     - bash: |
           echo "##vso[task.setvariable variable=appServiceAppUrl;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.webAppUrl.value')"
           echo "##vso[task.setvariable variable=appServiceAppName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.webAppName.value')"
@@ -66,7 +66,7 @@ jobs:
       env:
         DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
 
-- ${{ if ne( parameters.environment, 'deploy') }}:
+- ${{ if ne( parameters.modus, 'deploy') }}:
   - job: Delete_Resourcegroup
     dependsOn: [Generate_ResourcegroupName, Create_Env]
     variables: 
