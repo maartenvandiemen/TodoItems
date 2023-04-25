@@ -79,4 +79,4 @@ jobs:
         azureSubscription: 'Azure'
         scriptType: 'pscore'
         scriptLocation: 'inlineScript'
-        inlineScript: 'az group delete --name $(resourcegroupName) --no-wait --y
+        inlineScript: 'az group delete --name $(resourcegroupName) --no-wait --y'
