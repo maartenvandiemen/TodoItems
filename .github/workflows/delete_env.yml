@@ -23,4 +23,4 @@ jobs:
           
       - uses: Azure/cli@v1.0.7
         with:
-          inlineScript: az group delete --name ${{ inputs.resourcegroupName }} --yes
+          inlineScript: az group delete --name ${{ inputs.resourcegroupName }} --yes --no-wait
