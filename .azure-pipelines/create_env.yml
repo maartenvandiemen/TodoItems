@@ -37,9 +37,9 @@ jobs:
   - task: AzureCLI@2
     inputs:
       azureSubscription: 'Azure'
-      scriptType: 'pscore'
+      scriptType: 'batch'
       scriptLocation: 'inlineScript'
-      inlineScript: 'az group create --location \'$(azure_region)\' --name $(resourcegroupName)'
+      inlineScript: 'az group create --location \"$(azure_region)\" --name $(resourcegroupName)'
   - task: AzureResourceManagerTemplateDeployment@3
     inputs:
       deploymentScope: 'Resource Group'
