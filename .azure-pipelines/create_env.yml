@@ -37,7 +37,7 @@ jobs:
   - task: AzureCLI@2
     inputs:
       azureSubscription: 'Azure'
-      scriptType: 'batch'
+      scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: 'az group create --location \"$(azure_region)\" --name $(resourcegroupName)'
   - task: AzureResourceManagerTemplateDeployment@3
@@ -77,6 +77,6 @@ jobs:
     - task: AzureCLI@2
       inputs:
         azureSubscription: 'Azure'
-        scriptType: 'pscore'
+        scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: 'az group delete --name $(resourcegroupName) --no-wait --y'
