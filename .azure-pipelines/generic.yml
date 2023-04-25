@@ -34,14 +34,24 @@ stages:
       buildConfiguration: ${{parameters.buildConfiguration}}
       serviceContainerName: 'mssql'
 
+- stage: Validate_Bicep
+  dependsOn: [Build]
+  jobs:
+  - template: create_env.yml
+    parameters:
+      template: ${{parameters.bicepTemplate}}
+      additionalParameters: ${{parameters.bicepAdditionalParameters}}
+      modus: validation
+      
 - ${{ if eq(variables['Build.Reason'], 'Manual') }}:
   - stage: Deploy
-    dependsOn: [Build]
+    dependsOn: [Build, Validate_Bicep]
     jobs:
     - template: create_env.yml
       parameters:
         template: ${{parameters.bicepTemplate}}
         additionalParameters: ${{parameters.bicepAdditionalParameters}}
+        modus: deploy
     #bicepAdditionalParameters are only passed for Docker
     #https://stackoverflow.com/questions/60098737/checking-for-null-object-type-parameter-in-azure-yaml
     - ${{if not(parameters.bicepAdditionalParameters)}}:
