@@ -72,7 +72,7 @@ jobs:
     variables: 
     - group: AzureSecrets
     - name: resourcegroupName
-      value: $[ dependencies.Generate_ResourcegroupNameBicep.outputs['DetermineResourcegroupName.resourcegroupName'] ]
+      value: $[ dependencies.Generate_ResourcegroupName.outputs['DetermineResourcegroupName.resourcegroupName'] ]
     steps:
     - task: AzureCLI@2
       inputs:
