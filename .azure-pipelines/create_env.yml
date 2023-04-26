@@ -74,6 +74,7 @@ jobs:
     - name: resourcegroupName
       value: $[ dependencies.Generate_ResourcegroupName.outputs['DetermineResourcegroupName.resourcegroupName'] ]
     steps:
+    - checkout: none
     - task: AzureCLI@2
       inputs:
         azureSubscription: 'Azure'
