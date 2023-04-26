@@ -39,7 +39,7 @@ jobs:
       azureSubscription: 'Azure'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
-      inlineScript: 'az group create --location \"$(azure_region)\" --name $(resourcegroupName)'
+      inlineScript: az group create --location '$(azure_region)' --name $(resourcegroupName)
   - task: AzureResourceManagerTemplateDeployment@3
     inputs:
       deploymentScope: 'Resource Group'
