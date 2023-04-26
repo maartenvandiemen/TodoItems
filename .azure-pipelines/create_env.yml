@@ -19,7 +19,7 @@ jobs:
   - checkout: none
   - powershell: |
       $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
-      $resourcegroupname="validate-$randomNumber"
+      $resourcegroupname="todoItems-$randomNumber"
       Write-Host "##vso[task.setvariable variable=resourcegroupName;isoutput=true]$resourcegroupname"
     name: DetermineResourcegroupName
 
