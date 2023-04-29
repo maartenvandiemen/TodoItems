@@ -81,7 +81,7 @@ jobs:
           inlineScript: az group create --location ${{ inputs.region }} --name ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
 
       - name: Deploy Azure infrastructure
-        if: ${{inputs.deploy == 'true'}}
+        if: ${{inputs.deploy == true}}
         uses: azure/arm-deploy@v1
         id: arm
         with:
@@ -92,7 +92,7 @@ jobs:
           deploymentMode: Incremental
 
       - name: Validate Azure infrastructure
-        if: ${{inputs.deploy != 'true'}}
+        if: ${{inputs.deploy != true}}
         uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ secrets.SUBSCRIPTION }}
@@ -102,7 +102,7 @@ jobs:
           deploymentMode: Validate
       
       - name: Delete resourcegroup ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
-        if: ${{inputs.deploy != 'true'}}
+        if: ${{inputs.deploy != true}}
         uses: Azure/cli@v1.0.7
         with:
           inlineScript: az group delete --name ${{ needs.determine_resourcegroup.outputs.resourcegroup }} --yes --no-wait 
