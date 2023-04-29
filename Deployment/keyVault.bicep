@@ -9,20 +9,20 @@ param sqlAdministratorLoginUser string
 @secure ()
 param sqlAdministratorLoginPassword string
 
-resource key_vault 'Microsoft.KeyVault/vaults@2022-11-01' = {
+resource key_vault 'Microsoft.KeyVault/vaults@2023-02-01' = {
   name: keyVaultName
   location: location
   properties: {
     sku: {
       family: 'A'
       name: 'standard'
-    }    
+    }
     tenantId: subscription().tenantId
     enableRbacAuthorization: true
   }
 }
 
-resource secret 'Microsoft.KeyVault/vaults/secrets@2022-11-01' = {
+resource secret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
   name: 'ConnectionString'
   parent: key_vault
   properties: {

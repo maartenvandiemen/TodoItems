@@ -1,10 +1,6 @@
 on:
   workflow_call: 
     inputs:
-      resourcegroupName:
-        type: string
-        required: true
-        description: Name of the resourcegroup where the information should be deployed to
       region:
         type: string
         required: true
@@ -17,13 +13,15 @@ on:
         type: string
         required: false
         description: Arguments for the ARM or BICEP template
+      deploy:
+        type: boolean
+        required: true
+        default: true
+        description: Specify if a deployment should be done or a validation should be performed
     secrets:
       AZURE_CREDENTIALS:
         required: true
         description: Azure Service Principal credentials
-      SUBSCRIPTION:
-        required: true
-        description: ID (Guid) of the subscription
     outputs:
       webAppName:
         description: "Created webApp"
@@ -37,13 +35,27 @@ on:
       webAppUrl:
         description: "Created webApp url"
         value: ${{jobs.create_env.outputs.webAppUrl}}
+      resourcegroup:
+        description: "Random generated resource group name"
+        value: ${{jobs.determine_resourcegroup.outputs.resourcegroup}}
       
 defaults:
   run:
     shell: pwsh
 jobs:
+  determine_resourcegroup:
+    runs-on: ubuntu-latest
+    outputs:
+      resourcegroup: ${{ steps.setupResourcegroup.outputs.resourcegroup }}
+    steps:
+      - name: Setup variables
+        id: setupResourcegroup
+        run: |
+          $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
+          echo "resourcegroup=todoItems-$randomNumber" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
   create_env:
     runs-on: ubuntu-latest
+    needs: determine_resourcegroup
     outputs:
       webAppUrl: ${{ steps.arm.outputs.webAppUrl }}
       webAppName: ${{ steps.arm.outputs.webAppName }}
@@ -63,16 +75,34 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true
 
-      - name: Create resourcegroup ${{ inputs.resourcegroupName }}
+      - name: Create resourcegroup ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
         uses: Azure/cli@v1.0.7
         with:
-          inlineScript: az group create --location ${{ inputs.region }} --name ${{ inputs.resourcegroupName }}
+          inlineScript: az group create --location ${{ inputs.region }} --name ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
 
       - name: Deploy Azure infrastructure
+        if: ${{inputs.deploy == true}}
         uses: azure/arm-deploy@v1
         id: arm
         with:
           subscriptionId: ${{ secrets.SUBSCRIPTION }}
-          resourceGroupName: ${{ inputs.resourcegroupName }}
+          resourceGroupName: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
           template: ${{github.workspace}}${{ inputs.template }}
           parameters: ${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
+          deploymentMode: Incremental
+
+      - name: Validate Azure infrastructure
+        if: ${{inputs.deploy != true}}
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.SUBSCRIPTION }}
+          resourceGroupName: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
+          template: ${{github.workspace}}${{ inputs.template }}
+          parameters: ${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
+          deploymentMode: Validate
+      
+      - name: Delete resourcegroup ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
+        if: ${{inputs.deploy != true}}
+        uses: Azure/cli@v1.0.7
+        with:
+          inlineScript: az group delete --name ${{ needs.determine_resourcegroup.outputs.resourcegroup }} --yes --no-wait 

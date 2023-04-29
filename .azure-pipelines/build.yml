@@ -8,6 +8,8 @@ parameters:
 - name: testDatabasename
   type: string
   default: TodoItemsDB
+- name: serviceContainerName
+  type: string
 
 jobs: 
 - job: Build
@@ -29,8 +31,7 @@ jobs:
     readonly: true
     
   services:
-    mssql:
-      alias: mssql
+    ${{parameters.serviceContainerName}}: ${{parameters.serviceContainerName}}
         
   steps:
   - task: PowerShell@2
@@ -61,9 +62,7 @@ jobs:
       key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,!**/bin/**,!**/obj/**'
       path: '$(NUGET_PACKAGES)'
       cacheHitVar: 'CACHE_RESTORED'
-      restoreKeys: |
-        nuget | "$(Agent.OS)"
-        nuget
+
   - task: DotNetCoreCLI@2
     displayName: Dotnet restore '**/*.csproj'
     condition: ne(variables.CACHE_RESTORED, true)
@@ -133,6 +132,12 @@ jobs:
       modifyOutputPath: false
       zipAfterPublish: false
 
+  - script: |
+        az bicep build --file main.docker.webapp.bicep
+        az bicep build --file main.nodocker.webapp.bicep
+    displayName: Bicep linting
+    workingDirectory: Deployment
+
   - task: PublishPipelineArtifact@1
     displayName: Publish pipeline artifact 'SQL'
     inputs:
@@ -140,10 +145,17 @@ jobs:
       artifact: 'database'
       publishLocation: 'pipeline'
 
+  - task: CopyFiles@2
+    displayName: Copy Bicep files to artifact staging directory
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/Deployment'
+      Contents: '*.bicep'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/Deployment'
+
   - task: PublishPipelineArtifact@1
     displayName: Publish pipeline artifact 'Deployment'
     inputs:
-      targetPath: '$(Build.SourcesDirectory)/Deployment'
+      targetPath: '$(Build.ArtifactStagingDirectory)/Deployment'
       artifact: 'infraCode'
       publishLocation: 'pipeline'
       

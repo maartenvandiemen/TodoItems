@@ -74,6 +74,26 @@ jobs:
       env:
         integrationtests_ConnectionStrings__TodoDb: 'Server=127.0.0.1,1433;Database=${{env.testDatabasename}};User Id=SA;Password=${{secrets.SA_PASSWORD}};TrustServerCertificate=true;'
     
+    - name: Bicep Lint
+      run: |
+        az bicep build --file main.docker.webapp.bicep
+        az bicep build --file main.nodocker.webapp.bicep
+      working-directory: Deployment
+
+    - name: Publish Bicep artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: infraCode
+        path: '${{github.workspace}}/Deployment/*.bicep'
+        if-no-files-found: error
+
+    - name: Publish Smoketests artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: smoketests
+        path: '${{github.workspace}}/tests/**'
+        if-no-files-found: error
+
     - name: Publish API
       run: dotnet publish ${{github.workspace}}/TodoItems.Api/TodoItems.Api.csproj --configuration ${{inputs.buildConfiguration}} --no-build --output ${{github.workspace}}/artifacts/TodoItems.Api
     

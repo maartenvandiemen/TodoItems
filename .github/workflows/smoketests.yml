@@ -9,12 +9,8 @@ defaults:
   run:
     shell: pwsh
 jobs:
-  create_env:
+  smoke_tests:
     runs-on: ubuntu-latest
-    outputs:
-      webAppName: ${{ steps.arm.outputs.webAppName }}
-      sqlServerFQDN: ${{ steps.arm.outputs.sqlServerFQDN }}
-      databaseName: ${{ steps.arm.outputs.databaseName }}
     environment: AzureProvision
     steps:
       - name: Download test files
