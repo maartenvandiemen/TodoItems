@@ -22,9 +22,6 @@ on:
       AZURE_CREDENTIALS:
         required: true
         description: Azure Service Principal credentials
-      SUBSCRIPTION:
-        required: true
-        description: ID (Guid) of the subscription
     outputs:
       webAppName:
         description: "Created webApp"
