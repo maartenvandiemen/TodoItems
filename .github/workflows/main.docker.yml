@@ -48,21 +48,24 @@ jobs:
         else{
           echo "pushImage=false" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
-        
-  artifacts_release:
-    if: inputs.buildConfiguration != ''
-    uses: ./.github/workflows/artifacts_release.yml
-    
-  create_env:
-    needs: [artifacts_release, push_docker_image]
+  
+  build:  
+    needs: [determine_variables]
+    uses: ./.github/workflows/build.yml
+    with:
+      buildConfiguration: ${{needs.determine_variables.outputs.buildConfiguration}}
+    secrets: inherit
+
+  validate_env:
+    needs: [build]
     uses: ./.github/workflows/create_env.yml
     with:
-      resourcegroupName: ${{ needs.artifacts_release.outputs.resourcegroup }}
       region: 'eastus'
       template: /artifacts/bicep/main.docker.webapp.bicep
       additionalParameters: applicationname=todoitems dockerImageNameAndTag=${{needs.push_docker_image.outputs.dockerTag}}
+      deploy: false
     secrets: inherit
-        
+
   dockerfile_artifact:
     runs-on: ubuntu-latest
     steps:
@@ -74,15 +77,9 @@ jobs:
           name: dockerFile
           path: ${{github.workspace}}/TodoItems.Api/Dockerfile
           if-no-files-found: error
-  
-  build:  
-    needs: [determine_variables]
-    uses: ./.github/workflows/build.yml
-    with:
-      buildConfiguration: ${{needs.determine_variables.outputs.buildConfiguration}}
-    secrets: inherit
-  
+
   push_docker_image:
+    if: inputs.buildConfiguration != ''
     runs-on: ubuntu-latest
     outputs:
       dockerTag: ${{ steps.createTag.outputs.dockerTag }}
@@ -91,7 +88,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs: [build, dockerfile_artifact, determine_variables]
+    needs: [validate_env, dockerfile_artifact, determine_variables]
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -122,6 +119,16 @@ jobs:
           push: ${{ needs.determine_variables.outputs.pushImage }}
           tags: ${{ steps.createTag.outputs.dockerTag }}
 
+  create_env:
+    needs: [build, push_docker_image]
+    uses: ./.github/workflows/create_env.yml
+    with:
+      region: 'eastus'
+      template: /artifacts/bicep/main.docker.webapp.bicep
+      additionalParameters: applicationname=todoitems dockerImageNameAndTag=${{needs.push_docker_image.outputs.dockerTag}}
+      deploy: true
+    secrets: inherit
+
   deploy_db:
     needs: [build, create_env]
     uses: ./.github/workflows/deploy_db.yml
@@ -137,8 +144,8 @@ jobs:
       webAppUrl: ${{needs.create_env.outputs.webAppUrl}}
 
   delete_env:
-    needs: [artifacts_release, smoketests]
+    needs: [create_env, smoketests]
     uses: ./.github/workflows/delete_env.yml
     with:
-      resourcegroupName: ${{ needs.artifacts_release.outputs.resourcegroup }}
+      resourcegroupName: ${{ needs.create_env.outputs.resourcegroup }}
     secrets: inherit

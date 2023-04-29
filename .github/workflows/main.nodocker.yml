@@ -36,29 +36,36 @@ jobs:
           echo "buildConfiguration=Release" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
   
-  artifacts_release:
-    if: inputs.buildConfiguration != ''
-    uses: ./.github/workflows/artifacts_release.yml
-  
   build:  
     needs: [determine_variables_build]
     uses: ./.github/workflows/build.yml
     with:
       buildConfiguration: ${{needs.determine_variables_build.outputs.buildConfiguration}}
     secrets: inherit
-
-  create_env:
-    needs: [artifacts_release]
+  
+  validate:
+    needs: [build]
     uses: ./.github/workflows/create_env.yml
     with:
-      resourcegroupName: ${{ needs.artifacts_release.outputs.resourcegroup }}
       region: 'eastus'
       template: /artifacts/bicep/main.nodocker.webapp.bicep
       additionalParameters: applicationname=todoitems
+      deploy: false
+    secrets: inherit
+
+  create_env:
+    if: inputs.buildConfiguration != ''
+    needs: [artifacts_release, validate]
+    uses: ./.github/workflows/create_env.yml
+    with:
+      region: 'eastus'
+      template: /artifacts/bicep/main.nodocker.webapp.bicep
+      additionalParameters: applicationname=todoitems
+      deploy: true
     secrets: inherit
 
   deploy_app:
-    needs: [build, artifacts_release, create_env]
+    needs: [build, create_env]
     runs-on: ubuntu-latest
     environment: AzureDeploy
     steps:
@@ -76,8 +83,8 @@ jobs:
         name: Azure Deploy WebApp
         with:
           inlineScript: |
-             az webapp deployment source config-zip --src ${{github.workspace}}/artifacts/api/api.zip --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.artifacts_release.outputs.resourcegroup }}
-             az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.artifacts_release.outputs.resourcegroup }}
+             az webapp deployment source config-zip --src ${{github.workspace}}/artifacts/api/api.zip --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.create_env.outputs.resourcegroup }}
+             az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.create_env.outputs.resourcegroup }}
   
   deploy_db:
     needs: [build, create_env]
@@ -94,8 +101,8 @@ jobs:
       webAppUrl: ${{needs.create_env.outputs.webAppUrl}}
   
   delete_env:
-    needs: [artifacts_release, smoketests]
+    needs: [create_env, smoketests]
     uses: ./.github/workflows/delete_env.yml
     with:
-      resourcegroupName: ${{ needs.artifacts_release.outputs.resourcegroup }}
+      resourcegroupName: ${{ needs.create_env.outputs.resourcegroup }}
     secrets: inherit
