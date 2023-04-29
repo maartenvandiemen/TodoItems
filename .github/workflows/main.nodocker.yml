@@ -47,7 +47,7 @@ jobs:
     needs: [build]
     uses: ./.github/workflows/create_env.yml
     with:
-      region: 'eastus'
+      region: ${{ env.AZURE_REGION }}
       template: /artifacts/bicep/main.nodocker.webapp.bicep
       additionalParameters: applicationname=todoitems
       deploy: false
@@ -58,7 +58,7 @@ jobs:
     needs: [validate]
     uses: ./.github/workflows/create_env.yml
     with:
-      region: 'eastus'
+      region: ${{ env.AZURE_REGION }}
       template: /artifacts/bicep/main.nodocker.webapp.bicep
       additionalParameters: applicationname=todoitems
       deploy: true
