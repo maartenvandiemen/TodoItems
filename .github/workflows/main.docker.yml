@@ -60,7 +60,7 @@ jobs:
     needs: [build]
     uses: ./.github/workflows/create_env.yml
     with:
-      region: $env:AZURE_REGION
+      region: ${{ vars.AZURE_REGION }}
       template: /artifacts/bicep/main.docker.webapp.bicep
       additionalParameters: applicationname=todoitems dockerImageNameAndTag=${{needs.push_docker_image.outputs.dockerTag}}
       deploy: false
@@ -123,7 +123,7 @@ jobs:
     needs: [build, push_docker_image]
     uses: ./.github/workflows/create_env.yml
     with:
-      region: $env:AZURE_REGION
+      region: ${{ vars.AZURE_REGION }}
       template: /artifacts/bicep/main.docker.webapp.bicep
       additionalParameters: applicationname=todoitems dockerImageNameAndTag=${{needs.push_docker_image.outputs.dockerTag}}
       deploy: true
