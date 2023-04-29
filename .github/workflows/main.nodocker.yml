@@ -55,7 +55,7 @@ jobs:
 
   create_env:
     if: inputs.buildConfiguration != ''
-    needs: [artifacts_release, validate]
+    needs: [validate]
     uses: ./.github/workflows/create_env.yml
     with:
       region: 'eastus'
