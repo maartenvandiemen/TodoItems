@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TodoItems.Api", "TodoItems.Api\TodoItems.Api.csproj", "{CB0CC66A-548D-4FDD-A887-2E21A0596F30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoItems.Api.UnitTests", "TodoItems.Api.UnitTests\TodoItems.Api.UnitTests.csproj", "{1129F7DE-E2D7-4D42-9C26-8E0C2B1D2CB5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TodoItems.Api.IntegrationTests", "TodoItems.Api.UnitTests\TodoItems.Api.IntegrationTests.csproj", "{1129F7DE-E2D7-4D42-9C26-8E0C2B1D2CB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
