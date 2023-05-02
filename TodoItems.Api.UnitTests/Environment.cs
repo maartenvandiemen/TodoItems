@@ -1,8 +1,9 @@
-﻿namespace TodoItems.Api.UnitTests
+﻿namespace TodoItems.Api.IntegrationTests
 {
     public enum Environment
     {
-        Development,
-        Integration
+        InMemory,
+        TestContainers,
+        ExternalDatabase
     }
 }
