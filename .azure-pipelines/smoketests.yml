@@ -23,5 +23,6 @@ jobs:
       versionSpec: '18.x'
   - bash: npm install -g httpyac
     displayName: Install HttpYac
-  - bash: httpyac "$(Pipeline.Workspace)/smoketests/test.http" --all -o short --var host=$(appServiceUrl)
+  - bash: httpyac ./test.http --all -o short --var host=$(appServiceUrl)
     displayName: Execute httpYac Tests
+    workingDirectory: $(Pipeline.Workspace)/smoketests
