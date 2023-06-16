@@ -23,7 +23,7 @@ extends:
    template: generic.yml
    parameters:
      bicepTemplate: main.docker.webapp.bicep
-     bicepAdditionalParameters: '-dockerImageNameAndTag ghcr.io/mvdiemen/todoitems:$(Build.SourceVersion)'
+     bicepAdditionalParameters: '-dockerImageNameAndTag ghcr.io/maartenvandiemen/todoitems:$(Build.SourceVersion)'
      postBuildSteps: 
        - task: Docker@2
          inputs:
