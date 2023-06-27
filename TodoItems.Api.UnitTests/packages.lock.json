@@ -43,11 +43,11 @@
       },
       "Testcontainers.MsSql": {
         "type": "Direct",
-        "requested": "[3.2.0, )",
-        "resolved": "3.2.0",
-        "contentHash": "z8hNZKz0+8e+T9r/IcH9fQcNcYD3uPZuUTCIf9d2Pp7+CZu+l9rb2hdnct5pFOkFq/FduaO4ZxVsjmYO2gtLIg==",
+        "requested": "[3.3.0, )",
+        "resolved": "3.3.0",
+        "contentHash": "bAr2xsu73jtQj0LrBNd2Y62dvKw5t0kUrtqwxfnbkV3+f92JIIhJjf2iciBByD4R2pwtxhQUuPEMuddzr+wDfQ==",
         "dependencies": {
-          "Testcontainers": "3.2.0"
+          "Testcontainers": "3.3.0"
         }
       },
       "AspNetCore.HealthChecks.UI.Client": {
@@ -1165,8 +1165,8 @@
       },
       "Testcontainers": {
         "type": "Transitive",
-        "resolved": "3.2.0",
-        "contentHash": "q4WXHpfCjOmPs78EWN3Hxe78eVsT4p4wNPy6Azpiwo79yowtsKrwybRNfScoJdVdWAjwXSSm6hiIcZY2CVT6OQ==",
+        "resolved": "3.3.0",
+        "contentHash": "PNl479gZH7U54sGzQKM9MhAt8eos678gsNOlu/MMc0qecTAYBGronT0GGsBwaJtrsMGqD5bQr6ylcmRI+HwAtw==",
         "dependencies": {
           "Docker.DotNet": "3.125.15",
           "Docker.DotNet.X509": "3.125.15",
