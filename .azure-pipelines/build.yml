@@ -65,7 +65,6 @@ jobs:
 
   - task: DotNetCoreCLI@2
     displayName: Dotnet restore '**/*.csproj'
-    condition: ne(variables.CACHE_RESTORED, true)
     inputs:
       command: 'restore'
       projects: '**/*.csproj'
