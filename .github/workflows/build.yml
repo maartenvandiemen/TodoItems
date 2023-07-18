@@ -39,10 +39,9 @@ jobs:
         key: ${{runner.os}}-build-${{ hashFiles('**/packages.lock.json', '!**/bin/**', '!**/obj/**') }}
 
     - name: Dotnet restore
-      if: ${{steps.cache.outputs.cache-hit != 'true'}}
       run: dotnet restore --locked-mode --nologo
     
-    - name: Dotnet build - no cache
+    - name: Dotnet build
       run: dotnet build --no-restore --configuration ${{inputs.buildConfiguration}}
     
     - name: Restore tools
