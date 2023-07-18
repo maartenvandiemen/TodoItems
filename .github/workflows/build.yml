@@ -37,18 +37,12 @@ jobs:
       with:
         path: ${{env.NUGET_PACKAGES}}
         key: ${{runner.os}}-build-${{ hashFiles('**/packages.lock.json', '!**/bin/**', '!**/obj/**') }}
-   
-      #If the cache has been restored, the deps.json isn't generated. In order to generate this we will do a dotnet build.
-    - name: Dotnet build - cache restored
-      if: ${{steps.cache.outputs.cache-hit == 'true'}}
-      run: dotnet build --configuration ${{inputs.buildConfiguration}}
-    
+
     - name: Dotnet restore
       if: ${{steps.cache.outputs.cache-hit != 'true'}}
       run: dotnet restore --locked-mode --nologo
     
     - name: Dotnet build - no cache
-      if: ${{steps.cache.outputs.cache-hit != 'true'}}
       run: dotnet build --no-restore --configuration ${{inputs.buildConfiguration}}
     
     - name: Restore tools
