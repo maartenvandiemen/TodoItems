@@ -129,7 +129,7 @@ jobs:
     workingDirectory: Deployment
 
   - task: PublishPipelineArtifact@1
-    displayName: 🏁 Publish pipeline artifact 'SQL'
+    displayName: 📤 Publish pipeline artifact 'SQL'
     inputs:
       targetPath: '$(Build.ArtifactStagingDirectory)/SQL'
       artifact: 'database'
@@ -143,14 +143,14 @@ jobs:
       TargetFolder: '$(Build.ArtifactStagingDirectory)/Deployment'
 
   - task: PublishPipelineArtifact@1
-    displayName: 🏁 Publish pipeline artifact 'Deployment'
+    displayName: 📤 Publish pipeline artifact 'Deployment'
     inputs:
       targetPath: '$(Build.ArtifactStagingDirectory)/Deployment'
       artifact: 'infraCode'
       publishLocation: 'pipeline'
       
   - task: PublishPipelineArtifact@1
-    displayName: 🏁 Publish pipeline artifact 'Smoke tests'
+    displayName: 📤 Publish pipeline artifact 'Smoke tests'
     inputs:
       targetPath: '$(Build.SourcesDirectory)/tests'
       artifact: 'smoketests'
