@@ -35,7 +35,7 @@ jobs:
         
   steps:
   - task: PowerShell@2
-    displayName: 'Determine if dotnet is installed'
+    displayName: 🔦 Determine if dotnet is installed
     inputs:
       targetType: 'inline'
       script: |
@@ -50,21 +50,20 @@ jobs:
       pwsh: true
 
   - task: UseDotNet@2
-    displayName: 'Install dotnet'
+    displayName: 🚧 Install dotnet
     condition: and(succeeded(), ne(variables['isDotNetVersionInstalled'], 'true'))
     inputs:
       packageType: 'sdk'
       useGlobalJson: true
   
   - task: Cache@2
-    displayName: 'Restore cache for NuGet'
+    displayName: 🚆 Restore cache for NuGet
     inputs:
       key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,!**/bin/**,!**/obj/**'
       path: '$(NUGET_PACKAGES)'
-      cacheHitVar: 'CACHE_RESTORED'
 
   - task: DotNetCoreCLI@2
-    displayName: Dotnet restore '**/*.csproj'
+    displayName: ⛽ Dotnet restore '**/*.csproj'
     inputs:
       command: 'restore'
       projects: '**/*.csproj'
@@ -72,7 +71,7 @@ jobs:
       feedsToUse: 'select'
 
   - task: DotNetCoreCLI@2
-    displayName: Dotnet build - pipeline cache not restored
+    displayName: 🔨 Dotnet build
     inputs:
       command: 'build'
       projects: '**/*.csproj'
@@ -84,7 +83,7 @@ jobs:
       custom: 'tool'
       arguments: 'restore'
       workingDirectory: '$(Build.SourcesDirectory)/TodoItems.Api'
-    displayName: 'Restore dotnet tools'
+    displayName: 👷 Restore dotnet tools
 
   - task: DotNetCoreCLI@2
     inputs:
@@ -92,7 +91,7 @@ jobs:
       custom: 'ef'
       arguments: 'migrations script --output $(Build.ArtifactStagingDirectory)/SQL/db.sql --idempotent --project TodoItems.Api.csproj --context TodoDb --no-build --verbose --configuration ${{parameters.buildConfiguration}}'
       workingDirectory: '$(Build.SourcesDirectory)/TodoItems.Api'
-    displayName: 'Create idempotent SQL'
+    displayName: 📓 Create idempotent SQL
     env:
       #Pass environment variable dummy. So the migration script will not be created against the InMemory database.
       ASPNETCORE_ENVIRONMENT: 'DUMMY'
@@ -101,10 +100,11 @@ jobs:
         sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -Q 'CREATE DATABASE ${{parameters.testDatabasename}}' -b
         sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -i db.sql -d ${{parameters.testDatabasename}} -b
     workingDirectory: '$(Build.ArtifactStagingDirectory)/SQL'
-    displayName: 'Create database and tables for unit tests'
+    displayName: '🌅 Create database and tables for unit tests'
     timeoutInMinutes: 1
+
   - task: DotNetCoreCLI@2
-    displayName: Dotnet test '**/*Tests.csproj'
+    displayName: 🚦 Dotnet test '**/*Tests.csproj'
     inputs:
       command: 'test'
       projects: '**/*Tests.csproj'
@@ -113,7 +113,7 @@ jobs:
       integrationtests_ConnectionStrings__TodoDb: 'Server=127.0.0.1,1433;Database=${{parameters.testDatabasename}};User Id=SA;Password=$(SA_PASSWORD);TrustServerCertificate=true;'
     
   - task: DotNetCoreCLI@2
-    displayName: Dotnet publish '**/TodoItems.Api.csproj' 
+    displayName: 🏁 Dotnet publish '**/TodoItems.Api.csproj' 
     inputs:
       command: 'publish'
       publishWebProjects: false
@@ -125,32 +125,32 @@ jobs:
   - script: |
         az bicep build --file main.docker.webapp.bicep
         az bicep build --file main.nodocker.webapp.bicep
-    displayName: Bicep linting
+    displayName: 🚥 Bicep linting
     workingDirectory: Deployment
 
   - task: PublishPipelineArtifact@1
-    displayName: Publish pipeline artifact 'SQL'
+    displayName: 🏁 Publish pipeline artifact 'SQL'
     inputs:
       targetPath: '$(Build.ArtifactStagingDirectory)/SQL'
       artifact: 'database'
       publishLocation: 'pipeline'
 
   - task: CopyFiles@2
-    displayName: Copy Bicep files to artifact staging directory
+    displayName: 🚚 Copy Bicep files to artifact staging directory
     inputs:
       SourceFolder: '$(Build.SourcesDirectory)/Deployment'
       Contents: '*.bicep'
       TargetFolder: '$(Build.ArtifactStagingDirectory)/Deployment'
 
   - task: PublishPipelineArtifact@1
-    displayName: Publish pipeline artifact 'Deployment'
+    displayName: 🏁 Publish pipeline artifact 'Deployment'
     inputs:
       targetPath: '$(Build.ArtifactStagingDirectory)/Deployment'
       artifact: 'infraCode'
       publishLocation: 'pipeline'
       
   - task: PublishPipelineArtifact@1
-    displayName: Publish pipeline artifact 'Smoke tests'
+    displayName: 🏁 Publish pipeline artifact 'Smoke tests'
     inputs:
       targetPath: '$(Build.SourcesDirectory)/tests'
       artifact: 'smoketests'
