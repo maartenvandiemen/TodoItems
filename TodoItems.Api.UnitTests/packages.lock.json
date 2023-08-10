@@ -43,11 +43,11 @@
       },
       "Testcontainers.MsSql": {
         "type": "Direct",
-        "requested": "[3.3.0, )",
-        "resolved": "3.3.0",
-        "contentHash": "bAr2xsu73jtQj0LrBNd2Y62dvKw5t0kUrtqwxfnbkV3+f92JIIhJjf2iciBByD4R2pwtxhQUuPEMuddzr+wDfQ==",
+        "requested": "[3.4.0, )",
+        "resolved": "3.4.0",
+        "contentHash": "xJgwvlOdo74Fw11nYPbXeKsAKdYZsACUgLNFrAPJznQWgFJtQ3Q8PP2UQuxeB37NcBJRcfHeXQgRLByGlw6mCQ==",
         "dependencies": {
-          "Testcontainers": "3.3.0"
+          "Testcontainers": "3.4.0"
         }
       },
       "AspNetCore.HealthChecks.UI.Client": {
@@ -1165,17 +1165,17 @@
       },
       "Testcontainers": {
         "type": "Transitive",
-        "resolved": "3.3.0",
-        "contentHash": "PNl479gZH7U54sGzQKM9MhAt8eos678gsNOlu/MMc0qecTAYBGronT0GGsBwaJtrsMGqD5bQr6ylcmRI+HwAtw==",
+        "resolved": "3.4.0",
+        "contentHash": "zAQOLMxrxlfD8zYiLOgbZmXqGSr2h/ng+IRBfmFe/027sEZSaiS4Oo1W5wv+xtDLSlGyRORkkT1TSSudyFJ5hg==",
         "dependencies": {
           "Docker.DotNet": "3.125.15",
           "Docker.DotNet.X509": "3.125.15",
           "Microsoft.Bcl.AsyncInterfaces": "6.0.0",
-          "Microsoft.Extensions.Logging.Abstractions": "6.0.3",
+          "Microsoft.Extensions.Logging.Abstractions": "6.0.4",
           "Portable.BouncyCastle": "1.9.0",
           "SSH.NET": "2020.0.2",
           "SharpZipLib": "1.4.2",
-          "System.Text.Json": "6.0.7"
+          "System.Text.Json": "6.0.8"
         }
       },
       "todoitems.api": {
