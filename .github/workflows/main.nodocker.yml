@@ -79,7 +79,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - run: Compress-Archive -Path ${{github.workspace}}/artifacts/api/* -DestinationPath ${{github.workspace}}/artifacts/api/api.zip
-      - uses: Azure/cli@v1.0.7
+      - uses: Azure/cli@v1.0.8
         name: Azure Deploy WebApp
         with:
           inlineScript: |
