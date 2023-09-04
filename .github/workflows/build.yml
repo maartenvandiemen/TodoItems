@@ -27,7 +27,7 @@ jobs:
       NUGET_PACKAGES: '${{github.workspace}}/.nuget/packages'
       testDatabasename: 'TodoItemDB'
     steps:    
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - uses: actions/setup-dotnet@v3
     
