@@ -9,7 +9,7 @@ param sqlAdministratorLoginUser string
 @secure ()
 param sqlAdministratorLoginPassword string
 
-resource key_vault 'Microsoft.KeyVault/vaults@2023-02-01' = {
+resource key_vault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: keyVaultName
   location: location
   properties: {
