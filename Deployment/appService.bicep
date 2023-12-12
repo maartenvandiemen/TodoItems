@@ -22,7 +22,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   kind: 'linux'
 }
 
-resource appServiceApp 'Microsoft.Web/sites@2022-09-01' = {
+resource appServiceApp 'Microsoft.Web/sites@2023-01-01' = {
   name: appServiceAppName
   location: location
   properties: {
