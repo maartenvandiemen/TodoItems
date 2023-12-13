@@ -21,6 +21,6 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           
-      - uses: Azure/cli@v1.0.8
+      - uses: Azure/cli@v1.0.9
         with:
           inlineScript: az group delete --name ${{ inputs.resourcegroupName }} --yes --no-wait
