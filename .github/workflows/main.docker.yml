@@ -79,12 +79,12 @@ jobs:
       packages: write
     needs: [validate_env, dockerfile_artifact, determine_variables]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
             name: todoItemsApi
             path: ${{github.workspace}}/api
             
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
             name: dockerFile
             path: ${{github.workspace}}/dockerFile
