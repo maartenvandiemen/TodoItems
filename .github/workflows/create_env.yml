@@ -76,7 +76,7 @@ jobs:
           enable-AzPSSession: true
 
       - name: Create resourcegroup ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
-        uses: Azure/cli@v1.0.9
+        uses: Azure/cli@v1
         with:
           inlineScript: az group create --location ${{ inputs.region }} --name ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
 
