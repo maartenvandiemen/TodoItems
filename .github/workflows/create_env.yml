@@ -103,6 +103,6 @@ jobs:
       
       - name: Delete resourcegroup ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
         if: ${{inputs.deploy != true}}
-        uses: Azure/cli@v1.0.9
+        uses: Azure/cli@v1
         with:
           inlineScript: az group delete --name ${{ needs.determine_resourcegroup.outputs.resourcegroup }} --yes --no-wait 
