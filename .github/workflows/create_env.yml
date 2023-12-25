@@ -73,7 +73,6 @@ jobs:
         uses: Azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          enable-AzPSSession: true
 
       - name: Create resourcegroup ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
         uses: Azure/cli@v1
