@@ -43,8 +43,13 @@ resource appServiceApp 'Microsoft.Web/sites@2023-01-01' = {
       {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
           value: applicationInsightsConnectionString
+      },
+      empty(dockerImageNameAndTag) ? {} : 
+      {
+          name: 'WEBSITES_PORT'
+          value: 8081
       }
-     ]
+     ]     
     }
   }  
   identity: {
