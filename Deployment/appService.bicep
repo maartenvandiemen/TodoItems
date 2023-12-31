@@ -28,8 +28,7 @@ var defaultAppsettings = [
           value: applicationInsightsConnectionString
       }]
 
-var appsettingsValues = concat(defaultAppsettings, empty(dockerImageNameAndTag) ? [] : 
-      [
+var appsettingsValues = concat(defaultAppsettings, empty(dockerImageNameAndTag) ? [] : [
           {
               name: 'WEBSITES_PORT'
               value: 8081
