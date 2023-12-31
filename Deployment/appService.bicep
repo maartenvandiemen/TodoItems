@@ -22,6 +22,19 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   kind: 'linux'
 }
 
+var defaultAppsettings = [
+      {
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: applicationInsightsConnectionString
+      }]
+
+var appsettingsValues = concat(defaultAppsettings, empty(dockerImageNameAndTag) ? [] : 
+      [
+          {
+              name: 'WEBSITES_PORT'
+              value: 8081
+          }])  
+
 resource appServiceApp 'Microsoft.Web/sites@2023-01-01' = {
   name: appServiceAppName
   location: location
@@ -39,18 +52,7 @@ resource appServiceApp 'Microsoft.Web/sites@2023-01-01' = {
         type: 'SQLAzure'
       }
      ]
-     appSettings: concat([
-      {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: applicationInsightsConnectionString
-      }], 
-      empty(dockerImageNameAndTag) ? [] : 
-      [
-      {
-          name: 'WEBSITES_PORT'
-          value: 8081
-      }
-     ]) 
+     appSettings: appsettingsValues 
     }
   }  
   identity: {
