@@ -39,12 +39,12 @@ resource appServiceApp 'Microsoft.Web/sites@2023-01-01' = {
         type: 'SQLAzure'
       }
      ]
-     appSettings: appSettings: [
+     appSettings: [
       {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
           value: applicationInsightsConnectionString
       }
-     ] 
+     ]
     }
   }  
   identity: {
