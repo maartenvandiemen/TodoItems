@@ -99,9 +99,6 @@ jobs:
           template: ${{github.workspace}}${{ inputs.template }}
           parameters: ${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
           deploymentMode: Validate
-          
-      - name: Sleep for 900 seconds
-        run: Start-Sleep -s 900
     
       - name: Delete resourcegroup ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
         if: ${{inputs.deploy != true}}
