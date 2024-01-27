@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApiDocument(document => { document.Title = "TodoItems API"; });
 
 if (builder.Environment.IsDevelopment())
 {
@@ -25,14 +25,15 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseOpenApi();
+    app.UseSwaggerUi();
 }
 
 app.MapHealthChecks("/health", new HealthCheckOptions()
 {
+    AllowCachingResponses = false, //Never caching of the responses.
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-});
+}); ;
 
 var todoItems = app.MapGroup("/todoitems");
 
