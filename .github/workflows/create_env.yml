@@ -81,7 +81,7 @@ jobs:
 
       - name: Deploy Azure infrastructure
         if: ${{inputs.deploy == true}}
-        uses: azure/arm-deploy@v1
+        uses: azure/arm-deploy@v2
         id: arm
         with:
           subscriptionId: ${{ secrets.SUBSCRIPTION }}
@@ -92,7 +92,7 @@ jobs:
 
       - name: Validate Azure infrastructure
         if: ${{inputs.deploy != true}}
-        uses: azure/arm-deploy@v1
+        uses: azure/arm-deploy@v2
         with:
           subscriptionId: ${{ secrets.SUBSCRIPTION }}
           resourceGroupName: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
