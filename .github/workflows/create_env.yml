@@ -70,7 +70,7 @@ jobs:
           path: ${{github.workspace}}/artifacts/bicep
 
       - name: Azure login
-        uses: Azure/login@v1
+        uses: Azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
