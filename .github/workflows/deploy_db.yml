@@ -30,7 +30,7 @@ jobs:
           name: database
           path: ${{github.workspace}}/artifacts/database
           
-      - uses: Azure/login@v1
+      - uses: Azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           

@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: AzureRemove
     steps:
-      - uses: Azure/login@v1
+      - uses: Azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           

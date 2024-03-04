@@ -74,7 +74,7 @@ jobs:
         with:
           name: todoItemsApi
           path: ${{github.workspace}}/artifacts/api
-      - uses: Azure/login@v1
+      - uses: Azure/login@v2
         name: Azure Login
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
