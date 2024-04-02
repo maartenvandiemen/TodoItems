@@ -1,4 +1,5 @@
 using HealthChecks.UI.Client;
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,10 @@ else
     builder.Services.AddDbContext<TodoDb>(opt => opt.UseSqlServer(connectionString));
 }
 
-builder.Services.AddApplicationInsightsTelemetry();
+builder.Services.AddApplicationInsightsTelemetry(new ApplicationInsightsServiceOptions
+{
+    ConnectionString = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]
+});
 builder.Services.AddHealthChecks().AddDbContextCheck<TodoDb>();
 
 var app = builder.Build();
