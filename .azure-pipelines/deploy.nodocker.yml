@@ -21,5 +21,5 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az webapp deployment source config-zip --src $(Pipeline.Workspace)/todoItemsAPI/api.zip --name $(appServiceAppName) --resource-group $(resourceGroupName)
+        az webapp deploy --src-path $(Pipeline.Workspace)/todoItemsAPI/api.zip --name $(appServiceAppName) --resource-group $(resourceGroupName) --type zip
         az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name $(appServiceAppName) --resource-group $(resourceGroupName)
