@@ -83,7 +83,7 @@ jobs:
         name: Azure Deploy WebApp
         with:
           inlineScript: |
-             az webapp deployment --src-path ${{github.workspace}}/artifacts/api/api.zip --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.create_env.outputs.resourcegroup }} --type zip
+             az webapp deploy --src-path ${{github.workspace}}/artifacts/api/api.zip --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.create_env.outputs.resourcegroup }} --type zip
              az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.create_env.outputs.resourcegroup }}
   
   deploy_db:
