@@ -31,9 +31,9 @@
       },
       "MSTest.TestAdapter": {
         "type": "Direct",
-        "requested": "[3.4.2, )",
-        "resolved": "3.4.2",
-        "contentHash": "GreSHbP64DhrWIk9NBvFA9Jts+ukGT5dhTC4+/JXnzFPAacyqdVFGAenhYeY/KIQishCOGDNdip2KykimOkKiw==",
+        "requested": "[3.4.3, )",
+        "resolved": "3.4.3",
+        "contentHash": "5ul31wYr17590gDumPxWMiBLPREfPF/ggtdPGfaKoYSsO0EW6H1GWY+7xnVCKa2SB4I/dSEZLDYSwRLDjA0LEQ==",
         "dependencies": {
           "Microsoft.Testing.Extensions.VSTestBridge": "1.2.1",
           "Microsoft.Testing.Platform.MSBuild": "1.2.1"
@@ -41,9 +41,9 @@
       },
       "MSTest.TestFramework": {
         "type": "Direct",
-        "requested": "[3.4.2, )",
-        "resolved": "3.4.2",
-        "contentHash": "JqIU5CA/alXJII0ShuzD/cRMMx97P5z8AJfmS5Wu1ateZ/E3t9+Alsshy51ywXTr9CNV0ztDciuxkhZb00Ctxw=="
+        "requested": "[3.4.3, )",
+        "resolved": "3.4.3",
+        "contentHash": "hu7F0PyRe47LScY2SCjRFIzP2QYxq1oeHMAIdao9onUm5WhobO9tfZrFAAkJ4v+66EQjilloEbA4kspVHCZpTg=="
       },
       "Testcontainers.MsSql": {
         "type": "Direct",
