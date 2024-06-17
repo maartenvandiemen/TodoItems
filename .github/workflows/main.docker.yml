@@ -101,14 +101,14 @@ jobs:
           $lowercaseRepo = "${{ github.repository }}".ToLower()
           $dockerTag="${{ env.REGISTRY }}/$lowercaseRepo`:${{ github.sha }}"
           echo "dockerTag=$dockerTag" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v6
         if: inputs.buildConfiguration != ''
         with:
           context: ${{ github.workspace }}/api
           file: ${{github.workspace}}/dockerFile/Dockerfile
           push: true
           tags: ${{ steps.createTag.outputs.dockerTag }}
-      - uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v6
         if: inputs.buildConfiguration == ''
         with:
           context: ${{ github.workspace }}/api
