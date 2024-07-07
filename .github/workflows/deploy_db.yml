@@ -35,7 +35,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           
       - name: Azure SQL Deploy
-        uses: Azure/sql-action@v2.2.1
+        uses: Azure/sql-action@v2.3
         with:
           connection-string: 'Data Source=tcp:${{ inputs.sqlServerFQDN }},1433;Initial Catalog=${{ inputs.databaseName }};Persist Security Info=False;User Id=${{secrets.AZURE_SQL_USER}};Password=${{secrets.SA_PASSWORD}};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
           path: ${{github.workspace}}/artifacts/database/*.sql
