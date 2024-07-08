@@ -78,6 +78,7 @@ stages:
             steps:
             - download: none
             - task: AzureCLI@2
+              displayName: Delete resourcegroup
               inputs:
                 azureSubscription: 'Azure'
                 scriptType: 'bash'
