@@ -19,13 +19,5 @@ jobs:
           name: smoketests
           path: ${{github.workspace}}/artifacts/smoketests
 
-      - name: Setup NodeJS
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      
-      - name: Install httpYac
-        run: npm install -g httpyac
-
       - name: Execute httpYac tests
-        run: httpyac "${{github.workspace}}/artifacts/smoketests/test.http" --all -o short --var host=${{ inputs.webAppUrl }}
+        run: docker run --workdir /github/workspace --rm -v ${{github.workspace}}/artifacts/smoketests:/github/workspace ghcr.io/anweber/httpyac:latest test.http --all -o short --var host=${{inputs.webAppUrl}}
