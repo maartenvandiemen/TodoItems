@@ -15,7 +15,9 @@ jobs:
     artifact: todoItemsAPI
     displayName: Download API
   - powershell: Compress-Archive -Path $(Pipeline.Workspace)/todoItemsAPI/* -DestinationPath $(Pipeline.Workspace)/todoItemsAPI/api.zip
+    displayName: Make zip from API as prerequisite for deployment
   - task: AzureCLI@2
+    displayName: Deploy API
     inputs:
       azureSubscription: 'Azure'
       scriptType: 'bash'

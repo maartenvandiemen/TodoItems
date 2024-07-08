@@ -17,6 +17,7 @@ jobs:
     artifact: database
     displayName: Download database
   - task: SqlAzureDacpacDeployment@1
+    displayName: Deploy database
     inputs:
       azureSubscription: 'Azure'
       AuthenticationType: 'server'

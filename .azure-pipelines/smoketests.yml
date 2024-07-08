@@ -16,13 +16,5 @@ jobs:
   - download: current
     artifact: smoketests
     displayName: Download smoketests
-  - task: NodeTool@0
-    displayName: Download NodeJS
-    inputs:
-      versionSource: 'spec'
-      versionSpec: '18.x'
-  - bash: npm install -g httpyac
-    displayName: Install HttpYac
-  - bash: httpyac test.http --all -o short --var host=$(appServiceUrl)
-    displayName: Execute httpYac Tests
-    workingDirectory: $(Pipeline.Workspace)/smoketests
+  - displayName: Run httpYac tests
+    script: docker run --workdir /ado/workspace --rm -v $(Pipeline.Workspace)/smoketests:/ado/workspace ghcr.io/anweber/httpyac:latest test.http --all -o short --var host=$(appServiceUrl)

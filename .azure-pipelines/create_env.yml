@@ -22,6 +22,7 @@ jobs:
       $resourcegroupname="todoItems-$randomNumber"
       Write-Host "##vso[task.setvariable variable=resourcegroupName;isoutput=true]$resourcegroupname"
     name: DetermineResourcegroupName
+    displayName: Determine resourcegroup name
 
 - job: Create_Env
   dependsOn: [Generate_ResourcegroupName]
@@ -35,6 +36,7 @@ jobs:
     artifact: infraCode
     displayName: Download Bicep files
   - task: AzureCLI@2
+    displayName: Create resourcegroup
     inputs:
       azureSubscription: 'Azure'
       scriptType: 'bash'
@@ -77,6 +79,7 @@ jobs:
     steps:
     - checkout: none
     - task: AzureCLI@2
+      displayName: Delete resourcegroup
       inputs:
         azureSubscription: 'Azure'
         scriptType: 'bash'
