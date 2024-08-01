@@ -29,7 +29,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    app.UseSwagger(setupaction => setupaction.SerializeAsV2 = true);
     app.UseSwaggerUI();
 }
 

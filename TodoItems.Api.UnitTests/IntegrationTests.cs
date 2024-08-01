@@ -1,3 +1,4 @@
+using DotNet.Testcontainers.Builders;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,8 @@ namespace TodoItems.Api.IntegrationTests
                 .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
                 //Will remove the image automatically after all tests have been run.
                 .WithCleanUp(true)
+                //Temp fix untill: https://github.com/testcontainers/testcontainers-dotnet/pull/1221 is completed.
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted("/opt/mssql-tools18/bin/sqlcmd", "-C", "-Q", "SELECT 1;"))
                 .Build();            
         }
 
