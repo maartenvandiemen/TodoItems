@@ -74,6 +74,7 @@ jobs:
       dockerTag: ${{ steps.createTag.outputs.dockerTag }}
     env:
       REGISTRY: ghcr.io
+      DOCKER_BUILD_SUMMARY: false
     permissions:
       contents: read
       packages: write
