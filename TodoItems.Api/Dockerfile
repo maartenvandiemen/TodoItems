@@ -3,3 +3,4 @@ COPY . /app
 WORKDIR /app
 ENTRYPOINT ["dotnet", "TodoItems.Api.dll"]
 EXPOSE 8080
+USER user
