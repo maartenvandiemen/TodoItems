@@ -16,5 +16,5 @@ jobs:
   - download: current
     artifact: smoketests
     displayName: Download smoketests
-  - displayName: Run httpYac tests
-    script: docker run --workdir /ado/workspace --rm -v $(Pipeline.Workspace)/smoketests:/ado/workspace ghcr.io/anweber/httpyac:latest test.http --all -o short --var host=$(appServiceUrl)
+  - script: docker run --workdir /ado/workspace --rm -v $(Pipeline.Workspace)/smoketests:/ado/workspace ghcr.io/anweber/httpyac:latest test.http --all -o short --var host=$(appServiceUrl)
+    displayName: Run httpYac tests
