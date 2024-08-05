@@ -34,6 +34,12 @@ jobs:
     ${{parameters.serviceContainerName}}: ${{parameters.serviceContainerName}}
         
   steps:
+  - displayName: Run Trivy analysis
+    script: docker run --workdir /ado/workspace --rm -v "$(Build.SourcesDirectory)":"/ado/workspace" -v "$(Build.ArtifactStagingDirectory)/trivy":"/ado/artifact" aquasec/trivy:latest fs -f json --scanners vuln,secret,misconfig --list-all-pkgs -o /ado/artifact/trivy-result.json /ado/workspace
+  
+  - displayName: Parse Trivy analysis
+    script: docker run --workdir /ado/artifact --rm -v "$(Build.ArtifactStagingDirectory)/trivy":"/ado/artifact" aquasec/trivy:latest convert -f table --exit-code -1 -s HIGH,CRITICAL trivy-result.json
+
   - task: PowerShell@2
     displayName: 'Determine if dotnet is installed'
     inputs:
