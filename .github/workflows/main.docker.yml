@@ -75,6 +75,7 @@ jobs:
     env:
       REGISTRY: ghcr.io
       DOCKER_BUILD_SUMMARY: false
+      DOCKER_BUILD_RECORD_UPLOAD: false
     permissions:
       contents: read
       packages: write
