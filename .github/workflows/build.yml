@@ -29,7 +29,7 @@ jobs:
     steps:    
     - uses: actions/checkout@v4
 
-    #Sometimes we get a TOOMANYREQUESTS response back. Retry before breaking the build.
+      #Sometimes we get a TOOMANYREQUESTS response. Retry before breaking the build in this case.    
     - name: Run Trivy Analysis
       uses: nick-fields/retry@v3
       with:
