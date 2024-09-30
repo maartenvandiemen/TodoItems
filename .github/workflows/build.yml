@@ -28,9 +28,15 @@ jobs:
       testDatabasename: 'TodoItemDB'
     steps:    
     - uses: actions/checkout@v4
-    
+
+      #Sometimes we get a TOOMANYREQUESTS response. Retry before breaking the build in this case.    
     - name: Run Trivy Analysis
-      run: docker run --workdir /github/workspace --rm -v ${{github.workspace}}:/github/workspace -v ${{github.workspace}}/trivy:/github/artifact aquasec/trivy:latest fs -f json --scanners vuln,secret,misconfig --list-all-pkgs -o /github/artifact/trivy-result.json /github/workspace
+      uses: nick-fields/retry@v3
+      with:
+        timeout_minutes: 2
+        max_attempts: 3
+        retry_on: error
+        command:  docker run --workdir /github/workspace --rm -v ${{github.workspace}}:/github/workspace -v ${{github.workspace}}/trivy:/github/artifact aquasec/trivy:latest fs -f json --scanners vuln,secret,misconfig --list-all-pkgs -o /github/artifact/trivy-result.json /github/workspace
     
     - name: Parse Trivy Analysis results
       run: docker run --workdir /github/artifact --rm -v ${{github.workspace}}/trivy:/github/artifact aquasec/trivy:latest convert -f table --exit-code -1 -s HIGH,CRITICAL trivy-result.json
