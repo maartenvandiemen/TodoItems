@@ -1,13 +1,12 @@
-using HealthChecks.UI.Client;
 using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using System.ComponentModel.DataAnnotations;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();
 
 if (builder.Environment.IsDevelopment())
 {
@@ -29,13 +28,13 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger(setupaction => setupaction.SerializeAsV2 = true);
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.MapHealthChecks("/health", new HealthCheckOptions()
 {
-    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    //ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 });
 
 var todoItems = app.MapGroup("/todoitems");
