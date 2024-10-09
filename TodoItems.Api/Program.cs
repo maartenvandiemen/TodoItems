@@ -1,11 +1,12 @@
 using Microsoft.ApplicationInsights.AspNetCore.Extensions;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using System.ComponentModel.DataAnnotations;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.AddConsole();
+
 builder.Services.AddOpenApi();
 
 if (builder.Environment.IsDevelopment())
@@ -32,18 +33,15 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.MapHealthChecks("/health", new HealthCheckOptions()
-{
-    //ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-});
+app.MapHealthChecks("/health");
 
 var todoItems = app.MapGroup("/todoitems");
 
 todoItems.MapGet("/", async (TodoDb db) =>
-    await db.Todos.ToListAsync());
+    await db.Todos.ToArrayAsync());
 
 todoItems.MapGet("/complete", async (TodoDb db) =>
-    await db.Todos.Where(t => t.IsComplete).ToListAsync());
+    await db.Todos.Where(t => t.IsComplete).ToArrayAsync());
 
 todoItems.MapGet("/{id}", async Task<Results<Ok<Todo>, NotFound>> (int id, TodoDb db) =>
     await db.Todos.FindAsync(id)
@@ -53,7 +51,7 @@ todoItems.MapGet("/{id}", async Task<Results<Ok<Todo>, NotFound>> (int id, TodoD
 
 todoItems.MapPost("/", async (Todo todo, TodoDb db) =>
 {
-    db.Todos.Add(todo);
+    db.Add(todo);
     await db.SaveChangesAsync();
 
     return TypedResults.Created($"/todoitems/{todo.Id}", todo);
