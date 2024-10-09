@@ -38,10 +38,10 @@ app.MapHealthChecks("/health");
 var todoItems = app.MapGroup("/todoitems");
 
 todoItems.MapGet("/", async (TodoDb db) =>
-    await db.Todos.ToArrayAsync());
+    await db.Todos.ToListAsync());
 
 todoItems.MapGet("/complete", async (TodoDb db) =>
-    await db.Todos.Where(t => t.IsComplete).ToArrayAsync());
+    await db.Todos.Where(t => t.IsComplete).ToListAsync());
 
 todoItems.MapGet("/{id}", async Task<Results<Ok<Todo>, NotFound>> (int id, TodoDb db) =>
     await db.Todos.FindAsync(id)
