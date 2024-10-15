@@ -43,7 +43,7 @@
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "6.35.0",
           "Microsoft.SqlServer.Server": "1.0.0",
           "System.Configuration.ConfigurationManager": "8.0.0",
-          "System.Runtime.Caching": "8.0.1"
+          "System.Runtime.Caching": "8.0.0"
         }
       },
       "Microsoft.EntityFrameworkCore.Design": {
