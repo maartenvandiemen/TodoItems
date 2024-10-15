@@ -69,32 +69,14 @@ jobs:
     inputs:
       key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,!**/bin/**,!**/obj/**'
       path: '$(NUGET_PACKAGES)'
-      cacheHitVar: 'CACHE_RESTORED'
 
   - task: DotNetCoreCLI@2
     displayName: Dotnet restore '**/*.csproj'
-    condition: eq(variables.CACHE_RESTORED, false)
     inputs:
       command: 'restore'
       projects: '**/*.csproj'
       restoreArguments: '--locked-mode'
       feedsToUse: 'select'
-         
-  - task: DotNetCoreCLI@2
-    displayName: Dotnet build - pipeline cache restored
-    condition: eq(variables.CACHE_RESTORED, true)
-    inputs:
-      command: 'build'
-      projects: '**/*.csproj'
-      arguments: '--configuration ${{parameters.buildConfiguration}}'
-    
-  - task: DotNetCoreCLI@2
-    displayName: Dotnet build - pipeline cache not restored
-    condition: eq(variables.CACHE_RESTORED, false)
-    inputs:
-      command: 'build'
-      projects: '**/*.csproj'
-      arguments: '--no-restore --configuration ${{parameters.buildConfiguration}}' 
 
   - task: DotNetCoreCLI@2
     inputs:
