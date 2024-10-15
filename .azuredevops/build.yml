@@ -71,11 +71,19 @@ jobs:
       path: '$(NUGET_PACKAGES)'
 
   - task: DotNetCoreCLI@2
+    displayName: Dotnet restore '**/*.csproj'
+    inputs:
+      command: 'restore'
+      projects: '**/*.csproj'
+      restoreArguments: '--locked-mode'
+      feedsToUse: 'select'
+
+  - task: DotNetCoreCLI@2
     displayName: Dotnet build
     inputs:
       command: 'build'
       projects: '**/*.csproj'
-      arguments: '-restoreProperty:RestoreLockedMode=true --configuration ${{parameters.buildConfiguration}}'
+      arguments: '--no-restore --configuration ${{parameters.buildConfiguration}}'
 
   - task: DotNetCoreCLI@2
     inputs:
