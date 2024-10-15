@@ -71,19 +71,11 @@ jobs:
       path: '$(NUGET_PACKAGES)'
 
   - task: DotNetCoreCLI@2
-    displayName: Dotnet restore '**/*.csproj'
-    inputs:
-      command: 'restore'
-      projects: '**/*.csproj'
-      restoreArguments: '--locked-mode'
-      feedsToUse: 'select'
-
-  - task: DotNetCoreCLI@2
     displayName: Dotnet build
     inputs:
       command: 'build'
       projects: '**/*.csproj'
-      arguments: '--no-restore --configuration ${{parameters.buildConfiguration}}'
+      arguments: '-restoreProperty:RestoreLockedMode=true --configuration ${{parameters.buildConfiguration}}'
 
   - task: DotNetCoreCLI@2
     inputs:
@@ -116,7 +108,7 @@ jobs:
     inputs:
       command: 'test'
       projects: '**/*Tests.csproj'
-      arguments: '--no-restore --nologo --configuration ${{parameters.buildConfiguration}}'
+      arguments: '--no-build --nologo --configuration ${{parameters.buildConfiguration}}'
     env:
       integrationtests_ConnectionStrings__TodoDb: 'Server=127.0.0.1,1433;Database=${{parameters.testDatabasename}};User Id=SA;Password=$(SA_PASSWORD);TrustServerCertificate=true;'
     
