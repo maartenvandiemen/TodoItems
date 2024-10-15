@@ -73,7 +73,7 @@ jobs:
 
   - task: DotNetCoreCLI@2
     displayName: Dotnet restore '**/*.csproj'
-    condition: ne(variables.CACHE_RESTORED, true)
+    condition: eq(variables.CACHE_RESTORED, false)
     inputs:
       command: 'restore'
       projects: '**/*.csproj'
@@ -90,7 +90,7 @@ jobs:
     
   - task: DotNetCoreCLI@2
     displayName: Dotnet build - pipeline cache not restored
-    condition: ne(variables.CACHE_RESTORED, true)
+    condition: eq(variables.CACHE_RESTORED, false)
     inputs:
       command: 'build'
       projects: '**/*.csproj'
@@ -121,6 +121,7 @@ jobs:
     workingDirectory: '$(Build.ArtifactStagingDirectory)/SQL'
     displayName: 'Create database and tables for unit tests'
     timeoutInMinutes: 1
+
   - task: DotNetCoreCLI@2
     displayName: Dotnet test '**/*Tests.csproj'
     inputs:

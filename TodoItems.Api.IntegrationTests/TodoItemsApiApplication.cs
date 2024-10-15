@@ -22,8 +22,8 @@ namespace TodoItems.Api.IntegrationTests
 
         public IConfiguration Configuration { get; private set; } = default!;
 
-        public TodoItemsApiApplication(Environment environment, MsSqlContainer? container) : base() 
-        { 
+        public TodoItemsApiApplication(Environment environment, MsSqlContainer? container) : base()
+        {
             _environment = environment;
 
             if (_environment == Environment.TestContainers)
@@ -54,23 +54,8 @@ namespace TodoItems.Api.IntegrationTests
                     services.AddLogging(c => c.AddConsole());
 
                     //First remove the serviceDescriptor added in the Program.cs if available
-                    var descriptorDbContextOptions = services.SingleOrDefault(
-                        d => d.ServiceType ==
-                            typeof(DbContextOptions<TodoDb>));
-
-                    var descriptorDbContextOptionsConfiguration = services.SingleOrDefault(
-                        d => d.ServiceType ==
-                            typeof(IDbContextOptionsConfiguration<TodoDb>));
-
-                    if (descriptorDbContextOptions is not null)
-                    {
-                        services.Remove(descriptorDbContextOptions);
-                    }
-
-                    if (descriptorDbContextOptionsConfiguration is not null)
-                    {
-                        services.Remove(descriptorDbContextOptionsConfiguration);
-                    }
+                    RemoveServiceDescriptor(services, typeof(DbContextOptions<TodoDb>));
+                    RemoveServiceDescriptor(services, typeof(IDbContextOptionsConfiguration<TodoDb>));
 
                     if (_environment == Environment.InMemory)
                     {
@@ -79,7 +64,7 @@ namespace TodoItems.Api.IntegrationTests
                         //Lifetime is singleton within this class. Since some tests might create multiple Scopes the Singleton is the safest.
                         services.AddDbContext<TodoDb>(options => options.UseInMemoryDatabase(Guid.NewGuid().ToString()), ServiceLifetime.Singleton);
                     }
-                    if(_environment == Environment.TestContainers)
+                    if (_environment == Environment.TestContainers)
                     {
                         services.AddDbContext<TodoDb>(options => options.UseSqlServer(_container!.GetConnectionString()), ServiceLifetime.Singleton);
                     }
@@ -87,6 +72,15 @@ namespace TodoItems.Api.IntegrationTests
             }
 
             builder.UseEnvironment(_environment.ToString());
+        }
+
+        private static void RemoveServiceDescriptor(IServiceCollection services, Type serviceType)
+        {
+            var descriptor = services.SingleOrDefault(d => d.ServiceType == serviceType);
+            if (descriptor is not null)
+            {
+                services.Remove(descriptor);
+            }
         }
     }
 }
