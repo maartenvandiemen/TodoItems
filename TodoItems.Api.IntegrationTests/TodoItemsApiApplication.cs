@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -53,13 +54,22 @@ namespace TodoItems.Api.IntegrationTests
                     services.AddLogging(c => c.AddConsole());
 
                     //First remove the serviceDescriptor added in the Program.cs if available
-                    var descriptor = services.SingleOrDefault(
+                    var descriptorDbContextOptions = services.SingleOrDefault(
                         d => d.ServiceType ==
                             typeof(DbContextOptions<TodoDb>));
 
-                    if (descriptor is not null)
+                    var descriptorDbContextOptionsConfiguration = services.SingleOrDefault(
+                        d => d.ServiceType ==
+                            typeof(IDbContextOptionsConfiguration<TodoDb>));
+
+                    if (descriptorDbContextOptions is not null)
                     {
-                        services.Remove(descriptor);
+                        services.Remove(descriptorDbContextOptions);
+                    }
+
+                    if (descriptorDbContextOptionsConfiguration is not null)
+                    {
+                        services.Remove(descriptorDbContextOptionsConfiguration);
                     }
 
                     if (_environment == Environment.InMemory)
