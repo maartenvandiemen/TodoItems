@@ -42,6 +42,8 @@ jobs:
       run: docker run --workdir /github/artifact --rm -v ${{github.workspace}}/trivy:/github/artifact aquasec/trivy:latest convert -f table --exit-code -1 -s HIGH,CRITICAL trivy-result.json
 
     - uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
     
     - name: Restore cache
       uses: actions/cache@v4
