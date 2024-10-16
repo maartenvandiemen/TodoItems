@@ -4,7 +4,7 @@ on:
     - cron:  '0 0 * * 3'
   push:
     paths-ignore:
-      - .azure-pipelines/**
+      - .azuredevops/**
       - .devcontainer/**
       - .vscode/**
   workflow_dispatch:
@@ -28,6 +28,7 @@ jobs:
       buildConfiguration: ${{ steps.setupVars.outputs.buildConfiguration }}
       pushImage: ${{ steps.setupVars.outputs.pushImage }}
     steps:
+    - run: echo '${{inputs.buildConfiguration}}'
     - name: Setup variables
       id: setupVars
       run: |

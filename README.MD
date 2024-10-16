@@ -5,7 +5,7 @@
 | Azure Devops no docker | [![Build Status](https://dev.azure.com/maartenvandiemen/GithubPipelines/_apis/build/status/TodoItems/TodoItems.NoDocker?branchName=main)](https://dev.azure.com/maartenvandiemen/GithubPipelines/_build/latest?definitionId=37&branchName=main) |
 | Azure Devops docker | [![Build Status](https://dev.azure.com/maartenvandiemen/GithubPipelines/_apis/build/status/TodoItems/TodoItems.Docker?branchName=main)](https://dev.azure.com/maartenvandiemen/GithubPipelines/_build/latest?definitionId=40&branchName=main) |
 
-Demo project of an ASP.NET Core 7 minimal API's. Inspired by the demo from [Daniel Roth](https://twitter.com/danroth27) that has been given at [dotnetconf](https://www.dotnetconf.net). See the original presentation below:<br>
+Demo project of an ASP.NET Core 9 minimal API's. Inspired by the demo from [Daniel Roth](https://twitter.com/danroth27) that has been given at [dotnetconf](https://www.dotnetconf.net). See the original presentation below:<br>
 [![YoutubePreview](http://img.youtube.com/vi/gNyEpkJMmcM/0.jpg)](http://www.youtube.com/watch?v=gNyEpkJMmcM)
 
 # Prerequisites

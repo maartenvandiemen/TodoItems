@@ -42,25 +42,19 @@ jobs:
       run: docker run --workdir /github/artifact --rm -v ${{github.workspace}}/trivy:/github/artifact aquasec/trivy:latest convert -f table --exit-code -1 -s HIGH,CRITICAL trivy-result.json
 
     - uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
     
     - name: Restore cache
-      id: cache
       uses: actions/cache@v4
       with:
         path: ${{env.NUGET_PACKAGES}}
         key: ${{runner.os}}-build-${{ hashFiles('**/packages.lock.json', '!**/bin/**', '!**/obj/**') }}
-   
-      #If the cache has been restored, the deps.json isn't generated. In order to generate this we will do a dotnet build.
-    - name: Dotnet build - cache restored
-      if: ${{steps.cache.outputs.cache-hit == 'true'}}
-      run: dotnet build --configuration ${{inputs.buildConfiguration}}
-    
+
     - name: Dotnet restore
-      if: ${{steps.cache.outputs.cache-hit != 'true'}}
       run: dotnet restore --locked-mode --nologo
     
-    - name: Dotnet build - no cache
-      if: ${{steps.cache.outputs.cache-hit != 'true'}}
+    - name: Dotnet build
       run: dotnet build --no-restore --configuration ${{inputs.buildConfiguration}}
     
     - name: Restore tools
