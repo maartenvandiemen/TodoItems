@@ -6,9 +6,11 @@
 version: 2
 updates:
   - package-ecosystem: "nuget"
-    directories:
-      - "/TodoItems.Api.IntegrationTests"
-      - "/TodoItems.Api"
-      - "/"
+    directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      angular:
+        applies-to: version-updates
+        patterns:
+        - "mstest*"
