@@ -34,7 +34,7 @@ var appsettingsValues = concat(defaultAppsettings, empty(dockerImageNameAndTag) 
               value: 8080
           }])  
 
-resource appServiceApp 'Microsoft.Web/sites@2023-12-01' = {
+resource appServiceApp 'Microsoft.Web/sites@2024-04-01' = {
   name: appServiceAppName
   location: location
   properties: {
