@@ -10,7 +10,7 @@ updates:
     schedule:
       interval: "weekly"
     groups:
-      angular:
+      MSTest:
         applies-to: version-updates
         patterns:
         - "mstest*"
