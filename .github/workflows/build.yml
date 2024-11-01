@@ -37,14 +37,15 @@ jobs:
         max_attempts: 3
         retry_on: error
         command:  docker run --workdir /github/workspace --rm -v ${{github.workspace}}:/github/workspace -v ${{github.workspace}}/trivy:/github/artifact aquasec/trivy:latest fs -f json --scanners vuln,secret,misconfig --list-all-pkgs -o /github/artifact/trivy-result.json /github/workspace
-    
+
     - name: Parse Trivy Analysis results
       run: docker run --workdir /github/artifact --rm -v ${{github.workspace}}/trivy:/github/artifact aquasec/trivy:latest convert -f table --exit-code -1 -s HIGH,CRITICAL trivy-result.json
 
     - uses: actions/setup-dotnet@v4
       with:
-        global-json-file: global.json
-    
+        dotnet-version: 9.x
+        dotnet-quality: 'preview'
+
     - name: Restore cache
       uses: actions/cache@v4
       with:
