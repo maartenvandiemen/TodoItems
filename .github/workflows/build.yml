@@ -33,8 +33,8 @@ jobs:
     - name: Run Trivy Analysis
       uses: nick-fields/retry@v3
       with:
-        timeout_minutes: 2
-        max_attempts: 3
+        timeout_minutes: 3
+        max_attempts: 5
         retry_on: error
         command:  docker run --workdir /github/workspace --rm -v ${{github.workspace}}:/github/workspace -v ${{github.workspace}}/trivy:/github/artifact aquasec/trivy:latest fs -f json --scanners vuln,secret,misconfig --list-all-pkgs -o /github/artifact/trivy-result.json /github/workspace
 
