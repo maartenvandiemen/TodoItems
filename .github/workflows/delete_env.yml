@@ -14,6 +14,9 @@ defaults:
     shell: pwsh
 jobs:
   delete_env:
+    permissions: 
+      id-token: write
+      contents: read
     runs-on: ubuntu-latest
     environment: AzureRemove
     steps:
