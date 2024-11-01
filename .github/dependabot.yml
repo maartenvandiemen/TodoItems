@@ -14,6 +14,7 @@ updates:
         applies-to: version-updates
         patterns:
         - "mstest*"
+        - "Microsoft.EntityFrameworkCore*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
