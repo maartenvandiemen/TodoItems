@@ -55,7 +55,7 @@ jobs:
       script: |
         $installedSdks = dotnet --list-sdks
         Write-Host "##[debug]$installedSdks"
-        $match = $installedSdks -like (${{variables.DOTNET_VERSION}} + "*")
+        $match = $installedSdks -like ("${{variables.DOTNET_VERSION}}" + "*")
         if($match){
           Write-Host "##vso[task.setvariable variable=isDotNetVersionInstalled;]true"
         }
