@@ -29,6 +29,9 @@ jobs:
   - name: NUGET_PACKAGES
     value: '$(Pipeline.Workspace)/.nuget/packages/'
     readonly: true
+  - name: DOTNET_VERSION 
+    value: 9
+    readonly: true
     
   services:
     ${{parameters.serviceContainerName}}: ${{parameters.serviceContainerName}}
@@ -48,21 +51,19 @@ jobs:
       targetType: 'inline'
       script: |
         $installedSdks = dotnet --list-sdks
-        $globalJsonLocation = Join-Path -Path "$(System.DefaultWorkingDirectory)" -ChildPath "global.json"
-        $globalJson = Get-Content $globalJsonLocation -Raw | ConvertFrom-Json 
-        $dotnetVersionGlobalJson = $globalJson.sdk.version
-        $match = $installedSdks -like ($dotnetVersionGlobalJson + "*")
+        Write-Host "##[debug]$installedSdks"
+        $match = $installedSdks -like ("${{variables.DOTNET_VERSION}}" + "*")
         if($match){
           Write-Host "##vso[task.setvariable variable=isDotNetVersionInstalled;]true"
         }
       pwsh: true
 
   - task: UseDotNet@2
-    displayName: 'Install dotnet'
     condition: and(succeeded(), ne(variables['isDotNetVersionInstalled'], 'true'))
     inputs:
       packageType: 'sdk'
-      useGlobalJson: true
+      version: '${{variables.DOTNET_VERSION}}.x'
+      includePreviewVersions: true
   
   - task: Cache@2
     displayName: 'Restore cache for NuGet'
