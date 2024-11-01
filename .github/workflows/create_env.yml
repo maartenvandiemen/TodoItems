@@ -87,7 +87,7 @@ jobs:
         uses: azure/arm-deploy@v2
         id: arm
         with:
-          subscriptionId: ${{ secrets.SUBSCRIPTION }}
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
           template: ${{github.workspace}}${{ inputs.template }}
           parameters: ${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
