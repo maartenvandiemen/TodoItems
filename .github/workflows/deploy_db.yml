@@ -21,6 +21,9 @@ defaults:
     shell: pwsh
 jobs:
   deploy_db:
+    permissions: 
+      id-token: write
+      contents: read
     runs-on: ubuntu-latest
     environment: AzureDeploy
     steps:
