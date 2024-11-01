@@ -35,7 +35,6 @@ on:
         description: "Random generated resource group name"
         value: ${{jobs.determine_resourcegroup.outputs.resourcegroup}}
 
-
 defaults:
   run:
     shell: pwsh
