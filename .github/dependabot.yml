@@ -22,6 +22,6 @@ updates:
       interval: "weekly"
 
   - package-ecosystem: "docker"
-    directory: "/"
+    directory: "/TodoItems.Api"
     schedule:
       interval: "weekly"
