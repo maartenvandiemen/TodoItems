@@ -61,7 +61,7 @@ jobs:
       webAppName: ${{ steps.arm.outputs.webAppName }}
       sqlServerFQDN: ${{ steps.arm.outputs.sqlServerFQDN }}
       databaseName: ${{ steps.arm.outputs.databaseName }}
-    environment: AzureProvision
+    environment: AzureDeploy
     steps:
       - name: Download a bicep templates
         uses: actions/download-artifact@v4
