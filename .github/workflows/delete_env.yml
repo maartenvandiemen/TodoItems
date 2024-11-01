@@ -5,10 +5,6 @@ on:
         type: string
         required: true
         description: Name of the resourcegroup where the information should be deployed to
-    secrets:
-      AZURE_CREDENTIALS:
-        required: true
-        description: Azure Service Principal credentials
 defaults:
   run:
     shell: pwsh
