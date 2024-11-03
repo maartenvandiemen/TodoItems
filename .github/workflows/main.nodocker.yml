@@ -7,6 +7,7 @@ on:
       - .azure-pipelines/**
       - .devcontainer/**
       - .vscode/**
+      - .github/dependabot.yml
   workflow_dispatch:
     inputs:
       buildConfiguration:
