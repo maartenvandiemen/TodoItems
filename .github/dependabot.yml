@@ -10,10 +10,18 @@ updates:
     schedule:
       interval: "daily"
     groups:
+      Scalar:
+        applies-to: version-updates
+        update-types: minor
+        patterns: 
+        - "Scalar.*"
       MSTest:
         applies-to: version-updates
         patterns:
         - "mstest*"
+      EntityFrameworkCore
+        applies-to: version-updates
+        patterns:
         - "Microsoft.EntityFrameworkCore*"
 
   - package-ecosystem: "github-actions"
