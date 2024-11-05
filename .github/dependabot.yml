@@ -14,7 +14,7 @@ updates:
         applies-to: version-updates
         update-types: minor
         patterns: 
-        - "Scalar.*"
+        - "Scalar*"
       MSTest:
         applies-to: version-updates
         patterns:
