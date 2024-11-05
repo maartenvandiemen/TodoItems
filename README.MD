@@ -45,6 +45,7 @@ The following prerequisites are required before executing the pipelines:
        - `subscriptionId` value the subscription id of the Azure subscription for which a service connection is created in the steps above.
        - `todoItemsSqlAdminpassword` The value of this field should be a [complex password according to SQL Server](https://learn.microsoft.com/en-us/sql/relational-databases/security/password-policy). Make this field a secret.
        - `todoItemsSqlAdminUser` Name of the admin user for SQL Server.
+       - `azure_region` the Azure Region to deploy to. **Note**: `westeurope` might refuse to create a SQL Azure Server, in that case use e.g. `swedencentral`.
 3. Import nodocker.yml
 
 ### CI build (docker)
