@@ -106,9 +106,9 @@
       },
       "Scalar.AspNetCore": {
         "type": "Direct",
-        "requested": "[1.2.29, )",
-        "resolved": "1.2.29",
-        "contentHash": "FwJetFzxqbzikkz13Q4jo4GP+/4QEdHy1PxcBYr6ahRKviInYAmTAwhTynAx1sr3IA1H9mvFJt9Zkr0ZWV36nQ=="
+        "requested": "[1.2.31, )",
+        "resolved": "1.2.31",
+        "contentHash": "qJXMA48BX0Kl7CCWByrUVd2ZgSDV8KWO1c2XXfSuc/tncZhJ+o71p8IGHCq/XXxvmq/fIFanbJvgOPXjnBUIdg=="
       },
       "System.Runtime.Caching": {
         "type": "Direct",
