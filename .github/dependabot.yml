@@ -9,14 +9,10 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "Scalar*"
+        update-types: ["version-update:semver-patch"]
     groups:
-      Scalar:
-        applies-to: version-updates
-        update-types:
-        - "major"
-        - "minor"
-        patterns: 
-        - "Scalar*"
       MSTest:
         applies-to: version-updates
         patterns:
@@ -24,7 +20,7 @@ updates:
       EntityFrameworkCore
         applies-to: version-updates
         patterns:
-        - "Microsoft.EntityFrameworkCore*"
+          - "Microsoft.EntityFrameworkCore*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
