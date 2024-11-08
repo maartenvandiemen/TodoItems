@@ -12,7 +12,9 @@ updates:
     groups:
       Scalar:
         applies-to: version-updates
-        update-types: minor
+        update-types:
+        - "major"
+        - "minor"
         patterns: 
         - "Scalar*"
       MSTest:
