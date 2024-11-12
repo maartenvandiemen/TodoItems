@@ -17,7 +17,7 @@ updates:
         applies-to: version-updates
         patterns:
         - "mstest*"
-      EntityFrameworkCore
+      EntityFrameworkCore:
         applies-to: version-updates
         patterns:
           - "Microsoft.EntityFrameworkCore*"
