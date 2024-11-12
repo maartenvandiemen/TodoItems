@@ -10,7 +10,7 @@ updates:
     schedule:
       interval: "daily"
     ignore:
-      - dependency-name: "Scalar*"
+      - dependency-name: "Scalar.AspNetCore"
         update-types: ["version-update:semver-patch"]
     groups:
       MSTest:
