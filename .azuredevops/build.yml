@@ -45,25 +45,11 @@ jobs:
   - script: docker run --workdir /ado/artifact --rm -v "$(Build.ArtifactStagingDirectory)/trivy":"/ado/artifact" aquasec/trivy:latest convert -f table --exit-code -1 -s HIGH,CRITICAL trivy-result.json
     displayName: Parse Trivy analysis
 
-  - task: PowerShell@2
-    displayName: 'Determine if dotnet is installed'
-    inputs:
-      targetType: 'inline'
-      script: |
-        $installedSdks = dotnet --list-sdks
-        Write-Host "##[debug]$installedSdks"
-        $match = $installedSdks -like ("${{variables.DOTNET_VERSION}}" + "*")
-        if($match){
-          Write-Host "##vso[task.setvariable variable=isDotNetVersionInstalled;]true"
-        }
-      pwsh: true
-
   - task: UseDotNet@2
-    condition: and(succeeded(), ne(variables['isDotNetVersionInstalled'], 'true'))
     inputs:
       packageType: 'sdk'
       version: '${{variables.DOTNET_VERSION}}.x'
-      includePreviewVersions: true
+      includePreviewVersions: false
   
   - task: Cache@2
     displayName: 'Restore cache for NuGet'
