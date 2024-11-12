@@ -23,7 +23,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0-rc.2.24474.1" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0-rc.2.24474.3" />
     <PackageReference Include="Scalar.AspNetCore" Version="1.2.31" />
-    <PackageReference Include="System.Runtime.Caching" Version="8.0.1" />
+    <PackageReference Include="System.Runtime.Caching" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
