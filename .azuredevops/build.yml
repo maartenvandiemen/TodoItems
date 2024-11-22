@@ -41,6 +41,8 @@ jobs:
     #Sometimes we get a TOOMANYREQUESTS response. Retry before breaking the build in this case.
     retryCountOnTaskFailure: 3
     displayName: Run Trivy analysis
+    env:
+      TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db,aquasec/trivy-db,ghcr.io/aquasecurity/trivy-db
     
   - script: docker run --workdir /ado/artifact --rm -v "$(Build.ArtifactStagingDirectory)/trivy":"/ado/artifact" aquasec/trivy:latest convert -f table --exit-code -1 -s HIGH,CRITICAL trivy-result.json
     displayName: Parse Trivy analysis
