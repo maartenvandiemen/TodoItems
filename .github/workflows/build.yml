@@ -33,7 +33,7 @@ jobs:
     - name: Run Trivy Analysis
       uses: nick-fields/retry@v3
       env:
-        TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db,aquasec/trivy-db,ghcr.io/aquasecurity/trivy-db
+        TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db,aquasec/trivy-db
       with:
         timeout_minutes: 3
         max_attempts: 5
