@@ -37,6 +37,21 @@ jobs:
     ${{parameters.serviceContainerName}}: ${{parameters.serviceContainerName}}
         
   steps:
+  - script: |
+      # Install dependencies for sqlcmd
+      sudo apt-get update
+      sudo apt-get install -y curl gnupg apt-transport-https
+      curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+      sudo curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list > /etc/apt/sources.list.d/mssql-release.list
+      sudo apt-get update
+      sudo ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
+      # Add SQLCMD to PATH for the current session
+      echo "export PATH=\$PATH:/opt/mssql-tools/bin" >> ~/.bashrc
+      source ~/.bashrc
+      # Verify installation
+      sqlcmd -?
+    displayName: 'Install and verify sqlcmd on Ubuntu'
+    
   - script: docker run --workdir /ado/workspace --rm -v "$(Build.SourcesDirectory)":"/ado/workspace" -v "$(Build.ArtifactStagingDirectory)/trivy":"/ado/artifact" aquasec/trivy:latest fs -f json --scanners vuln,secret,misconfig --list-all-pkgs -o /ado/artifact/trivy-result.json /ado/workspace
     #Sometimes we get a TOOMANYREQUESTS response. Retry before breaking the build in this case.
     retryCountOnTaskFailure: 3
@@ -92,19 +107,11 @@ jobs:
       ASPNETCORE_ENVIRONMENT: 'DUMMY'
 
   - script: |
-        cp $(Build.ArtifactStagingDirectory)/SQL/db.sql /tmp/db.sql
-    displayName: 'Copy scripts to Docker for creating database'
-    timeoutInMinutes: 1
-    target:
-      container: ${{parameters.serviceContainerName}}
-
-  - script: |
-        /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -Q 'CREATE DATABASE ${{parameters.testDatabasename}}' -b -C
-        /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -i /tmp/db.sql -d ${{parameters.testDatabasename}} -b -C
+        sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -Q 'CREATE DATABASE ${{parameters.testDatabasename}}' -b
+        sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -i db.sql -d ${{parameters.testDatabasename}} -b
+    workingDirectory: '$(Build.ArtifactStagingDirectory)/SQL'
     displayName: 'Create database and tables for unit tests'
     timeoutInMinutes: 1
-    target:
-      container: ${{parameters.serviceContainerName}}
 
   - task: DotNetCoreCLI@2
     displayName: Dotnet test '**/*Tests.csproj'
