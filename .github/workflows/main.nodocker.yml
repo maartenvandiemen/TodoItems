@@ -24,7 +24,7 @@ defaults:
     shell: pwsh
 jobs:
   determine_variables_build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       buildConfiguration: ${{ steps.setupVars.outputs.buildConfiguration }}
     steps:
