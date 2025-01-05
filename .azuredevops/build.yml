@@ -92,11 +92,19 @@ jobs:
       ASPNETCORE_ENVIRONMENT: 'DUMMY'
 
   - script: |
-        sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -Q 'CREATE DATABASE ${{parameters.testDatabasename}}' -b
-        sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -i db.sql -d ${{parameters.testDatabasename}} -b
-    workingDirectory: '$(Build.ArtifactStagingDirectory)/SQL'
+        cp $(Build.ArtifactStagingDirectory)/SQL/db.sql /tmp/db.sql
+    displayName: 'Copy scripts to Docker for creating database'
+    timeoutInMinutes: 1
+    target:
+      container: mssql
+
+  - script: |
+        /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -Q 'CREATE DATABASE ${{parameters.testDatabasename}}' -b -C
+        /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -i db.sql -d ${{parameters.testDatabasename}} -b -C
     displayName: 'Create database and tables for unit tests'
     timeoutInMinutes: 1
+    target:
+      container: mssql
 
   - task: DotNetCoreCLI@2
     displayName: Dotnet test '**/*Tests.csproj'
@@ -106,7 +114,7 @@ jobs:
       arguments: '--no-build --nologo --configuration ${{parameters.buildConfiguration}}'
     env:
       integrationtests_ConnectionStrings__TodoDb: 'Server=127.0.0.1,1433;Database=${{parameters.testDatabasename}};User Id=SA;Password=$(SA_PASSWORD);TrustServerCertificate=true;'
-    
+
   - task: DotNetCoreCLI@2
     displayName: Dotnet publish '**/TodoItems.Api.csproj' 
     inputs:
@@ -143,13 +151,13 @@ jobs:
       targetPath: '$(Build.ArtifactStagingDirectory)/Deployment'
       artifact: 'infraCode'
       publishLocation: 'pipeline'
-      
+
   - task: PublishPipelineArtifact@1
     displayName: Publish pipeline artifact 'Smoke tests'
     inputs:
       targetPath: '$(Build.SourcesDirectory)/tests'
       artifact: 'smoketests'
       publishLocation: 'pipeline'
-      
+
   - ${{ each step in parameters.postBuildSteps }}:
     - ${{ step }}
