@@ -13,7 +13,8 @@ parameters:
 
 jobs: 
 - job: Build
-  
+  pool:
+    vmImage: ubuntu-24.04
   variables:
   #Used for SQL Server password, placed in variable group. Comment group and uncomment SA_PASSWORD variable
   #- name: SA_PASSWORD
@@ -40,7 +41,7 @@ jobs:
   - script: |
       # Install dependencies for sqlcmd
       curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-      add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/20.04/prod.list)"
+      add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/24.04/prod.list)"
       sudo apt-get update
       sudo apt-get install sqlcmd
       # Add SQLCMD to PATH for the current session
