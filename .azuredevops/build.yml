@@ -96,7 +96,7 @@ jobs:
     displayName: 'Copy scripts to Docker for creating database'
     timeoutInMinutes: 1
     target:
-      container: mssql
+      container: ${{parameters.serviceContainerName}}
 
   - script: |
         /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U SA -P '$(SA_PASSWORD)' -Q 'CREATE DATABASE ${{parameters.testDatabasename}}' -b -C
@@ -104,7 +104,7 @@ jobs:
     displayName: 'Create database and tables for unit tests'
     timeoutInMinutes: 1
     target:
-      container: mssql
+      container: ${{parameters.serviceContainerName}}
 
   - task: DotNetCoreCLI@2
     displayName: Dotnet test '**/*Tests.csproj'
