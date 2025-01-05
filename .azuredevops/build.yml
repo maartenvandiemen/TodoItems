@@ -40,8 +40,8 @@ jobs:
   steps:
   - script: |
       # Install dependencies for sqlcmd
-      curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-      add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/24.04/prod.list)"
+      curl https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
+      sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/24.04/prod.list)"
       sudo apt-get update
       sudo apt-get install sqlcmd
       # Add SQLCMD to PATH for the current session
