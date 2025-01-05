@@ -18,6 +18,7 @@ on:
         options:
         - Debug
         - Release
+
 defaults:
   run:
     shell: pwsh
