@@ -106,14 +106,14 @@ jobs:
 
     - name: Publish API
       run: dotnet publish ${{github.workspace}}/TodoItems.Api/TodoItems.Api.csproj --configuration ${{inputs.buildConfiguration}} --no-build --output ${{github.workspace}}/artifacts/TodoItems.Api
-    
+
     - name: Publish SQL artifact
       uses: actions/upload-artifact@v4
       with:
         name: database
         path: '${{github.workspace}}/artifacts/SQL'
         if-no-files-found: error
-    
+
     - name: Publish API artifact
       uses: actions/upload-artifact@v4
       with:
