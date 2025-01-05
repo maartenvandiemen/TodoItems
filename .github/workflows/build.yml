@@ -68,16 +68,17 @@ jobs:
       env:
         #Pass environment variable dummy. So the migration script will not be created against the InMemory database.
         ASPNETCORE_ENVIRONMENT: 'DUMMY'
-    
+
+    - name: copy script for creation of database
+      run: docker cp ${{github.workspace}}/artifacts/SQL/db.sql ${{ job.services.mssql.id }}:/tmp/db.sql
+
     - name: Create database for integration tests
       run: |
           docker exec ${{ job.services.mssql.id }} /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U SA -P '${{secrets.SA_PASSWORD}}' -Q 'CREATE DATABASE ${{env.testDatabasename}}' -b -C
-          sqlcmd -S 127.0.0.1,1433 -U SA -P '${{secrets.SA_PASSWORD}}' -i db.sql -d ${{env.testDatabasename}} -b
+          docker exec ${{ job.services.mssql.id }} /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U SA -P '${{secrets.SA_PASSWORD}}' -i /tmp/db.sql -d ${{env.testDatabasename}} -b -C
       working-directory: '${{github.workspace}}/artifacts/SQL'
-      timeout-minutes: 1
-      
-    
-    
+      timeout-minutes: 1   
+
     - name: Run tests
       run: dotnet test --no-build --configuration ${{inputs.buildConfiguration}} --logger:"console;verbosity=detailed"
       env:
