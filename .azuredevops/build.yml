@@ -13,7 +13,8 @@ parameters:
 
 jobs: 
 - job: Build
-  
+  pool:
+    vmImage: ubuntu-24.04
   variables:
   #Used for SQL Server password, placed in variable group. Comment group and uncomment SA_PASSWORD variable
   #- name: SA_PASSWORD
@@ -37,6 +38,18 @@ jobs:
     ${{parameters.serviceContainerName}}: ${{parameters.serviceContainerName}}
         
   steps:
+  - script: |
+      # Install dependencies for sqlcmd
+      curl https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
+      sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/22.04/prod.list)"
+      sudo apt-get install sqlcmd
+      # Add SQLCMD to PATH for the current session
+      echo "export PATH=\$PATH:/opt/mssql-tools/bin" >> ~/.bashrc
+      source ~/.bashrc
+      # Verify installation
+      sqlcmd -?
+    displayName: 'Install and verify sqlcmd on Ubuntu'
+    
   - script: docker run --workdir /ado/workspace --rm -v "$(Build.SourcesDirectory)":"/ado/workspace" -v "$(Build.ArtifactStagingDirectory)/trivy":"/ado/artifact" aquasec/trivy:latest fs -f json --scanners vuln,secret,misconfig --list-all-pkgs -o /ado/artifact/trivy-result.json /ado/workspace
     #Sometimes we get a TOOMANYREQUESTS response. Retry before breaking the build in this case.
     retryCountOnTaskFailure: 3
@@ -106,7 +119,7 @@ jobs:
       arguments: '--no-build --nologo --configuration ${{parameters.buildConfiguration}}'
     env:
       integrationtests_ConnectionStrings__TodoDb: 'Server=127.0.0.1,1433;Database=${{parameters.testDatabasename}};User Id=SA;Password=$(SA_PASSWORD);TrustServerCertificate=true;'
-    
+
   - task: DotNetCoreCLI@2
     displayName: Dotnet publish '**/TodoItems.Api.csproj' 
     inputs:
@@ -143,13 +156,13 @@ jobs:
       targetPath: '$(Build.ArtifactStagingDirectory)/Deployment'
       artifact: 'infraCode'
       publishLocation: 'pipeline'
-      
+
   - task: PublishPipelineArtifact@1
     displayName: Publish pipeline artifact 'Smoke tests'
     inputs:
       targetPath: '$(Build.SourcesDirectory)/tests'
       artifact: 'smoketests'
       publishLocation: 'pipeline'
-      
+
   - ${{ each step in parameters.postBuildSteps }}:
     - ${{ step }}

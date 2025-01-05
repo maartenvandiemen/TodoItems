@@ -22,7 +22,7 @@ jobs:
         options: --name mssql
         ports:
           - 1433:1433
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       NUGET_PACKAGES: '${{github.workspace}}/.nuget/packages'
       testDatabasename: 'TodoItemDB'
@@ -68,14 +68,17 @@ jobs:
       env:
         #Pass environment variable dummy. So the migration script will not be created against the InMemory database.
         ASPNETCORE_ENVIRONMENT: 'DUMMY'
-    
+
+    - name: copy script for creation of database
+      run: docker cp ${{github.workspace}}/artifacts/SQL/db.sql ${{ job.services.mssql.id }}:/tmp/db.sql
+
     - name: Create database for integration tests
       run: |
-          sqlcmd -S 127.0.0.1,1433 -U SA -P '${{secrets.SA_PASSWORD}}' -Q 'CREATE DATABASE ${{env.testDatabasename}}' -b
-          sqlcmd -S 127.0.0.1,1433 -U SA -P '${{secrets.SA_PASSWORD}}' -i db.sql -d ${{env.testDatabasename}} -b
+          docker exec ${{ job.services.mssql.id }} /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U SA -P '${{secrets.SA_PASSWORD}}' -Q 'CREATE DATABASE ${{env.testDatabasename}}' -b -C
+          docker exec ${{ job.services.mssql.id }} /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U SA -P '${{secrets.SA_PASSWORD}}' -i /tmp/db.sql -d ${{env.testDatabasename}} -b -C
       working-directory: '${{github.workspace}}/artifacts/SQL'
-      timeout-minutes: 1  
-    
+      timeout-minutes: 1
+
     - name: Run tests
       run: dotnet test --no-build --configuration ${{inputs.buildConfiguration}} --logger:"console;verbosity=detailed"
       env:
@@ -103,14 +106,14 @@ jobs:
 
     - name: Publish API
       run: dotnet publish ${{github.workspace}}/TodoItems.Api/TodoItems.Api.csproj --configuration ${{inputs.buildConfiguration}} --no-build --output ${{github.workspace}}/artifacts/TodoItems.Api
-    
+
     - name: Publish SQL artifact
       uses: actions/upload-artifact@v4
       with:
         name: database
         path: '${{github.workspace}}/artifacts/SQL'
         if-no-files-found: error
-    
+
     - name: Publish API artifact
       uses: actions/upload-artifact@v4
       with:
