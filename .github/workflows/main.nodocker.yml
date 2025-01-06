@@ -70,6 +70,9 @@ jobs:
     needs: [build, create_env]
     runs-on: ubuntu-latest
     environment: AzureDeploy
+    permissions: 
+      id-token: write
+      contents: read
     steps:
       - name: Download a Build Artifact
         uses: actions/download-artifact@v4
@@ -79,7 +82,9 @@ jobs:
       - uses: Azure/login@v2
         name: Azure Login
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - run: Compress-Archive -Path ${{github.workspace}}/artifacts/api/* -DestinationPath ${{github.workspace}}/artifacts/api/api.zip
       - uses: Azure/cli@v2
         name: Azure Deploy WebApp
