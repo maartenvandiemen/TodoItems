@@ -70,6 +70,9 @@ jobs:
     needs: [build, create_env]
     runs-on: ubuntu-latest
     environment: AzureDeploy
+    permissions: 
+      id-token: write
+      contents: read
     steps:
       - name: Download a Build Artifact
         uses: actions/download-artifact@v4
