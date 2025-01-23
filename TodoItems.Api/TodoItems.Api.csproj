@@ -22,7 +22,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.1" />
-    <PackageReference Include="Scalar.AspNetCore" Version="1.2.34" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.0.4" />
   </ItemGroup>
 
   <ItemGroup>
