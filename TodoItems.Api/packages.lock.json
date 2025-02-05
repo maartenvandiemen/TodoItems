@@ -106,9 +106,9 @@
       },
       "Scalar.AspNetCore": {
         "type": "Direct",
-        "requested": "[1.2.34, )",
-        "resolved": "1.2.34",
-        "contentHash": "S/9CdzjfX9rWX74wETX9KrQMg6bFrQkm+OeE9gcbirt/9zD1dRGP414PkC7oUJIKGsstOUn+ahJKKTdUGQo9AQ=="
+        "requested": "[2.0.11, )",
+        "resolved": "2.0.11",
+        "contentHash": "qX9DF2V9uOVcScLdU/6kD11n5i+h9bnFzuWJTRxTBISCfAKh0y/5F6gYvueXkYeluxzOW9LdeaM1fpwj63YfuA=="
       },
       "Azure.Core": {
         "type": "Transitive",
