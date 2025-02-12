@@ -254,8 +254,8 @@
       },
       "Microsoft.AspNetCore.OpenApi": {
         "type": "Transitive",
-        "resolved": "9.0.1",
-        "contentHash": "xRJe8UrLnOGs6hOBrT/4r74q97626H0mABb/DV0smlReIx6uQCENAe+TUqF6hD3NtT4sB+qrvWhAej6kxPxgew==",
+        "resolved": "9.0.2",
+        "contentHash": "JUndpjRNdG8GvzBLH/J4hen4ehWaPcshtiQ6+sUs1Bcj3a7dOsmWpDloDlpPeMOVSlhHwUJ3Xld0ClZjsFLgFQ==",
         "dependencies": {
           "Microsoft.OpenApi": "1.6.17"
         }
@@ -1069,7 +1069,7 @@
         "type": "Project",
         "dependencies": {
           "Microsoft.ApplicationInsights.AspNetCore": "[2.22.0, )",
-          "Microsoft.AspNetCore.OpenApi": "[9.0.1, )",
+          "Microsoft.AspNetCore.OpenApi": "[9.0.2, )",
           "Microsoft.Data.SqlClient": "[5.2.2, )",
           "Microsoft.EntityFrameworkCore.InMemory": "[9.0.1, )",
           "Microsoft.EntityFrameworkCore.SqlServer": "[9.0.1, )",
