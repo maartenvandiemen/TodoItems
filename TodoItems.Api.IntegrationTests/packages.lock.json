@@ -878,8 +878,8 @@
       },
       "Scalar.AspNetCore": {
         "type": "Transitive",
-        "resolved": "1.2.34",
-        "contentHash": "S/9CdzjfX9rWX74wETX9KrQMg6bFrQkm+OeE9gcbirt/9zD1dRGP414PkC7oUJIKGsstOUn+ahJKKTdUGQo9AQ=="
+        "resolved": "2.0.14",
+        "contentHash": "e4pXyxXpoHNPTPHTWjYLgIzilpbSYFNOqb8URMaP0vxMMKKB0Qn2FuBq1JQLW0hEPdZliW0WOYLOxczwOVHMhQ=="
       },
       "SharpZipLib": {
         "type": "Transitive",
@@ -1074,7 +1074,7 @@
           "Microsoft.EntityFrameworkCore.InMemory": "[9.0.1, )",
           "Microsoft.EntityFrameworkCore.SqlServer": "[9.0.1, )",
           "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": "[9.0.1, )",
-          "Scalar.AspNetCore": "[1.2.34, )"
+          "Scalar.AspNetCore": "[2.0.14, )"
         }
       }
     }
