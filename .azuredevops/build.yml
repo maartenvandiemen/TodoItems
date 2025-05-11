@@ -55,7 +55,7 @@ jobs:
       chmod +x cosign-linux-amd64
       sudo mv cosign-linux-amd64 /usr/local/bin/cosign
       cosign version
-   displayName: Install Cosign
+    displayName: Install Cosign
     
   - script: docker run --workdir /ado/workspace --rm -v "$(Build.SourcesDirectory)":"/ado/workspace" -v "$(Build.ArtifactStagingDirectory)/trivy":"/ado/artifact" aquasec/trivy:latest fs -f json --scanners vuln,secret,misconfig --list-all-pkgs -o /ado/artifact/trivy-result.json /ado/workspace
     #Sometimes we get a TOOMANYREQUESTS response. Retry before breaking the build in this case.
