@@ -163,6 +163,10 @@ jobs:
       Contents: '*.bicep'
       TargetFolder: '$(Build.ArtifactStagingDirectory)/Deployment'
 
+  - script: |
+    zip -r $(Build.ArtifactStagingDirectory)/Deployment.zip $(Build.ArtifactStagingDirectory)/Deployment
+  displayName: Compress Deployment artifacts
+
   - task: PublishPipelineArtifact@1
     displayName: Publish pipeline artifact 'Deployment'
     inputs:
@@ -176,6 +180,32 @@ jobs:
       targetPath: '$(Build.SourcesDirectory)/tests'
       artifact: 'smoketests'
       publishLocation: 'pipeline'
+
+  - script: |
+    cosign sign-blob --key 'SECRET' $(Build.ArtifactStagingDirectory)/SQL/db.sql
+    cosign sign-blob --key $(SIGNING_KEY) $(Build.ArtifactStagingDirectory)/Deployment.zip
+  displayName: Sign artifacts individually
+
+- task: PublishPipelineArtifact@1
+  displayName: Publish signed Deployment artifact and signature
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)/Deployment.zip'
+    artifact: 'Deployment-infracode'
+    publishLocation: 'pipeline'
+
+- task: PublishPipelineArtifact@1
+  displayName: Publish signature file for Deployment.zip
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)/Deployment.zip.sig'
+    artifact: 'Deployment-Signature'
+    publishLocation: 'pipeline'
+
+- task: PublishPipelineArtifact@1
+  displayName: Publish signature file for Deployment.zip
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)/SQL/db.sql.sig'
+    artifact: 'SQL-Signature'
+    publishLocation: 'pipeline'
 
   - ${{ each step in parameters.postBuildSteps }}:
     - ${{ step }}
