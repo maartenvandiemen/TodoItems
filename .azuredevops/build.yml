@@ -57,6 +57,12 @@ jobs:
     
   - script: docker run --workdir /ado/artifact --rm -v "$(Build.ArtifactStagingDirectory)/trivy":"/ado/artifact" aquasec/trivy:latest convert -f table --exit-code -1 -s HIGH,CRITICAL trivy-result.json
     displayName: Parse Trivy analysis
+    
+  - task: Cache@2
+    displayName: 'Restore cache for .dotnet directory'
+    inputs:
+      key: 'dotnet | "$(Agent.OS)"'
+      path: $(Agent.ToolsDirectory)/dotnet
 
   - task: UseDotNet@2
     inputs:
