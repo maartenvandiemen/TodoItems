@@ -164,8 +164,8 @@ jobs:
       TargetFolder: '$(Build.ArtifactStagingDirectory)/Deployment'
 
   - script: |
-    zip -r $(Build.ArtifactStagingDirectory)/Deployment.zip $(Build.ArtifactStagingDirectory)/Deployment
-  displayName: Compress Deployment artifacts
+      zip -r $(Build.ArtifactStagingDirectory)/Deployment.zip $(Build.ArtifactStagingDirectory)/Deployment
+    displayName: Compress Deployment artifacts
 
   - task: PublishPipelineArtifact@1
     displayName: Publish pipeline artifact 'Deployment'
