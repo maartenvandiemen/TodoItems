@@ -183,7 +183,7 @@ jobs:
 
   - script: |
       cosign sign-blob --key 'SECRET' $(Build.ArtifactStagingDirectory)/SQL/db.sql
-      cosign sign-blob --key $(SIGNING_KEY) $(Build.ArtifactStagingDirectory)/Deployment.zip
+      cosign sign-blob --key 'SECRET' $(Build.ArtifactStagingDirectory)/Deployment.zip
     displayName: Sign artifacts individually
 
   - task: PublishPipelineArtifact@1
