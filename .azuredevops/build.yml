@@ -186,26 +186,26 @@ jobs:
       cosign sign-blob --key $(SIGNING_KEY) $(Build.ArtifactStagingDirectory)/Deployment.zip
     displayName: Sign artifacts individually
 
-- task: PublishPipelineArtifact@1
-  displayName: Publish signed Deployment artifact and signature
-  inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)/Deployment.zip'
-    artifact: 'Deployment-infracode'
-    publishLocation: 'pipeline'
+  - task: PublishPipelineArtifact@1
+    displayName: Publish signed Deployment artifact and signature
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/Deployment.zip'
+      artifact: 'Deployment-infracode'
+      publishLocation: 'pipeline'
 
-- task: PublishPipelineArtifact@1
-  displayName: Publish signature file for Deployment.zip
-  inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)/Deployment.zip.sig'
-    artifact: 'Deployment-Signature'
-    publishLocation: 'pipeline'
+  - task: PublishPipelineArtifact@1
+    displayName: Publish signature file for Deployment.zip
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/Deployment.zip.sig'
+      artifact: 'Deployment-Signature'
+      publishLocation: 'pipeline'
 
-- task: PublishPipelineArtifact@1
-  displayName: Publish signature file for Deployment.zip
-  inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)/SQL/db.sql.sig'
-    artifact: 'SQL-Signature'
-    publishLocation: 'pipeline'
+  - task: PublishPipelineArtifact@1
+    displayName: Publish signature file for Deployment.zip
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/SQL/db.sql.sig'
+      artifact: 'SQL-Signature'
+      publishLocation: 'pipeline'
 
   - ${{ each step in parameters.postBuildSteps }}:
     - ${{ step }}
