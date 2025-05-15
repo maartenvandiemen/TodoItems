@@ -53,7 +53,7 @@ jobs:
     with:
       region: ${{ vars.AZURE_REGION }}
       template: /artifacts/bicep/main.docker.webapp.bicep
-      additionalParameters: applicationname=todoitems dockerImageNameAndTag=${{needs.push_docker_image.outputs.dockerTag}}
+      additionalParameters: applicationname=todoitems dockerImageNameAndTag=DUMMY
       deploy: false
     secrets: inherit
 
