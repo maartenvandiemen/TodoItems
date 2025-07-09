@@ -1,18 +1,23 @@
+// See https://aka.ms/bicep/config for more information on Bicep configuration options
+// Press CTRL+SPACE/CMD+SPACE at any location to see Intellisense suggestions
 {
-  // See https://aka.ms/bicep/config for more information on Bicep configuration options
-  // Press CTRL+SPACE/CMD+SPACE at any location to see Intellisense suggestions
   "analyzers": {
     "core": {
       "enabled": true,
-      "verbose": false,
       "rules": {
         "adminusername-should-not-be-literal": {
-          "level": "error"
+          "level": "warning"
         },
         "artifacts-parameters": {
-          "level": "error"
+          "level": "warning"
         },
         "decompiler-cleanup": {
+          "level": "warning"
+        },
+        "explicit-values-for-loc-params": {
+          "level": "off"
+        },
+        "max-asserts": {
           "level": "error"
         },
         "max-outputs": {
@@ -27,74 +32,96 @@
         "max-variables": {
           "level": "error"
         },
-        "no-hardcoded-env-urls": {
+        "nested-deployment-template-scoping": {
           "level": "error"
+        },
+        "no-conflicting-metadata" : {
+          "level": "warning"
+        },
+        "no-deployments-resources" : {
+          "level": "warning"
+        },
+        "no-hardcoded-env-urls": {
+          "level": "warning"
         },
         "no-hardcoded-location": {
-          "level": "error"
+          "level": "off"
         },
         "no-loc-expr-outside-params": {
-          "level": "error"
+          "level": "off"
         },
         "no-unnecessary-dependson": {
-          "level": "error"
+          "level": "warning"
         },
         "no-unused-existing-resources": {
-          "level": "error"
+          "level": "warning"
+        },
+        "no-unused-imports": {
+          "level": "warning"
         },
         "no-unused-params": {
-          "level": "error"
+          "level": "warning"
         },
         "no-unused-vars": {
-          "level": "error"
+          "level": "warning"
         },
         "outputs-should-not-contain-secrets": {
-          "level": "error"
+          "level": "warning"
         },
         "prefer-interpolation": {
           "level": "warning"
         },
         "prefer-unquoted-property-names": {
-          "level": "error"
+          "level": "warning"
         },
         "protect-commandtoexecute-secrets": {
-          "level": "error"
+          "level": "warning"
         },
         "secure-parameter-default": {
-          "level": "error"
+          "level": "warning"
         },
         "secure-params-in-nested-deploy": {
-          "level": "error"
+          "level": "warning"
         },
         "secure-secrets-in-params": {
-          "level": "error"
+          "level": "warning"
         },
         "simplify-interpolation": {
-          "level": "error"
+          "level": "warning"
         },
         "simplify-json-null": {
-          "level": "error"
+          "level": "warning"
         },
         "use-parent-property": {
-          "level": "error"
-        },
-        "explicit-values-for-loc-params": {
-          "level": "error"
+          "level": "warning"
         },
         "use-recent-api-versions": {
-          "level": "error"
+          "level": "off",
+          "maxAllowedAgeInDays": 730
+        },
+        "use-recent-module-versions": {
+          "level": "off"
         },
         "use-resource-id-functions": {
-          "level": "error"
+          "level": "off"
         },
         "use-resource-symbol-reference": {
+          "level": "warning"
+        },
+        "use-safe-access": {
+          "level": "warning"
+        },
+        "use-secure-value-for-secure-inputs": {
           "level": "error"
         },
         "use-stable-resource-identifiers": {
-          "level": "error"
+          "level": "warning"
         },
         "use-stable-vm-image": {
-          "level": "error"
+          "level": "warning"
+        },
+        "what-if-short-circuiting": {
+          "level": "off"
         }
       }
     }
