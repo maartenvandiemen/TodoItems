@@ -6,13 +6,13 @@
       "enabled": true,
       "rules": {
         "adminusername-should-not-be-literal": {
-          "level": "warning"
+          "level": "error"
         },
         "artifacts-parameters": {
-          "level": "warning"
+          "level": "error"
         },
         "decompiler-cleanup": {
-          "level": "warning"
+          "level": "error"
         },
         "explicit-values-for-loc-params": {
           "level": "off"
@@ -39,13 +39,13 @@
           "level": "warning"
         },
         "no-deployments-resources" : {
-          "level": "warning"
+          "level": "error"
         },
         "no-hardcoded-env-urls": {
-          "level": "warning"
+          "level": "error"
         },
         "no-hardcoded-location": {
-          "level": "off"
+          "level": "error"
         },
         "no-loc-expr-outside-params": {
           "level": "off"
@@ -54,59 +54,59 @@
           "level": "warning"
         },
         "no-unused-existing-resources": {
-          "level": "warning"
+          "level": "error"
         },
         "no-unused-imports": {
-          "level": "warning"
+          "level": "error"
         },
         "no-unused-params": {
-          "level": "warning"
+          "level": "error"
         },
         "no-unused-vars": {
-          "level": "warning"
+          "level": "error"
         },
         "outputs-should-not-contain-secrets": {
-          "level": "warning"
+          "level": "error"
         },
         "prefer-interpolation": {
           "level": "warning"
         },
         "prefer-unquoted-property-names": {
-          "level": "warning"
+          "level": "error"
         },
         "protect-commandtoexecute-secrets": {
-          "level": "warning"
+          "level": "error"
         },
         "secure-parameter-default": {
-          "level": "warning"
+          "level": "error"
         },
         "secure-params-in-nested-deploy": {
-          "level": "warning"
+          "level": "error"
         },
         "secure-secrets-in-params": {
-          "level": "warning"
+          "level": "error"
         },
         "simplify-interpolation": {
-          "level": "warning"
+          "level": "error"
         },
         "simplify-json-null": {
-          "level": "warning"
+          "level": "error"
         },
         "use-parent-property": {
-          "level": "warning"
+          "level": "error"
         },
         "use-recent-api-versions": {
-          "level": "off",
+          "level": "error",
           "maxAllowedAgeInDays": 730
         },
         "use-recent-module-versions": {
           "level": "off"
         },
         "use-resource-id-functions": {
-          "level": "off"
+          "level": "error"
         },
         "use-resource-symbol-reference": {
-          "level": "warning"
+          "level": "error"
         },
         "use-safe-access": {
           "level": "warning"
@@ -115,10 +115,10 @@
           "level": "error"
         },
         "use-stable-resource-identifiers": {
-          "level": "warning"
+          "level": "error"
         },
         "use-stable-vm-image": {
-          "level": "warning"
+          "level": "error"
         },
         "what-if-short-circuiting": {
           "level": "off"
