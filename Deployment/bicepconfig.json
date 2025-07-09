@@ -1,10 +1,9 @@
+// See https://aka.ms/bicep/config for more information on Bicep configuration options
+// Press CTRL+SPACE/CMD+SPACE at any location to see Intellisense suggestions
 {
-  // See https://aka.ms/bicep/config for more information on Bicep configuration options
-  // Press CTRL+SPACE/CMD+SPACE at any location to see Intellisense suggestions
   "analyzers": {
     "core": {
       "enabled": true,
-      "verbose": false,
       "rules": {
         "adminusername-should-not-be-literal": {
           "level": "error"
@@ -13,6 +12,12 @@
           "level": "error"
         },
         "decompiler-cleanup": {
+          "level": "error"
+        },
+        "explicit-values-for-loc-params": {
+          "level": "off"
+        },
+        "max-asserts": {
           "level": "error"
         },
         "max-outputs": {
@@ -27,6 +32,15 @@
         "max-variables": {
           "level": "error"
         },
+        "nested-deployment-template-scoping": {
+          "level": "error"
+        },
+        "no-conflicting-metadata" : {
+          "level": "warning"
+        },
+        "no-deployments-resources" : {
+          "level": "error"
+        },
         "no-hardcoded-env-urls": {
           "level": "error"
         },
@@ -34,12 +48,15 @@
           "level": "error"
         },
         "no-loc-expr-outside-params": {
-          "level": "error"
+          "level": "off"
         },
         "no-unnecessary-dependson": {
-          "level": "error"
+          "level": "warning"
         },
         "no-unused-existing-resources": {
+          "level": "error"
+        },
+        "no-unused-imports": {
           "level": "error"
         },
         "no-unused-params": {
@@ -78,11 +95,12 @@
         "use-parent-property": {
           "level": "error"
         },
-        "explicit-values-for-loc-params": {
-          "level": "error"
-        },
         "use-recent-api-versions": {
-          "level": "error"
+          "level": "error",
+          "maxAllowedAgeInDays": 730
+        },
+        "use-recent-module-versions": {
+          "level": "off"
         },
         "use-resource-id-functions": {
           "level": "error"
@@ -90,11 +108,20 @@
         "use-resource-symbol-reference": {
           "level": "error"
         },
+        "use-safe-access": {
+          "level": "warning"
+        },
+        "use-secure-value-for-secure-inputs": {
+          "level": "error"
+        },
         "use-stable-resource-identifiers": {
           "level": "error"
         },
         "use-stable-vm-image": {
           "level": "error"
+        },
+        "what-if-short-circuiting": {
+          "level": "off"
         }
       }
     }
