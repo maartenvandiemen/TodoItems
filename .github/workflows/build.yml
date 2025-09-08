@@ -27,7 +27,7 @@ jobs:
       NUGET_PACKAGES: '${{github.workspace}}/.nuget/packages'
       testDatabasename: 'TodoItemDB'
     steps:    
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
       #Sometimes we get a TOOMANYREQUESTS response. Retry before breaking the build in this case.    
     - name: Run Trivy Analysis
