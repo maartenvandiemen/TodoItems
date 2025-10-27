@@ -91,14 +91,14 @@ jobs:
       working-directory: Deployment
 
     - name: Publish Bicep artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: infraCode
         path: '${{github.workspace}}/Deployment/*.bicep'
         if-no-files-found: error
 
     - name: Publish Smoketests artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: smoketests
         path: '${{github.workspace}}/tests/**'
@@ -108,14 +108,14 @@ jobs:
       run: dotnet publish ${{github.workspace}}/TodoItems.Api/TodoItems.Api.csproj --configuration ${{inputs.buildConfiguration}} --no-build --output ${{github.workspace}}/artifacts/TodoItems.Api
 
     - name: Publish SQL artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: database
         path: '${{github.workspace}}/artifacts/SQL'
         if-no-files-found: error
 
     - name: Publish API artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: todoItemsApi
         path: '${{github.workspace}}/artifacts/TodoItems.Api/**'
