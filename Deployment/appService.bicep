@@ -10,7 +10,7 @@ param dockerImageNameAndTag string = ''
 var appServiceAppName = 'site-${applicationname}-${uniqueString(resourceGroup().id)}'
 var appServicePlanName = 'sitePlan-${applicationname}-${uniqueString(resourceGroup().id)}'
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
+resource appServicePlan 'Microsoft.Web/serverfarms@2024-11-01' = {
   name: appServicePlanName
   location: location
   sku: {
@@ -34,7 +34,7 @@ var appsettingsValues = concat(defaultAppsettings, empty(dockerImageNameAndTag) 
               value: 8080
           }])  
 
-resource appServiceApp 'Microsoft.Web/sites@2024-04-01' = {
+resource appServiceApp 'Microsoft.Web/sites@2024-11-01' = {
   name: appServiceAppName
   location: location
   properties: {
@@ -42,7 +42,7 @@ resource appServiceApp 'Microsoft.Web/sites@2024-04-01' = {
     httpsOnly: true
     siteConfig: {
      acrUseManagedIdentityCreds: false
-     linuxFxVersion: empty(dockerImageNameAndTag) ? 'DOTNETCORE|9.0' : 'DOCKER|${dockerImageNameAndTag}'
+     linuxFxVersion: empty(dockerImageNameAndTag) ? 'DOTNETCORE|10.0' : 'DOCKER|${dockerImageNameAndTag}'
      healthCheckPath: '/health'
      connectionStrings: [
       { 

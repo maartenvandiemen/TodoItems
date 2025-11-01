@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="TodoItems.Api.IntegrationTests/TodoItems.Api.IntegrationTests.csproj" />
+  <Project Path="TodoItems.Api/TodoItems.Api.csproj" />
+</Solution>
