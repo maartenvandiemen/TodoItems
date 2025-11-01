@@ -10,6 +10,9 @@ defaults:
     shell: pwsh
 jobs:
   smoke_tests:
+    permissions:
+      contents: read
+      deployments: write
     runs-on: ubuntu-latest
     environment: AzureProvision
     steps:

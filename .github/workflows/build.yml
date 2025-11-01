@@ -12,6 +12,8 @@ defaults:
     shell: pwsh
 jobs:
   build:
+    permissions:
+      contents: read
     services:
       mssql:
         image: mcr.microsoft.com/mssql/server:2022-latest

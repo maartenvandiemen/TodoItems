@@ -24,6 +24,8 @@ defaults:
     shell: pwsh
 jobs:
   determine_variables:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     outputs:
       buildConfiguration: ${{ steps.setupVars.outputs.buildConfiguration }}
@@ -40,7 +42,9 @@ jobs:
           echo "buildConfiguration=Release" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
   
-  build:  
+  build:
+    permissions:
+      contents: read
     needs: [determine_variables]
     uses: ./.github/workflows/build.yml
     with:
@@ -48,6 +52,9 @@ jobs:
     secrets: inherit
 
   validate_env:
+    permissions:
+      contents: read
+      id-token: write
     needs: [build]
     uses: ./.github/workflows/create_env.yml
     with:
@@ -58,6 +65,8 @@ jobs:
     secrets: inherit
 
   dockerfile_artifact:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -71,6 +80,9 @@ jobs:
 
   push_docker_image:
     if: inputs.buildConfiguration != ''
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-latest
     outputs:
       dockerTag: ${{ steps.createTag.outputs.dockerTag }}
@@ -78,9 +90,6 @@ jobs:
       REGISTRY: ghcr.io
       DOCKER_BUILD_SUMMARY: false
       DOCKER_BUILD_RECORD_UPLOAD: false
-    permissions:
-      contents: read
-      packages: write
     needs: [validate_env, dockerfile_artifact, determine_variables]
     steps:
       - uses: actions/download-artifact@v6
@@ -121,6 +130,9 @@ jobs:
           tags: ${{ steps.createTag.outputs.dockerTag }}
 
   create_env:
+    permissions:
+      contents: read
+      id-token: write
     needs: [build, push_docker_image]
     uses: ./.github/workflows/create_env.yml
     with:
@@ -131,6 +143,9 @@ jobs:
     secrets: inherit
 
   deploy_db:
+    permissions:
+      contents: read
+      id-token: write
     needs: [build, create_env]
     uses: ./.github/workflows/deploy_db.yml
     with:
@@ -139,12 +154,17 @@ jobs:
     secrets: inherit
 
   smoketests:
+    permissions:
+      contents: read
     needs: [deploy_db, create_env]
     uses: ./.github/workflows/smoketests.yml
     with:
       webAppUrl: ${{needs.create_env.outputs.webAppUrl}}
 
   delete_env:
+    permissions:
+      contents: read
+      id-token: write
     needs: [create_env, smoketests]
     uses: ./.github/workflows/delete_env.yml
     with:
