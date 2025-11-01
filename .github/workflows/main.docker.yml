@@ -43,8 +43,6 @@ jobs:
         }
   
   build:
-    permissions:
-      contents: read
     needs: [determine_variables]
     uses: ./.github/workflows/build.yml
     with:
@@ -52,9 +50,6 @@ jobs:
     secrets: inherit
 
   validate_env:
-    permissions:
-      contents: read
-      id-token: write
     needs: [build]
     uses: ./.github/workflows/create_env.yml
     with:
@@ -130,9 +125,6 @@ jobs:
           tags: ${{ steps.createTag.outputs.dockerTag }}
 
   create_env:
-    permissions:
-      contents: read
-      id-token: write
     needs: [build, push_docker_image]
     uses: ./.github/workflows/create_env.yml
     with:
@@ -143,9 +135,6 @@ jobs:
     secrets: inherit
 
   deploy_db:
-    permissions:
-      contents: read
-      id-token: write
     needs: [build, create_env]
     uses: ./.github/workflows/deploy_db.yml
     with:
@@ -154,17 +143,12 @@ jobs:
     secrets: inherit
 
   smoketests:
-    permissions:
-      contents: read
     needs: [deploy_db, create_env]
     uses: ./.github/workflows/smoketests.yml
     with:
       webAppUrl: ${{needs.create_env.outputs.webAppUrl}}
 
   delete_env:
-    permissions:
-      contents: read
-      id-token: write
     needs: [create_env, smoketests]
     uses: ./.github/workflows/delete_env.yml
     with:
