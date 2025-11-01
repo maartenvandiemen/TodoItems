@@ -24,6 +24,8 @@ defaults:
     shell: pwsh
 jobs:
   determine_variables_build:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     outputs:
       buildConfiguration: ${{ steps.setupVars.outputs.buildConfiguration }}
@@ -38,7 +40,7 @@ jobs:
           echo "buildConfiguration=Release" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
   
-  build:  
+  build:
     needs: [determine_variables_build]
     uses: ./.github/workflows/build.yml
     with:
@@ -73,6 +75,7 @@ jobs:
     permissions: 
       id-token: write
       contents: read
+      deployments: write
     steps:
       - name: Download a Build Artifact
         uses: actions/download-artifact@v6

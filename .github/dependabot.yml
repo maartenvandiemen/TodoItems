@@ -17,10 +17,15 @@ updates:
         applies-to: version-updates
         patterns:
         - "mstest*"
-      EntityFrameworkCore:
+        - "Microsoft.NET.Test.Sdk"
+        - "coverlet*"
+        - "Testcontainers*"
+      Framework:
         applies-to: version-updates
         patterns:
           - "Microsoft.EntityFrameworkCore*"
+          - "Microsoft.Extensions*"
+          - "Microsoft.AspNetCore*"         
 
   - package-ecosystem: "github-actions"
     directory: "/"
