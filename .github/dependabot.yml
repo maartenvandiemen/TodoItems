@@ -36,3 +36,4 @@ updates:
     directory: "/TodoItems.Api"
     schedule:
       interval: "weekly"
+
