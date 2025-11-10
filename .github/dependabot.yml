@@ -19,7 +19,6 @@ updates:
         - "mstest*"
         - "Microsoft.NET.Test.Sdk"
         - "coverlet*"
-        - "Testcontainers*"
       Framework:
         applies-to: version-updates
         patterns:
@@ -36,4 +35,3 @@ updates:
     directory: "/TodoItems.Api"
     schedule:
       interval: "weekly"
-
