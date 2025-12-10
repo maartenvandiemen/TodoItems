@@ -1,4 +1,3 @@
-using DotNet.Testcontainers.Builders;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +43,7 @@ namespace TodoItems.Api.IntegrationTests
 
                 //Assert
                 Assert.IsNotNull(todoItems);
-                Assert.AreEqual(0, todoItems.Count);
+                Assert.IsEmpty(todoItems);
             }
             finally
             {
@@ -80,7 +79,7 @@ namespace TodoItems.Api.IntegrationTests
 
                 //Assert
                 Assert.IsNotNull(todoItems);
-                Assert.AreEqual(2, todoItems.Count);
+                Assert.HasCount(2, todoItems);
             }
             finally
             {
