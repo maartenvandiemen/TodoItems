@@ -67,7 +67,7 @@ jobs:
       - uses: actions/checkout@v6
       
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: dockerFile
           path: ${{github.workspace}}/TodoItems.Api/Dockerfile
