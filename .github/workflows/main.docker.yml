@@ -87,12 +87,12 @@ jobs:
       DOCKER_BUILD_RECORD_UPLOAD: false
     needs: [validate_env, dockerfile_artifact, determine_variables]
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
             name: todoItemsApi
             path: ${{github.workspace}}/api
             
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
             name: dockerFile
             path: ${{github.workspace}}/dockerFile

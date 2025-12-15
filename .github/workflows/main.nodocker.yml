@@ -78,7 +78,7 @@ jobs:
       deployments: write
     steps:
       - name: Download a Build Artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: todoItemsApi
           path: ${{github.workspace}}/artifacts/api

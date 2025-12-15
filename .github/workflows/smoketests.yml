@@ -17,7 +17,7 @@ jobs:
     environment: AzureProvision
     steps:
       - name: Download test files
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: smoketests
           path: ${{github.workspace}}/artifacts/smoketests

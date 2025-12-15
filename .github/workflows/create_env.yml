@@ -66,7 +66,7 @@ jobs:
     environment: AzureDeploy
     steps:
       - name: Download a bicep templates
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: infraCode
           path: ${{github.workspace}}/artifacts/bicep
