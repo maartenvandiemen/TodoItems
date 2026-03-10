@@ -35,4 +35,10 @@ extends:
              command: 'build'
            Dockerfile: '**/Dockerfile'
            buildContext: '$(Build.ArtifactStagingDirectory)/todoItemsApi'
-           tags: '$(Build.SourceVersion)'
+           tags: '$(Build.SourceVersion)'       
+       - task: PublishPipelineArtifact@1
+         displayName: Publish pipeline artifact 'todoItemsBlazor'
+         inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)/todoItemsBlazor'
+          artifact: 'todoItemsBlazor'
+          publishLocation: 'pipeline'

@@ -1,0 +1,24 @@
+@inject TodoApiService TodoService
+
+@if (TodoService.ErrorMessage is not null)
+{
+    <div class="error-banner" role="alert" aria-live="assertive">
+        <span class="error-message">@TodoService.ErrorMessage</span>
+        <div class="error-actions">
+            <button class="btn-retry" @onclick="RetryAsync" aria-label="Retry">Retry</button>
+            <button class="btn-dismiss" @onclick="Dismiss" aria-label="Dismiss error">Dismiss</button>
+        </div>
+    </div>
+}
+
+@code {
+    private async Task RetryAsync()
+    {
+        await TodoService.LoadItemsAsync();
+    }
+
+    private void Dismiss()
+    {
+        TodoService.DismissError();
+    }
+}

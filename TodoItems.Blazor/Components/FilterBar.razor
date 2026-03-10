@@ -1,0 +1,43 @@
+@inject TodoApiService TodoService
+@implements IDisposable
+
+<div class="filter-bar" role="group" aria-label="Filter tasks">
+    <div class="filter-buttons">
+        @foreach (var option in Enum.GetValues<FilterOption>())
+        {
+            <button class="btn-filter @(TodoService.Filter == option ? "active" : "")"
+                    @onclick="() => SetFilter(option)"
+                    aria-pressed="@(TodoService.Filter == option ? "true" : "false")"
+                    aria-label="Show @option tasks">
+                @option
+            </button>
+        }
+    </div>
+    <span class="active-count" aria-label="@TodoService.ActiveCount active tasks">
+        <span class="count-number">@TodoService.ActiveCount</span>
+        <span class="count-label">active</span>
+    </span>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<FilterOption> OnFilterChanged { get; set; }
+
+    protected override void OnInitialized()
+    {
+        TodoService.StateChanged += OnStateChanged;
+    }
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        TodoService.StateChanged -= OnStateChanged;
+    }
+
+    private void SetFilter(FilterOption option)
+    {
+        TodoService.Filter = option;
+        OnFilterChanged.InvokeAsync(option);
+    }
+}

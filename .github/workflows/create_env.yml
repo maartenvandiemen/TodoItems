@@ -31,6 +31,12 @@ on:
       webAppUrl:
         description: "Created webApp url"
         value: ${{jobs.create_env.outputs.webAppUrl}}
+      blazorWebAppName:
+        description: "Created Blazor webApp name"
+        value: ${{jobs.create_env.outputs.blazorWebAppName}}
+      blazorWebAppUrl:
+        description: "Created Blazor webApp url"
+        value: ${{jobs.create_env.outputs.blazorWebAppUrl}}
       resourcegroup:
         description: "Random generated resource group name"
         value: ${{jobs.determine_resourcegroup.outputs.resourcegroup}}
@@ -63,6 +69,8 @@ jobs:
       webAppName: ${{ steps.arm.outputs.webAppName }}
       sqlServerFQDN: ${{ steps.arm.outputs.sqlServerFQDN }}
       databaseName: ${{ steps.arm.outputs.databaseName }}
+      blazorWebAppName: ${{ steps.arm.outputs.blazorWebAppName }}
+      blazorWebAppUrl: ${{ steps.arm.outputs.blazorWebAppUrl }}
     environment: AzureDeploy
     steps:
       - name: Download a bicep templates

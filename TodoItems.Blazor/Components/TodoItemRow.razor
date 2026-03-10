@@ -1,0 +1,35 @@
+@inject TodoApiService TodoService
+
+<div class="todo-row @(Item.IsComplete ? "completed" : "")">
+    <label class="todo-toggle" title="@(Item.IsComplete ? "Mark as active" : "Mark as complete")">
+        <input type="checkbox"
+               checked="@Item.IsComplete"
+               @onchange="ToggleAsync"
+               aria-label="@(Item.IsComplete ? "Mark active: " + Item.Name : "Mark complete: " + Item.Name)" />
+        <span class="checkmark"></span>
+    </label>
+
+    <span class="todo-name" title="@Item.Name">@Item.Name</span>
+
+    <button class="btn-delete"
+            @onclick="DeleteAsync"
+            aria-label="Delete: @Item.Name"
+            title="Delete item">
+        <span aria-hidden="true">✕</span>
+    </button>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public TodoItem Item { get; set; } = default!;
+
+    private async Task ToggleAsync()
+    {
+        await TodoService.ToggleItemAsync(Item);
+    }
+
+    private async Task DeleteAsync()
+    {
+        await TodoService.DeleteItemAsync(Item);
+    }
+}

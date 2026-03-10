@@ -1,0 +1,58 @@
+.error-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(191, 0, 255, 0.12);
+    border: 1px solid var(--accent-purple);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    animation: slide-down 200ms ease both;
+    box-shadow: var(--glow-purple);
+    flex-wrap: wrap;
+}
+
+.error-message {
+    flex: 1;
+    min-width: 0;
+}
+
+.error-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.btn-retry,
+.btn-dismiss {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--accent-purple);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--accent-cyan);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: box-shadow var(--transition-std), background var(--transition-std);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-retry:hover,
+.btn-retry:focus-visible {
+    background: rgba(0, 245, 255, 0.1);
+    box-shadow: var(--glow-cyan);
+    outline: none;
+}
+
+.btn-dismiss:hover,
+.btn-dismiss:focus-visible {
+    background: rgba(191, 0, 255, 0.15);
+    box-shadow: var(--glow-purple);
+    outline: none;
+}

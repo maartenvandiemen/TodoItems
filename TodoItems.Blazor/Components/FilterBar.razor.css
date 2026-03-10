@@ -1,0 +1,84 @@
+.filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.btn-filter {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    transition: color var(--transition-std), border-color var(--transition-std), box-shadow var(--transition-std), background var(--transition-std);
+}
+
+.btn-filter:hover,
+.btn-filter:focus-visible {
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+    background: rgba(0, 245, 255, 0.06);
+    outline: none;
+}
+
+.btn-filter.active {
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+    background: rgba(0, 245, 255, 0.1);
+    box-shadow: var(--glow-cyan);
+}
+
+/* Active count badge */
+.active-count {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.count-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    color: var(--accent-cyan);
+    font-weight: 700;
+}
+
+.count-label {
+    font-family: 'Rajdhani', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 300;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .filter-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .btn-filter {
+        flex: 1;
+        text-align: center;
+    }
+    .filter-buttons {
+        width: 100%;
+    }
+}

@@ -7,6 +7,14 @@ using System.ComponentModel.DataAnnotations;
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddConsole();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("BlazorWasmPolicy", policy =>
+        policy.WithOrigins(builder.Configuration["AllowedOrigins:Blazor"] ?? "")
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 builder.Services.AddOpenApi();
 
 if (builder.Environment.IsDevelopment())
@@ -32,6 +40,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
+app.UseCors("BlazorWasmPolicy");
 
 app.MapHealthChecks("/health");
 

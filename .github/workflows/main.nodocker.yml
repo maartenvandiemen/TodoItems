@@ -95,6 +95,33 @@ jobs:
           inlineScript: |
              az webapp deploy --src-path ${{github.workspace}}/artifacts/api/api.zip --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.create_env.outputs.resourcegroup }} --type zip
              az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.create_env.outputs.resourcegroup }}
+
+  deploy_blazor:
+    needs: [build, create_env]
+    runs-on: ubuntu-latest
+    environment: AzureDeploy
+    permissions:
+      id-token: write
+      contents: read
+      deployments: write
+    steps:
+      - name: Download Blazor Artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: todoItemsBlazor
+          path: ${{github.workspace}}/artifacts/blazor
+      - uses: Azure/login@v2
+        name: Azure Login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - run: Compress-Archive -Path ${{github.workspace}}/artifacts/blazor/* -DestinationPath ${{github.workspace}}/artifacts/blazor/blazor.zip
+      - uses: Azure/cli@v2
+        name: Azure Deploy Blazor WebApp
+        with:
+          inlineScript: |
+             az webapp deploy --src-path ${{github.workspace}}/artifacts/blazor/blazor.zip --name ${{ needs.create_env.outputs.blazorWebAppName }} --resource-group ${{ needs.create_env.outputs.resourcegroup }} --type zip
   
   deploy_db:
     needs: [build, create_env]
@@ -105,7 +132,7 @@ jobs:
     secrets: inherit
     
   smoketests:
-    needs: [deploy_app, create_env, deploy_db]
+    needs: [deploy_app, deploy_blazor, create_env, deploy_db]
     uses: ./.github/workflows/smoketests.yml
     with:
       webAppUrl: ${{needs.create_env.outputs.webAppUrl}}

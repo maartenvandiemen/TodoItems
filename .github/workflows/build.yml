@@ -108,6 +108,9 @@ jobs:
     - name: Publish API
       run: dotnet publish ${{github.workspace}}/TodoItems.Api/TodoItems.Api.csproj --configuration ${{inputs.buildConfiguration}} --no-build --output ${{github.workspace}}/artifacts/TodoItems.Api
 
+    - name: Publish Blazor
+      run: dotnet publish ${{github.workspace}}/TodoItems.Blazor/TodoItems.Blazor.csproj --configuration ${{inputs.buildConfiguration}} --no-build --output ${{github.workspace}}/artifacts/TodoItems.Blazor/wwwroot
+
     - name: Publish SQL artifact
       uses: actions/upload-artifact@v7
       with:
@@ -120,4 +123,11 @@ jobs:
       with:
         name: todoItemsApi
         path: '${{github.workspace}}/artifacts/TodoItems.Api/**'
+        if-no-files-found: error
+
+    - name: Publish Blazor artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: todoItemsBlazor
+        path: '${{github.workspace}}/artifacts/TodoItems.Blazor/**'
         if-no-files-found: error

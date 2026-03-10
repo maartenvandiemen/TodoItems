@@ -1,0 +1,32 @@
+.todo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 2rem;
+}
+
+.list-item-wrap {
+    animation: fade-slide-in 300ms ease both;
+}
+
+.list-item-wrap.entering {
+    animation: fade-slide-in 300ms ease both;
+}
+
+/* Empty state */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2.5rem 1rem;
+    color: var(--text-dim);
+    font-size: 1rem;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 2rem;
+    color: var(--accent-cyan);
+    opacity: 0.4;
+}

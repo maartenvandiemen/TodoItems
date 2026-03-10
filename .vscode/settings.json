@@ -16,7 +16,10 @@
         "Out-Null": true,
         "dotnet new": true,
         "dotnet sln": true,
-        "&": true
+        "&": true,
+        "dotnet restore": true,
+        "dotnet build": true,
+        "dotnet add": true
     }
 }
 

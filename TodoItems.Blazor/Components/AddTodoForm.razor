@@ -1,0 +1,49 @@
+@inject TodoApiService TodoService
+
+<div class="add-form">
+    <div class="input-wrap">
+        <input type="text"
+               @bind="_name"
+               @bind:event="oninput"
+               @onkeydown="HandleKeyDown"
+               maxlength="100"
+               placeholder="Add a new task..."
+               aria-label="New task name"
+               aria-describedby="add-form-error"
+               class="todo-input @(_showValidation && !IsValid ? "invalid" : "")" />
+        @if (_showValidation && !IsValid)
+        {
+            <span id="add-form-error" class="validation-msg" role="alert">Name cannot be empty.</span>
+        }
+    </div>
+    <button class="btn-add"
+            @onclick="SubmitAsync"
+            aria-label="Add task"
+            title="Add task">
+        <span aria-hidden="true">+</span>
+    </button>
+</div>
+
+@code {
+    private string _name = string.Empty;
+    private bool _showValidation;
+
+    private bool IsValid => !string.IsNullOrWhiteSpace(_name);
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await SubmitAsync();
+    }
+
+    private async Task SubmitAsync()
+    {
+        _showValidation = true;
+        if (!IsValid) return;
+
+        var name = _name.Trim();
+        _name = string.Empty;
+        _showValidation = false;
+        await TodoService.AddItemAsync(name);
+    }
+}

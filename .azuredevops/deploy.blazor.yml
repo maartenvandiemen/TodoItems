@@ -1,0 +1,26 @@
+jobs:
+- job: Deploy_Blazor
+  dependsOn: [Create_Env, Generate_ResourcegroupName]
+
+  variables:
+  - group: AzureSecrets
+  - name: blazorAppServiceName
+    value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.blazorAppServiceName'] ]
+  - name: resourceGroupName
+    value: $[ dependencies.Generate_ResourcegroupName.outputs['DetermineResourcegroupName.resourcegroupName'] ]
+
+  steps:
+  - checkout: none
+  - download: current
+    artifact: todoItemsBlazor
+    displayName: Download Blazor artifact
+  - powershell: Compress-Archive -Path $(Pipeline.Workspace)/todoItemsBlazor/* -DestinationPath $(Pipeline.Workspace)/todoItemsBlazor/blazor.zip
+    displayName: Zip Blazor artifact
+  - task: AzureCLI@2
+    displayName: Deploy Blazor to App Service
+    inputs:
+      azureSubscription: 'Azure'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az webapp deploy --src-path $(Pipeline.Workspace)/todoItemsBlazor/blazor.zip --name $(blazorAppServiceName) --resource-group $(resourceGroupName) --type zip

@@ -130,14 +130,15 @@ jobs:
       modifyOutputPath: false
       zipAfterPublish: false
 
-  - script: |
-        az bicep build --file main.docker.webapp.bicep
-        az bicep build --file main.nodocker.webapp.bicep
-    displayName: Bicep linting
-    workingDirectory: Deployment
-
-  - task: PublishPipelineArtifact@1
-    displayName: Publish pipeline artifact 'SQL'
+  - task: DotNetCoreCLI@2
+    displayName: Dotnet publish '**/TodoItems.Blazor.csproj'
+    inputs:
+      command: 'publish'
+      publishWebProjects: false
+      projects: '**/TodoItems.Blazor.csproj'
+      arguments: '--no-restore --configuration ${{parameters.buildConfiguration}} --nologo --no-build --output $(Build.ArtifactStagingDirectory)/todoItemsBlazor/wwwroot'
+      modifyOutputPath: false
+      zipAfterPublish: false
     inputs:
       targetPath: '$(Build.ArtifactStagingDirectory)/SQL'
       artifact: 'database'
@@ -162,6 +163,13 @@ jobs:
     inputs:
       targetPath: '$(Build.SourcesDirectory)/tests'
       artifact: 'smoketests'
+      publishLocation: 'pipeline'
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish pipeline artifact 'todoItemsBlazor'
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/todoItemsBlazor'
+      artifact: 'todoItemsBlazor'
       publishLocation: 'pipeline'
 
   - ${{ each step in parameters.postBuildSteps }}:

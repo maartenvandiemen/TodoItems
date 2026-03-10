@@ -1,0 +1,87 @@
+.page-container {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.dashboard-title {
+    font-size: clamp(1.6rem, 5vw, 2.8rem);
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.1em;
+}
+
+.title-accent {
+    color: var(--accent-cyan);
+    margin-right: 0.3rem;
+    text-shadow: var(--glow-cyan);
+}
+
+.title-highlight {
+    color: var(--accent-cyan);
+}
+
+.dashboard-subtitle {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 300;
+}
+
+/* Add section */
+.add-section {
+    margin-bottom: 1.5rem;
+}
+
+/* Loading indicator */
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-subtle);
+    border-top-color: var(--accent-cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* List section */
+.list-section {
+    margin-top: 0.5rem;
+}
+
+/* Filter section */
+.filter-section {
+    margin-bottom: 1rem;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+    .page-container {
+        padding-top: 3rem;
+    }
+    .dashboard-header {
+        margin-bottom: 2.5rem;
+    }
+}

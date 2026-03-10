@@ -1,0 +1,63 @@
+﻿@page "/"
+@inject TodoApiService TodoService
+@implements IDisposable
+
+<PageTitle>TodoItems — Futuristic Dashboard</PageTitle>
+
+<div class="page-container container">
+    <header class="dashboard-header">
+        <h1 class="dashboard-title">
+            <span class="title-accent">◈</span>
+            Todo<span class="title-highlight">Items</span>
+        </h1>
+        <p class="dashboard-subtitle">Task Management System</p>
+    </header>
+
+    <ErrorBanner />
+
+    <section class="add-section" aria-label="Add new task">
+        <AddTodoForm />
+    </section>
+
+    @if (TodoService.IsLoading)
+    {
+        <div class="loading-indicator" role="status" aria-label="Loading tasks">
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Loading tasks...</span>
+        </div>
+    }
+    else
+    {
+        <section class="filter-section" aria-label="Filter tasks">
+            <FilterBar OnFilterChanged="HandleFilterChanged" />
+        </section>
+
+        <section class="list-section" aria-label="Task list">
+            <TodoList />
+        </section>
+    }
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        TodoService.StateChanged += OnStateChanged;
+        await TodoService.LoadItemsAsync();
+    }
+
+    private void OnStateChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleFilterChanged(FilterOption _)
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        TodoService.StateChanged -= OnStateChanged;
+    }
+}
+

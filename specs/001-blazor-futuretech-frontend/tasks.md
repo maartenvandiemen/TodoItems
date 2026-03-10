@@ -19,9 +19,9 @@
 
 **Purpose**: Bootstrap the Blazor WASM project and integrate it into the repository.
 
-- [ ] T001 Create Blazor WASM project using `dotnet new blazorwasm --name TodoItems.Blazor --output TodoItems.Blazor` from repository root
-- [ ] T002 Add `TodoItems.Blazor` to `TodoItems.slnx` using `dotnet sln TodoItems.slnx add TodoItems.Blazor/TodoItems.Blazor.csproj`
-- [ ] T003 Enable NuGet lock file in `TodoItems.Blazor/TodoItems.Blazor.csproj` (`<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>`), run `dotnet restore --force-evaluate`, and commit `packages.lock.json`
+- [x] T001 Create Blazor WASM project using `dotnet new blazorwasm --name TodoItems.Blazor --output TodoItems.Blazor` from repository root
+- [x] T002 Add `TodoItems.Blazor` to `TodoItems.slnx` using `dotnet sln TodoItems.slnx add TodoItems.Blazor/TodoItems.Blazor.csproj`
+- [x] T003 Enable NuGet lock file in `TodoItems.Blazor/TodoItems.Blazor.csproj` (`<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>`), run `dotnet restore --force-evaluate`, and commit `packages.lock.json`
 
 ---
 
@@ -31,16 +31,16 @@
 
 **⚠️ CRITICAL**: No user story component work can be completed until this phase is done.
 
-- [ ] T004 [P] Add CORS configuration keys `AllowedOrigins:Blazor` to `TodoItems.Api/appsettings.json` (production placeholder) and `TodoItems.Api/appsettings.Development.json` (`https://localhost:7002`)
-- [ ] T005 [P] Add CORS policy `"BlazorWasmPolicy"` (`WithOrigins(builder.Configuration["AllowedOrigins:Blazor"] ?? "")` + `AllowAnyHeader` + `AllowAnyMethod`) and `app.UseCors("BlazorWasmPolicy")` middleware to `TodoItems.Api/Program.cs` — reads the allowed origin from the config key introduced in T004, never a hardcoded string
-- [ ] T006 [P] Create `TodoItem`, `CreateTodoRequest`, and `UpdateTodoRequest` records in `TodoItems.Blazor/Models/TodoItem.cs`
-- [ ] T007 [P] Create `FilterOption` enum (`All`, `Active`, `Completed`) in `TodoItems.Blazor/Models/FilterOption.cs`
-- [ ] T008 [P] Configure API base URL in `TodoItems.Blazor/wwwroot/appsettings.json` (`ApiBaseUrl` production placeholder) and `TodoItems.Blazor/wwwroot/appsettings.Development.json` (`https://localhost:7001`)
-- [ ] T009 [P] Set up `TodoItems.Blazor/wwwroot/index.html` as SPA host page: dark background (`#0a0a0f`), Google Fonts import for Orbitron and Rajdhani, Blazor WASM script tag
-- [ ] T010 [P] Create global futuristic theme in `TodoItems.Blazor/wwwroot/css/app.css`: CSS custom properties (--bg-dark, --surface, --accent-cyan, --accent-purple, --text-primary, --text-dim, --glow-cyan, --glow-purple), `@keyframes` for `fade-slide-in` (300ms), `fade-slide-out` (250ms), `pulse-glow` (350ms), `glow-intensify` (150ms), `slide-down` (200ms), **and** an animated background treatment to satisfy FR-010 particle/glow requirement — implement as a CSS `@keyframes`-driven radial-gradient shift on `body::before` pseudo-element (e.g., slow-cycling cyan-to-purple glow at 8 s ease-in-out infinite); no canvas or JS interop required
-- [ ] T011 [P] Configure `TodoItems.Blazor/_Imports.razor` with required `@using` directives and set up `TodoItems.Blazor/App.razor` with `Router` component
-- [ ] T012 Implement `TodoApiService` in `TodoItems.Blazor/Services/TodoApiService.cs` with `Items`, `Filter`, `IsLoading`, `ErrorMessage` state; `FilteredItems` and `ActiveCount` computed properties; and HTTP methods `LoadItemsAsync`, `AddItemAsync`, `ToggleItemAsync`, `DeleteItemAsync` using optimistic updates per data-model.md; **`DeleteItemAsync` MUST call `LoadItemsAsync` after setting `ErrorMessage` when the server returns HTTP 404 (item already deleted), ensuring the list is reconciled rather than left in a stale optimistic state** (depends on T006, T007)
-- [ ] T013 In `TodoItems.Blazor/Program.cs`: register a **named** `HttpClient` (`builder.Services.AddHttpClient("TodoApi", c => c.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!))`) and register `TodoApiService` as a **scoped** service (`builder.Services.AddScoped<TodoApiService>()`) — `TodoApiService` constructor receives `IHttpClientFactory` and creates the named client; do NOT use `AddHttpClient<TodoApiService>()` which registers the service as transient and would break its stateful `Items`/`Filter`/`ErrorMessage` properties (depends on T008, T012)
+- [x] T004 [P] Add CORS configuration keys `AllowedOrigins:Blazor` to `TodoItems.Api/appsettings.json` (production placeholder) and `TodoItems.Api/appsettings.Development.json` (`https://localhost:7002`)
+- [x] T005 [P] Add CORS policy `"BlazorWasmPolicy"` (`WithOrigins(builder.Configuration["AllowedOrigins:Blazor"] ?? "")` + `AllowAnyHeader` + `AllowAnyMethod`) and `app.UseCors("BlazorWasmPolicy")` middleware to `TodoItems.Api/Program.cs` — reads the allowed origin from the config key introduced in T004, never a hardcoded string
+- [x] T006 [P] Create `TodoItem`, `CreateTodoRequest`, and `UpdateTodoRequest` records in `TodoItems.Blazor/Models/TodoItem.cs`
+- [x] T007 [P] Create `FilterOption` enum (`All`, `Active`, `Completed`) in `TodoItems.Blazor/Models/FilterOption.cs`
+- [x] T008 [P] Configure API base URL in `TodoItems.Blazor/wwwroot/appsettings.json` (`ApiBaseUrl` production placeholder) and `TodoItems.Blazor/wwwroot/appsettings.Development.json` (`https://localhost:7001`)
+- [x] T009 [P] Set up `TodoItems.Blazor/wwwroot/index.html` as SPA host page: dark background (`#0a0a0f`), Google Fonts import for Orbitron and Rajdhani, Blazor WASM script tag
+- [x] T010 [P] Create global futuristic theme in `TodoItems.Blazor/wwwroot/css/app.css`: CSS custom properties (--bg-dark, --surface, --accent-cyan, --accent-purple, --text-primary, --text-dim, --glow-cyan, --glow-purple), `@keyframes` for `fade-slide-in` (300ms), `fade-slide-out` (250ms), `pulse-glow` (350ms), `glow-intensify` (150ms), `slide-down` (200ms), **and** an animated background treatment to satisfy FR-010 particle/glow requirement — implement as a CSS `@keyframes`-driven radial-gradient shift on `body::before` pseudo-element (e.g., slow-cycling cyan-to-purple glow at 8 s ease-in-out infinite); no canvas or JS interop required
+- [x] T011 [P] Configure `TodoItems.Blazor/_Imports.razor` with required `@using` directives and set up `TodoItems.Blazor/App.razor` with `Router` component
+- [x] T012 Implement `TodoApiService` in `TodoItems.Blazor/Services/TodoApiService.cs` with `Items`, `Filter`, `IsLoading`, `ErrorMessage` state; `FilteredItems` and `ActiveCount` computed properties; and HTTP methods `LoadItemsAsync`, `AddItemAsync`, `ToggleItemAsync`, `DeleteItemAsync` using optimistic updates per data-model.md; **`DeleteItemAsync` MUST call `LoadItemsAsync` after setting `ErrorMessage` when the server returns HTTP 404 (item already deleted), ensuring the list is reconciled rather than left in a stale optimistic state** (depends on T006, T007)
+- [x] T013 In `TodoItems.Blazor/Program.cs`: register a **named** `HttpClient` (`builder.Services.AddHttpClient("TodoApi", c => c.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!))`) and register `TodoApiService` as a **scoped** service (`builder.Services.AddScoped<TodoApiService>()`) — `TodoApiService` constructor receives `IHttpClientFactory` and creates the named client; do NOT use `AddHttpClient<TodoApiService>()` which registers the service as transient and would break its stateful `Items`/`Filter`/`ErrorMessage` properties (depends on T008, T012)
 
 **Checkpoint**: Foundation ready — user story component implementation can begin
 
@@ -54,11 +54,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T014 [P] [US1] Create `TodoItems.Blazor/Components/ErrorBanner.razor` displaying `ErrorMessage` with Retry and Dismiss buttons; add `TodoItems.Blazor/Components/ErrorBanner.razor.css` with slide-down entry animation using `--accent-purple` glow
-- [ ] T015 [P] [US1] Create `TodoItems.Blazor/Components/TodoItemRow.razor` with completion toggle checkbox (pulse-glow on click) and delete button (neon hover glow); add `TodoItems.Blazor/Components/TodoItemRow.razor.css` with completion strikethrough + color change styles; ensure 44×44px touch targets; **when the displayed name is CSS-truncated (text-overflow: ellipsis), add a `title` attribute on the element containing the full untruncated name so it appears as a browser tooltip on hover**
-- [ ] T016 [P] [US1] Create `TodoItems.Blazor/Components/AddTodoForm.razor` with name input (maxlength 100), whitespace/empty inline validation, submit on Enter and button click; add `TodoItems.Blazor/Components/AddTodoForm.razor.css` with neon input focus glow and 44×44px touch target for submit button
-- [ ] T017 [US1] Create `TodoItems.Blazor/Components/TodoList.razor` as animated list container: wraps `TodoItemRow` components, applies `fade-slide-in` on add and `fade-slide-out` on delete, shows empty-state message when no items; add `TodoItems.Blazor/Components/TodoList.razor.css` (depends on T015)
-- [ ] T018 [US1] Implement `TodoItems.Blazor/Pages/Home.razor` as main page composition root: injects `TodoApiService`, triggers `LoadItemsAsync` on init, renders `AddTodoForm`, `TodoList`, `ErrorBanner`, and loading indicator; add `TodoItems.Blazor/Pages/Home.razor.css` with page-level layout and futuristic dashboard header (depends on T014, T016, T017)
+- [x] T014 [P] [US1] Create `TodoItems.Blazor/Components/ErrorBanner.razor` displaying `ErrorMessage` with Retry and Dismiss buttons; add `TodoItems.Blazor/Components/ErrorBanner.razor.css` with slide-down entry animation using `--accent-purple` glow
+- [x] T015 [P] [US1] Create `TodoItems.Blazor/Components/TodoItemRow.razor` with completion toggle checkbox (pulse-glow on click) and delete button (neon hover glow); add `TodoItems.Blazor/Components/TodoItemRow.razor.css` with completion strikethrough + color change styles; ensure 44×44px touch targets; **when the displayed name is CSS-truncated (text-overflow: ellipsis), add a `title` attribute on the element containing the full untruncated name so it appears as a browser tooltip on hover**
+- [x] T016 [P] [US1] Create `TodoItems.Blazor/Components/AddTodoForm.razor` with name input (maxlength 100), whitespace/empty inline validation, submit on Enter and button click; add `TodoItems.Blazor/Components/AddTodoForm.razor.css` with neon input focus glow and 44×44px touch target for submit button
+- [x] T017 [US1] Create `TodoItems.Blazor/Components/TodoList.razor` as animated list container: wraps `TodoItemRow` components, applies `fade-slide-in` on add and `fade-slide-out` on delete, shows empty-state message when no items; add `TodoItems.Blazor/Components/TodoList.razor.css` (depends on T015)
+- [x] T018 [US1] Implement `TodoItems.Blazor/Pages/Home.razor` as main page composition root: injects `TodoApiService`, triggers `LoadItemsAsync` on init, renders `AddTodoForm`, `TodoList`, `ErrorBanner`, and loading indicator; add `TodoItems.Blazor/Pages/Home.razor.css` with page-level layout and futuristic dashboard header (depends on T014, T016, T017)
 
 **Checkpoint**: User Story 1 fully functional and independently testable — MVP scope complete
 
@@ -72,8 +72,8 @@
 
 ### Implementation for User Story 2
 
-- [ ] T019 [P] [US2] Create `TodoItems.Blazor/Components/FilterBar.razor` with All / Active / Completed toggle buttons and active-item count badge (`ActiveCount`); add `TodoItems.Blazor/Components/FilterBar.razor.css` with neon-active state and `--accent-cyan` border for selected filter; ensure 44×44px touch targets
-- [ ] T020 [US2] Update `TodoItems.Blazor/Pages/Home.razor` to include `FilterBar`, pass `FilteredItems` from `TodoApiService` to `TodoList`, and wire `FilterBar` filter-change events to update `TodoApiService.Filter` triggering re-render (depends on T019)
+- [x] T019 [P] [US2] Create `TodoItems.Blazor/Components/FilterBar.razor` with All / Active / Completed toggle buttons and active-item count badge (`ActiveCount`); add `TodoItems.Blazor/Components/FilterBar.razor.css` with neon-active state and `--accent-cyan` border for selected filter; ensure 44×44px touch targets
+- [x] T020 [US2] Update `TodoItems.Blazor/Pages/Home.razor` to include `FilterBar`, pass `FilteredItems` from `TodoApiService` to `TodoList`, and wire `FilterBar` filter-change events to update `TodoApiService.Filter` triggering re-render (depends on T019)
 
 **Checkpoint**: User Stories 1 and 2 both independently functional
 
@@ -87,9 +87,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T021 [P] [US3] Add responsive CSS breakpoints to `TodoItems.Blazor/wwwroot/css/app.css`: mobile-first base (320px+), tablet breakpoint (768px), desktop breakpoint (1440px), wide breakpoint (2560px); ensure full-width single-column layout on mobile, max-width centered layout on desktop
-- [ ] T022 [P] [US3] Add mobile-first layout overrides to `TodoItems.Blazor/Components/AddTodoForm.razor.css` and `TodoItems.Blazor/Components/FilterBar.razor.css`: full-width inputs/buttons on narrow viewports, minimum 44×44px touch targets confirmed at all breakpoints
-- [ ] T023 [US3] Add mobile-first layout overrides to `TodoItems.Blazor/Components/TodoItemRow.razor.css` and `TodoItems.Blazor/Components/TodoList.razor.css`: full-width stack on narrow viewports, comfortable padding, no content clipping (depends on T022)
+- [x] T021 [P] [US3] Add responsive CSS breakpoints to `TodoItems.Blazor/wwwroot/css/app.css`: mobile-first base (320px+), tablet breakpoint (768px), desktop breakpoint (1440px), wide breakpoint (2560px); ensure full-width single-column layout on mobile, max-width centered layout on desktop
+- [x] T022 [P] [US3] Add mobile-first layout overrides to `TodoItems.Blazor/Components/AddTodoForm.razor.css` and `TodoItems.Blazor/Components/FilterBar.razor.css`: full-width inputs/buttons on narrow viewports, minimum 44×44px touch targets confirmed at all breakpoints
+- [x] T023 [US3] Add mobile-first layout overrides to `TodoItems.Blazor/Components/TodoItemRow.razor.css` and `TodoItems.Blazor/Components/TodoList.razor.css`: full-width stack on narrow viewports, comfortable padding, no content clipping (depends on T022)
 
 **Checkpoint**: All user stories functional and fully responsive across all target viewports
 
@@ -99,18 +99,18 @@
 
 **Purpose**: Infrastructure, deployment pipelines, and solution-wide integration. All four CI/CD pipelines updated in the same PR per Principle V.
 
-- [ ] T024 [P] Create `Deployment/blazorService.bicep` as a new App Service module for Blazor WASM (Linux, DOTNETCORE|10.0), following the pattern of existing `Deployment/appService.bicep`
-- [ ] T025 [P] Update `Deployment/main.nodocker.webapp.bicep` to reference the `blazorService` module and expose its outputs (app service name, URL)
-- [ ] T026 [P] Update `Deployment/main.docker.webapp.bicep` to reference the `blazorService` module with appropriate Docker parameters
-- [ ] T027 [P] Update `.github/workflows/build.yml` to publish the `TodoItems.Blazor` artifact (`dotnet publish TodoItems.Blazor/TodoItems.Blazor.csproj`) alongside the existing API artifact
-- [ ] T028 [P] Update `.github/workflows/main.nodocker.yml` to add a deploy step that deploys the Blazor artifact to the `blazorService` App Service (non-Docker)
-- [ ] T029 [P] Update `.github/workflows/main.docker.yml` to add a deploy step for Blazor (Docker variant)
-- [ ] T029a Create the `.azuredevops/` directory at the repository root and stub `build.yml`, `main.nodocker.yml`, and `main.docker.yml` files modeled on the equivalent `.github/workflows/` files — **this directory does not currently exist in the repository and must be created before T030–T032 can be executed**; T030–T032 depend on this task
-- [ ] T030 [P] Update `.azuredevops/build.yml` to publish the `todoItemsBlazor` artifact alongside the existing API artifact
-- [ ] T031 [P] Update `.azuredevops/main.nodocker.yml` to add a Blazor deploy stage
-- [ ] T032 [P] Update `.azuredevops/main.docker.yml` to add a Blazor deploy stage (Docker variant)
-- [ ] T034 [P] Run a Lighthouse or Axe DevTools accessibility audit on the running application; resolve any CRITICAL findings (missing `aria-label`, insufficient contrast ratio for primary text, keyboard-focus traps); document results — satisfies the spec's best-effort WCAG 2.1 AA commitment
-- [ ] T033 Run `quickstart.md` validation: start API locally, run Blazor project, confirm CORS works (DevTools network tab shows `Access-Control-Allow-Origin` header), confirm all CRUD operations work end-to-end
+- [x] T024 [P] Create `Deployment/blazorService.bicep` as a new App Service module for Blazor WASM (Linux, DOTNETCORE|10.0), following the pattern of existing `Deployment/appService.bicep`
+- [x] T025 [P] Update `Deployment/main.nodocker.webapp.bicep` to reference the `blazorService` module and expose its outputs (app service name, URL)
+- [x] T026 [P] Update `Deployment/main.docker.webapp.bicep` to reference the `blazorService` module with appropriate Docker parameters
+- [x] T027 [P] Update `.github/workflows/build.yml` to publish the `TodoItems.Blazor` artifact (`dotnet publish TodoItems.Blazor/TodoItems.Blazor.csproj`) alongside the existing API artifact
+- [x] T028 [P] Update `.github/workflows/main.nodocker.yml` to add a deploy step that deploys the Blazor artifact to the `blazorService` App Service (non-Docker)
+- [x] T029 [P] Update `.github/workflows/main.docker.yml` to add a deploy step for Blazor (Docker variant)
+- [x] T029a Create the `.azuredevops/` directory at the repository root and stub `build.yml`, `main.nodocker.yml`, and `main.docker.yml` files modeled on the equivalent `.github/workflows/` files — **this directory does not currently exist in the repository and must be created before T030–T032 can be executed**; T030–T032 depend on this task
+- [x] T030 [P] Update `.azuredevops/build.yml` to publish the `todoItemsBlazor` artifact alongside the existing API artifact
+- [x] T031 [P] Update `.azuredevops/main.nodocker.yml` to add a Blazor deploy stage
+- [x] T032 [P] Update `.azuredevops/main.docker.yml` to add a Blazor deploy stage (Docker variant)
+- [x] T034 [P] Run a Lighthouse or Axe DevTools accessibility audit on the running application; resolve any CRITICAL findings (missing `aria-label`, insufficient contrast ratio for primary text, keyboard-focus traps); document results — satisfies the spec's best-effort WCAG 2.1 AA commitment
+- [x] T033 Run `quickstart.md` validation: start API locally, run Blazor project, confirm CORS works (DevTools network tab shows `Access-Control-Allow-Origin` header), confirm all CRUD operations work end-to-end
 
 ---
 
@@ -173,3 +173,4 @@ Agent-A: T018  # Home.razor (needs T014+T016+T017)
 2. Phase 4 added → filtering available (FR-005, FR-006)
 3. Phase 5 added → fully responsive (SC-003, SC-004 for FR-012–FR-013)
 4. Phase 6 added → deployable to Azure via all four pipelines
+

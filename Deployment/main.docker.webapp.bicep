@@ -53,7 +53,17 @@ module keyVault 'keyVault.bicep' = {
   }
 }
 
+module blazorService 'blazorService.bicep' = {
+  name: 'blazorService-${dateTime}'
+  params: {
+    location: location
+    applicationname: applicationname
+  }
+}
+
 output webAppUrl string = appService.outputs.webAppUrl
 output webAppName string = appService.outputs.webAppName
 output sqlServerFQDN string = sql.outputs.sqlServerDatabase.fullyQualifiedDomainName
 output databaseName string = sql.outputs.sqlServerDatabase.databaseName
+output blazorWebAppUrl string = blazorService.outputs.webAppUrl
+output blazorWebAppName string = blazorService.outputs.webAppName
