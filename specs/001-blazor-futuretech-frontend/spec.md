@@ -61,7 +61,7 @@ A user accesses the application on a mobile phone or tablet. The layout adapts g
 
 ### Edge Cases
 
-- What happens when the API is unreachable at page load? An error state with a retry option is shown rather than a blank or broken page.
+- What happens when the API is unreachable at page load? An error state with a manual **"Retry"** button is shown rather than a blank or broken page. No automatic retries are attempted.
 - What happens when a user submits an empty or whitespace-only todo name? The submission is blocked and inline validation feedback is displayed.
 - What happens when a todo name exceeds the maximum allowed length (100 characters)? The input is capped at 100 characters or a validation message is shown.
 - What happens when a delete action is triggered on an item that is already deleted on the server? A graceful error message is shown and the list is refreshed.
@@ -78,13 +78,13 @@ A user accesses the application on a mobile phone or tablet. The layout adapts g
 - **FR-005**: Users MUST be able to filter the displayed todo list to show: all items, only active (incomplete) items, or only completed items.
 - **FR-006**: The interface MUST display a count of active (incomplete) items prominently.
 - **FR-007**: The interface MUST display a loading indicator while communicating with the backend.
-- **FR-008**: The interface MUST display user-friendly error messages when backend operations fail, with the option to dismiss or retry.
+- **FR-008**: The interface MUST display user-friendly error messages when backend operations fail, with a manual **"Retry"** button and a dismiss option. No automatic/silent retries are performed.
 - **FR-009**: The interface MUST prevent submission of blank or whitespace-only todo names with inline feedback.
 - **FR-010**: The visual design MUST reflect a futuristic, high-impact aesthetic: dark background, vibrant neon accent colors, bold typography, particle/glow effects, and animated transitions on interactions.
 - **FR-011**: All user interactions (add, complete, delete) MUST include visual transition animations (e.g., fade-in for new items, slide-out for deleted items, pulse on completion toggle).
 - **FR-012**: The application MUST be fully usable on screen widths from 320px (mobile) to 2560px (wide desktop) without horizontal scrolling or content overlap.
 - **FR-013**: All interactive elements MUST have a minimum touch target size of 44×44 logical pixels for mobile usability.
-- **FR-014**: The application MUST be implemented as a Blazor web application as specified by the requestor.
+- **FR-014**: The application MUST be implemented as a **Blazor WebAssembly** (standalone SPA) application in a **separate project** colocated in the repository. It calls the existing backend API directly from the browser over HTTP.
 
 ### Key Entities
 
@@ -105,11 +105,14 @@ A user accesses the application on a mobile phone or tablet. The layout adapts g
 ## Assumptions
 
 - The existing backend API (GET/POST/PUT/DELETE `/todoitems`) is already deployed and accessible during development and testing.
+- The API base URL is configured via `wwwroot/appsettings.json` in the Blazor WASM project, with per-environment overrides (e.g., `appsettings.Development.json`). It is never hardcoded in source.
 - No user authentication is required for the frontend; the application is treated as a single-user or demo application.
 - The application does not need to support offline mode; an active connection to the backend is required.
+- No pagination is required; all items returned by the API are rendered on a single page. Pagination and virtual scrolling are out of scope.
+- The existing `TodoItems.Api` project will be updated with a CORS policy permitting requests from the Blazor WASM origin. This is the sole cross-origin configuration mechanism; no proxy or gateway changes are required.
 - "Over the top" futuristic design is interpreted as: dark/near-black background, neon/electric accent colors (cyan, purple, or similar), glowing effects, bold sans-serif typography, subtle animated background elements (e.g., particle grid or gradient shifts), and high-contrast interactive states.
 - Accessibility (WCAG 2.1 AA) is a best-effort goal; contrast ratios for text over dark backgrounds will be maintained where the neon design allows.
-- The Blazor application will be hosted as a separate project colocated in the same repository as the existing API.
+- The Blazor application will be hosted as a **separate Blazor WebAssembly project** colocated in the same repository as the existing API. It runs entirely in the browser and calls the API directly via HTTP—no server-side render infrastructure is required.
 
 ## Out of Scope
 
@@ -118,3 +121,13 @@ A user accesses the application on a mobile phone or tablet. The layout adapts g
 - Due dates, priorities, or categories for todo items.
 - Offline or local storage fallback.
 - Push notifications or real-time sync (e.g., SignalR).
+
+## Clarifications
+
+### Session 2026-03-10
+
+- Q: Which Blazor hosting model should be used? → A: Blazor WebAssembly, separate project colocated in the repository.
+- Q: How should the API base URL be configured in the Blazor WASM project? → A: `appsettings.json` with per-environment overrides.
+- Q: Should API error retry behavior be manual (user-initiated) or automatic? → A: Manual only — show error with a "Retry" button, no automatic retries.
+- Q: Should the frontend paginate or cap the displayed todo list? → A: No pagination — render all items returned by the API.
+- Q: How should CORS be handled for Blazor WASM calling the API from a different origin? → A: Add a CORS policy to the existing `TodoItems.Api` project.
