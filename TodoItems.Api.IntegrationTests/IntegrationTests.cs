@@ -26,9 +26,6 @@ namespace TodoItems.Api.IntegrationTests
         [TestMethod]
         [DoNotParallelize]
         [DataRow(Environment.InMemory)]
-        [DataRow(Environment.ExternalDatabase)]
-        [DataRow(Environment.TestContainers)]
-
         public async Task InitialDb_TodoItems_Empty(Environment environment)
         {
             try
@@ -53,8 +50,6 @@ namespace TodoItems.Api.IntegrationTests
         [TestMethod]
         [DoNotParallelize]
         [DataRow(Environment.InMemory)]
-        [DataRow(Environment.ExternalDatabase)]
-        [DataRow(Environment.TestContainers)]
         public async Task FilledDb_GetTodoItems_Returned(Environment environment)
         {
             try

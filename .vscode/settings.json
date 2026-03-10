@@ -1,0 +1,21 @@
+{
+    "chat.promptFilesRecommendations": {
+        "speckit.constitution": true,
+        "speckit.specify": true,
+        "speckit.plan": true,
+        "speckit.tasks": true,
+        "speckit.implement": true
+    },
+    "chat.tools.terminal.autoApprove": {
+        ".specify/scripts/bash/": true,
+        ".specify/scripts/powershell/": true,
+        "git fetch": true,
+        "git ls-remote": true,
+        "Test-Path": true,
+        "New-Item": true,
+        "Out-Null": true,
+        "dotnet new": true,
+        "dotnet sln": true
+    }
+}
+
