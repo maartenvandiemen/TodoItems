@@ -15,7 +15,8 @@
         "New-Item": true,
         "Out-Null": true,
         "dotnet new": true,
-        "dotnet sln": true
+        "dotnet sln": true,
+        "&": true
     }
 }
 
