@@ -66,8 +66,8 @@ in the same pull request/commit:
 
 - `.github/workflows/main.nodocker.yml`
 - `.github/workflows/main.docker.yml`
-- `azure-pipelines/nodocker.yml` (or equivalent)
-- `azure-pipelines/docker.yml` (or equivalent)
+- `.azuredevops/main.nodocker.yml` (or equivalent)
+- `.azuredevops/main.docker.yml` (or equivalent)
 
 A change that adds infrastructure without updating all pipelines MUST NOT be merged.
 

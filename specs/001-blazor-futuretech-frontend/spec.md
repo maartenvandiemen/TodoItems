@@ -44,7 +44,7 @@ A user wants to focus on either their pending tasks or review what they've alrea
 
 ### User Story 3 - Responsive Experience Across Devices (Priority: P3)
 
-A user accesses the application on a mobile phone or tablet. The layout adapts gracefully to smaller screen sizes: navigation collapses, the todo list uses the full width, touch targets are large enough to tap comfortably, and the futuristic visual design is preserved without horizontal scrolling.
+A user accesses the application on a mobile phone or tablet. The layout adapts gracefully to smaller screen sizes: the page header and filter bar stack vertically (no separate navigation component exists), the todo list uses the full width, touch targets are large enough to tap comfortably, and the futuristic visual design is preserved without horizontal scrolling.
 
 **Why this priority**: Responsive design ensures the application is accessible to all users regardless of device. It is independent of the functional stories and can be validated in isolation via device simulation.
 
@@ -99,8 +99,7 @@ A user accesses the application on a mobile phone or tablet. The layout adapts g
 - **SC-003**: All core actions (add, toggle, delete, filter) work correctly on the three most common viewport sizes: mobile (375px), tablet (768px), and desktop (1440px).
 - **SC-004**: No horizontal scroll bar appears on any viewport width from 320px to 2560px.
 - **SC-005**: Animated transitions for add and delete interactions complete within 400ms, providing responsive feel without perceived lag.
-- **SC-006**: 100% of functional requirements (FR-001 through FR-014) have passing acceptance tests before the feature is considered complete.
-- **SC-007**: The visual design is immediately recognizable as futuristic and bold by a non-technical reviewer unfamiliar with the FutureTech site reference.
+- **SC-006**: The visual design is immediately recognizable as futuristic and bold by a non-technical reviewer unfamiliar with the FutureTech site reference. (Gate: stakeholder sign-off before merge — verified by at least one non-technical reviewer confirming the design reads as 'clearly futuristic'.)
 
 ## Assumptions
 
