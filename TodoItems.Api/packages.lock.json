@@ -28,19 +28,19 @@
       },
       "Microsoft.Build.Tasks.Core": {
         "type": "Direct",
-        "requested": "[18.3.3, )",
-        "resolved": "18.3.3",
-        "contentHash": "840f8/0fURdj2FquP0YZakOYDxqR17XT01G7mNisyRjofClEgv9ma+H9BS/hTz2dUTOka1Zcc8y/l6OS4W4mfg==",
+        "requested": "[18.4.0, )",
+        "resolved": "18.4.0",
+        "contentHash": "+V0ohf0eBQQbWqN0sUBpaGglIduK2ZvPZVSyu/MOpCSGHtlaapxnzCNwj8AqwwYHBP/Sb63l4p0xUJxQJ6eJzg==",
         "dependencies": {
-          "Microsoft.Build.Framework": "18.3.3",
-          "Microsoft.Build.Utilities.Core": "18.3.3",
-          "Microsoft.NET.StringTools": "18.3.3",
-          "System.CodeDom": "9.0.11",
-          "System.Configuration.ConfigurationManager": "9.0.11",
-          "System.Formats.Nrbf": "9.0.11",
-          "System.Resources.Extensions": "9.0.11",
-          "System.Security.Cryptography.Pkcs": "9.0.11",
-          "System.Security.Cryptography.ProtectedData": "9.0.11"
+          "Microsoft.Build.Framework": "18.4.0",
+          "Microsoft.Build.Utilities.Core": "18.4.0",
+          "Microsoft.NET.StringTools": "18.4.0",
+          "System.CodeDom": "10.0.1",
+          "System.Configuration.ConfigurationManager": "10.0.1",
+          "System.Formats.Nrbf": "10.0.1",
+          "System.Resources.Extensions": "10.0.1",
+          "System.Security.Cryptography.Pkcs": "10.0.1",
+          "System.Security.Cryptography.ProtectedData": "10.0.1"
         }
       },
       "Microsoft.EntityFrameworkCore.Design": {
@@ -181,18 +181,18 @@
       },
       "Microsoft.Build.Framework": {
         "type": "Transitive",
-        "resolved": "18.3.3",
-        "contentHash": "6lUd+/IQrxKz+++m2ehMnN+83bWrdvLf6S/iNH41d2RhuGE9etoCqosIBzjfkPwBoHih3touW/xl1ev+KUgkjw=="
+        "resolved": "18.4.0",
+        "contentHash": "oq6UxPfzz5S5hCC9hTRBt1r99BwEzCP/h/DadMl/m6RSGTUUXjoblsTTrokYks0SzZ2Cvx0fk4TvuEpxuXxPbw=="
       },
       "Microsoft.Build.Utilities.Core": {
         "type": "Transitive",
-        "resolved": "18.3.3",
-        "contentHash": "jpqF191vbyUs9TU3oxT6xURHQhdH7CwECFMyItGoizbYVQMyk0Di2bF4fs2DrbJHN1o1eVfWZrC08tauDceG4g==",
+        "resolved": "18.4.0",
+        "contentHash": "k0nCnZRs4r/y0pJNLKYGXYyzToaBV2JM0XFidRyEuRUhtZGcIvWKnK7dzXA8MGs4ah4pzYh6/7EJLlmPyjHTnA==",
         "dependencies": {
-          "Microsoft.Build.Framework": "18.3.3",
-          "Microsoft.NET.StringTools": "18.3.3",
-          "System.Configuration.ConfigurationManager": "9.0.11",
-          "System.Security.Cryptography.ProtectedData": "9.0.11"
+          "Microsoft.Build.Framework": "18.4.0",
+          "Microsoft.NET.StringTools": "18.4.0",
+          "System.Configuration.ConfigurationManager": "10.0.1",
+          "System.Security.Cryptography.ProtectedData": "10.0.1"
         }
       },
       "Microsoft.CodeAnalysis.Analyzers": {
@@ -381,8 +381,8 @@
       },
       "Microsoft.NET.StringTools": {
         "type": "Transitive",
-        "resolved": "18.3.3",
-        "contentHash": "y1qPJA/B7i+IGpS9yCBw64kOaDIC5x1pGIqKdcKfasj7kwRIWxbAoPCxRWLlP2p0ovLgLXae46KCEf3F+oMGyA=="
+        "resolved": "18.4.0",
+        "contentHash": "iQWOKi3L5QStmWqDjDubcr1KlTDy88qBTe88I0etlUUo1l0zSNebGJXl1Xetyl+ACA+ujP3YUtxo3Nz54JPriw=="
       },
       "Microsoft.OpenApi": {
         "type": "Transitive",
@@ -422,8 +422,8 @@
       },
       "System.CodeDom": {
         "type": "Transitive",
-        "resolved": "9.0.11",
-        "contentHash": "3dQXQ1w7LjiaTD9eJaEGB8cpMcpsayE3aRNoKWslhca8tLLJAUnEJe7tS4rzwn1LFxSm26hgiWuBF+Ll3FmBxw=="
+        "resolved": "10.0.1",
+        "contentHash": "owy+NlWSBRNLZO8CZ7IguuaPHHiAivjstTciM7YlXyDDqBY26FMl3F9Nw04n8Dog1JaxFlZiEIEXKPaigRmkNg=="
       },
       "System.Composition": {
         "type": "Transitive",
@@ -475,10 +475,10 @@
       },
       "System.Configuration.ConfigurationManager": {
         "type": "Transitive",
-        "resolved": "9.0.11",
-        "contentHash": "vPinosRgEk1CGjohbv0pDuz6gPprkWo5xvBTjOJjks5JOgOEWvPndq5NngGxiTcBcy1+k9GwzZ1c3Bp2fU5ezw==",
+        "resolved": "10.0.1",
+        "contentHash": "HfOAIlSA8OuaxBZD6xjsUWhtB0KdKSWEfRId8gSGveLUjuP6G8IxfiFgJNxaiRIEC1kx4pSvz3Em5xW/J6LLxA==",
         "dependencies": {
-          "System.Security.Cryptography.ProtectedData": "9.0.11"
+          "System.Security.Cryptography.ProtectedData": "10.0.1"
         }
       },
       "System.Diagnostics.PerformanceCounter": {
@@ -491,8 +491,8 @@
       },
       "System.Formats.Nrbf": {
         "type": "Transitive",
-        "resolved": "9.0.11",
-        "contentHash": "E9NND4jfFVAl+vrUIsIM/D3h2ExcbqoWfFcxw8yZF41CVP28CPMIde6M7l+NmgsttHIlQrJvD6v1ldFQYrTibw=="
+        "resolved": "10.0.1",
+        "contentHash": "UnsCQWrLHB4AzTxSvxriBQ+N4EiAPSOPWNdL/XzqgNyxu5Q9rU/s7M+ld5sHPRvtP9OkJPSXDi0iuhlq1IcdkQ=="
       },
       "System.IdentityModel.Tokens.Jwt": {
         "type": "Transitive",
@@ -515,21 +515,21 @@
       },
       "System.Resources.Extensions": {
         "type": "Transitive",
-        "resolved": "9.0.11",
-        "contentHash": "qRo3yMlUExa/shhZ/a1FyH9Hh+aQkDrp0AfL882Mtr/RO4HxldKs9Esie51Pkuh5RSTun+vD3DlcnHzU0Rzj/w==",
+        "resolved": "10.0.1",
+        "contentHash": "zq8Q3THQDjZ2O2LfwGnHXJ9aON4sIYf6kTR3AKXib+z2bwI9apV2vOWvBB1FygVfJZigFypwNxJ2PXeF/6S4GQ==",
         "dependencies": {
-          "System.Formats.Nrbf": "9.0.11"
+          "System.Formats.Nrbf": "10.0.1"
         }
       },
       "System.Security.Cryptography.Pkcs": {
         "type": "Transitive",
-        "resolved": "9.0.11",
-        "contentHash": "YS2YqtN6fFjlTDIQI+ucjbbrEvwMn796r+VLTQRr/5Oy6g+i+m7nIou83KnJCnAcKna2I+5eVJRks6SoHSpetQ=="
+        "resolved": "10.0.1",
+        "contentHash": "fitIhsqh2ZAB/fjKNPmUC2Fs1KCN67tWd9Sfv4ueUERHX9RYDPO1ZMowPM7bLDydi3WCLxdg9cy73B4VwscLjg=="
       },
       "System.Security.Cryptography.ProtectedData": {
         "type": "Transitive",
-        "resolved": "9.0.11",
-        "contentHash": "s8yUYuYYu+PAwvBdhLG1KyrGrk9gkYeuPxfAsXsTqqWyepwSyEw8hAaflW4nO98NG52YpYI1am2+9o+79h2RtQ=="
+        "resolved": "10.0.1",
+        "contentHash": "9SqHNq+lAjZeyPcm69FTQEjr+wsRYvkS3aW8yxoEndVYwDRkCrsP/44QPqpWHwzevoX26rkOoQ6kr7GZWngw2A=="
       }
     }
   }
