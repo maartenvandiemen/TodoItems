@@ -33,7 +33,7 @@ jobs:
 
       #Sometimes we get a TOOMANYREQUESTS response. Retry before breaking the build in this case.    
     - name: Run Trivy Analysis
-      uses: nick-fields/retry@v3
+      uses: nick-fields/retry@v4
       with:
         timeout_minutes: 3
         max_attempts: 5
