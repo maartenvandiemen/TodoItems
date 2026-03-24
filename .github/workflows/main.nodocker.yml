@@ -82,7 +82,7 @@ jobs:
         with:
           name: todoItemsApi
           path: ${{github.workspace}}/artifacts/api
-      - uses: Azure/login@v2
+      - uses: Azure/login@v3
         name: Azure Login
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
