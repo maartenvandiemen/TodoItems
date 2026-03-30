@@ -89,7 +89,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - run: Compress-Archive -Path ${{github.workspace}}/artifacts/api/* -DestinationPath ${{github.workspace}}/artifacts/api/api.zip
-      - uses: Azure/cli@v2
+      - uses: Azure/cli@v3
         name: Azure Deploy WebApp
         with:
           inlineScript: |
