@@ -79,7 +79,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Create resourcegroup ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
-        uses: Azure/cli@v2
+        uses: Azure/cli@v3
         with:
           inlineScript: az group create --location ${{ inputs.region }} --name ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
 
@@ -106,6 +106,6 @@ jobs:
     
       - name: Delete resourcegroup ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
         if: ${{inputs.deploy != true}}
-        uses: Azure/cli@v2
+        uses: Azure/cli@v3
         with:
           inlineScript: az group delete --name ${{ needs.determine_resourcegroup.outputs.resourcegroup }} --yes --no-wait 
