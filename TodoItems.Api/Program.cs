@@ -5,6 +5,8 @@ using Scalar.AspNetCore;
 using System.ComponentModel.DataAnnotations;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddServiceDefaults();
+
 builder.Logging.AddConsole();
 
 builder.Services.AddOpenApi();
@@ -15,8 +17,7 @@ if (builder.Environment.IsDevelopment())
 }
 else
 {
-    var connectionString = builder.Configuration.GetConnectionString("TodoDb");
-    builder.Services.AddDbContext<TodoDb>(opt => opt.UseSqlServer(connectionString));
+    builder.AddSqlServerDbContext<TodoDb>(connectionName: "sqldb");
 }
 
 builder.Services.AddApplicationInsightsTelemetry(new ApplicationInsightsServiceOptions

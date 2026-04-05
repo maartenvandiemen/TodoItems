@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="AppHost/AppHost.csproj" Id="6c55a1b7-c1fc-4cc1-9879-ab3f68a93bf4" />
+  <Project Path="ServiceDefaults/ServiceDefaults.csproj" Id="121ddee8-025b-47db-b13c-06c1f56d9681" />
   <Project Path="TodoItems.Api.IntegrationTests/TodoItems.Api.IntegrationTests.csproj" />
   <Project Path="TodoItems.Api/TodoItems.Api.csproj" />
 </Solution>
