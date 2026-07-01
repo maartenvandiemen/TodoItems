@@ -12,7 +12,7 @@ on:
       additionalParameters:
         type: string
         required: false
-        description: Arguments for the ARM or BICEP template
+        description: Arguments for the BICEP template as a JSON object (e.g. '{"param1": "value1"}')
       deploy:
         type: boolean
         required: true
@@ -83,26 +83,46 @@ jobs:
         with:
           inlineScript: az group create --location ${{ inputs.region }} --name ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
 
+      - name: Build deployment parameters
+        id: params
+        env:
+          SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
+          AZURE_SQL_USER: ${{ secrets.AZURE_SQL_USER }}
+          ADDITIONAL_PARAMS: ${{ inputs.additionalParameters }}
+        run: |
+          $additionalParamsJson = if ($env:ADDITIONAL_PARAMS) { $env:ADDITIONAL_PARAMS } else { '{}' }
+          $additionalParams = $additionalParamsJson | ConvertFrom-Json
+          $additionalParams | Add-Member -NotePropertyName 'sqlAdministratorLoginPassword' -NotePropertyValue $env:SA_PASSWORD -Force
+          $additionalParams | Add-Member -NotePropertyName 'sqlAdministratorLoginUser' -NotePropertyValue $env:AZURE_SQL_USER -Force
+          $params = $additionalParams | ConvertTo-Json -Compress
+          "parameters=$params" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+
       - name: Deploy Azure infrastructure
         if: ${{inputs.deploy == true}}
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@v2
         id: arm
         with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
-          template: ${{github.workspace}}${{ inputs.template }}
-          parameters: ${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
-          deploymentMode: Incremental
+          type: deployment
+          operation: create
+          scope: resourceGroup
+          name: todoitems-deployment
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
+          template-file: ${{github.workspace}}${{ inputs.template }}
+          parameters: ${{ steps.params.outputs.parameters }}
 
       - name: Validate Azure infrastructure
         if: ${{inputs.deploy != true}}
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@v2
         with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
-          template: ${{github.workspace}}${{ inputs.template }}
-          parameters: ${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
-          deploymentMode: Validate
+          type: deployment
+          operation: validate
+          scope: resourceGroup
+          name: todoitems-validation
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
+          template-file: ${{github.workspace}}${{ inputs.template }}
+          parameters: ${{ steps.params.outputs.parameters }}
     
       - name: Delete resourcegroup ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
         if: ${{inputs.deploy != true}}
