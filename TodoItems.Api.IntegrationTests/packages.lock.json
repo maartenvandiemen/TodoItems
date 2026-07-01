@@ -31,9 +31,9 @@
       },
       "Microsoft.OpenApi": {
         "type": "Direct",
-        "requested": "[2.9.0, )",
-        "resolved": "2.9.0",
-        "contentHash": "uS2awDkgUvVhd735HEcNcOQdwbIDCAK3V1QzgWoszd/FPDLLVv9eF+fImmdJiGLIKKWJv2DMJQ7OSR9gYLd+uw=="
+        "requested": "[3.7.0, )",
+        "resolved": "3.7.0",
+        "contentHash": "7Ld/wUsxSEKBjAk8nPZ13qkju5kNoh20gf0JHPeHrK41tMZRpIq9amXFAOHncicjg0U5M035I+6/z3cBsYBHfg=="
       },
       "MSTest.TestAdapter": {
         "type": "Direct",
@@ -981,7 +981,7 @@
           "Microsoft.EntityFrameworkCore.InMemory": "[10.0.9, )",
           "Microsoft.EntityFrameworkCore.SqlServer": "[10.0.9, )",
           "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": "[10.0.9, )",
-          "Microsoft.OpenApi": "[2.9.0, )",
+          "Microsoft.OpenApi": "[3.7.0, )",
           "Scalar.AspNetCore": "[2.16.7, )"
         }
       }
