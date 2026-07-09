@@ -27,7 +27,7 @@
 
 	<!-- Transitive dependencies with vulnerabilities. Check if can be removed in future -->
 	<ItemGroup>
-		<PackageReference Include="Microsoft.OpenApi" Version="2.9.0" />
+		<PackageReference Include="Microsoft.OpenApi" Version="3.8.0" />
 	</ItemGroup>
 
   <ItemGroup>
