@@ -43,7 +43,7 @@ jobs:
     - name: Parse Trivy Analysis results
       run: docker run --workdir /github/artifact --rm -v ${{github.workspace}}/trivy:/github/artifact aquasec/trivy:canary convert -f table --exit-code -1 -s HIGH,CRITICAL trivy-result.json
 
-    - uses: actions/setup-dotnet@v5
+    - uses: actions/setup-dotnet@v6
       with:
         dotnet-version: '10.x'
 
