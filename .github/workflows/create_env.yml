@@ -12,7 +12,7 @@ on:
       additionalParameters:
         type: string
         required: false
-        description: Additional parameters for the ARM or BICEP template, as YAML (key: value per line)
+        description: "Additional parameters for the ARM or BICEP template, as YAML (key: value per line)"
       deploy:
         type: boolean
         required: true
