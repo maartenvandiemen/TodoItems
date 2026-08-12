@@ -22,5 +22,5 @@ jobs:
           name: smoketests
           path: ${{github.workspace}}/artifacts/smoketests
 
-      - name: Execute httpYac tests
-        run: docker run --workdir /github/workspace --rm -v ${{github.workspace}}/artifacts/smoketests:/github/workspace ghcr.io/anweber/httpyac:latest test.http --all -o short --var host=${{inputs.webAppUrl}}
+      - name: Execute IntelliJ HTTP Client tests
+        run: docker run --rm -v ${{github.workspace}}/artifacts/smoketests:/workdir jetbrains/intellij-http-client:latest test.http -V host=${{inputs.webAppUrl}}
