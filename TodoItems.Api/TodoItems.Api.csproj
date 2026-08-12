@@ -26,11 +26,6 @@
     <PackageReference Include="Scalar.AspNetCore" Version="2.16.18" />
   </ItemGroup>
 
-	<!-- Transitive dependencies with vulnerabilities. Check if can be removed in future -->
-	<ItemGroup>
-		<PackageReference Include="Microsoft.OpenApi" Version="2.*" />
-	</ItemGroup>
-
   <ItemGroup>
     <Folder Include="Migrations\" />
   </ItemGroup>
