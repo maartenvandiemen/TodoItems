@@ -12,6 +12,8 @@ updates:
     ignore:
       - dependency-name: "Scalar.AspNetCore"
         update-types: ["version-update:semver-patch"]
+      - dependency-name: "Microsoft.OpenApi*"
+        update-types: ["version-update:semver-major"]
     groups:
       MSTest:
         applies-to: version-updates
