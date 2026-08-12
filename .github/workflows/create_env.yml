@@ -12,7 +12,7 @@ on:
       additionalParameters:
         type: string
         required: false
-        description: Arguments for the ARM or BICEP template
+        description: "Additional parameters for the ARM or BICEP template, as YAML (key: value per line)"
       deploy:
         type: boolean
         required: true
@@ -85,24 +85,34 @@ jobs:
 
       - name: Deploy Azure infrastructure
         if: ${{inputs.deploy == true}}
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@v2
         id: arm
         with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
-          template: ${{github.workspace}}${{ inputs.template }}
-          parameters: ${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
-          deploymentMode: Incremental
+          type: deployment
+          operation: create
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
+          template-file: ${{github.workspace}}${{ inputs.template }}
+          parameters: |
+            ${{ inputs.additionalParameters }}
+            sqlAdministratorLoginPassword: ${{ secrets.SA_PASSWORD }}
+            sqlAdministratorLoginUser: ${{ secrets.AZURE_SQL_USER }}
 
       - name: Validate Azure infrastructure
         if: ${{inputs.deploy != true}}
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@v2
         with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
-          template: ${{github.workspace}}${{ inputs.template }}
-          parameters: ${{ inputs.additionalParameters }} sqlAdministratorLoginPassword=${{secrets.SA_PASSWORD}} sqlAdministratorLoginUser=${{secrets.AZURE_SQL_USER}}
-          deploymentMode: Validate
+          type: deployment
+          operation: validate
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
+          template-file: ${{github.workspace}}${{ inputs.template }}
+          parameters: |
+            ${{ inputs.additionalParameters }}
+            sqlAdministratorLoginPassword: ${{ secrets.SA_PASSWORD }}
+            sqlAdministratorLoginUser: ${{ secrets.AZURE_SQL_USER }}
     
       - name: Delete resourcegroup ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
         if: ${{inputs.deploy != true}}

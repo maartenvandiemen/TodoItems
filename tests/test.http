@@ -1,42 +1,81 @@
-###
-
-{{
-  exports.defaultHeaders = {
-    'Content-Type': 'application/json',
-  };
-}}
-
-###
-# @name postIncomplete
+### createForGet
 POST {{host}}/todoitems
-...defaultHeaders
+Content-Type: application/json
+
 {
   "name": "{{$random.alphabetic(50)}}",
   "isComplete": false
 }
 
-??  status == 201
+> {%
+  client.test("createForGet returns 201", function() {
+    client.assert(response.status === 201, "Response status is not 201");
+  });
+  client.global.set("getId", response.body.id);
+%}
 
-###
-# @ref postIncomplete
-GET {{host}}/todoitems/{{postIncomplete.id}}
-...defaultHeaders
+### getIncomplete
+GET {{host}}/todoitems/{{getId}}
+Content-Type: application/json
 
-??  status == 200
+> {%
+  client.test("getIncomplete returns 200", function() {
+    client.assert(response.status === 200, "Response status is not 200");
+  });
+%}
 
-###
-# @forceRef postIncomplete
-DELETE {{host}}/todoitems/{{postIncomplete.id}}
+### createForDelete
+POST {{host}}/todoitems
+Content-Type: application/json
 
-??  status == 200
+{
+  "name": "{{$random.alphabetic(50)}}",
+  "isComplete": false
+}
 
-###
-# @forceRef postIncomplete
-PUT {{host}}/todoitems/{{postIncomplete.id}}
-...defaultHeaders
+> {%
+  client.test("createForDelete returns 201", function() {
+    client.assert(response.status === 201, "Response status is not 201");
+  });
+  client.global.set("deleteId", response.body.id);
+%}
+
+### deleteIncomplete
+DELETE {{host}}/todoitems/{{deleteId}}
+
+> {%
+  client.test("deleteIncomplete returns 200", function() {
+    client.assert(response.status === 200, "Response status is not 200");
+  });
+%}
+
+### createForPut
+POST {{host}}/todoitems
+Content-Type: application/json
+
+{
+  "name": "{{$random.alphabetic(50)}}",
+  "isComplete": false
+}
+
+> {%
+  client.test("createForPut returns 201", function() {
+    client.assert(response.status === 201, "Response status is not 201");
+  });
+  client.global.set("putId", response.body.id);
+%}
+
+### putComplete
+PUT {{host}}/todoitems/{{putId}}
+Content-Type: application/json
+
 {
   "name": "{{$random.alphabetic(50)}}",
   "isComplete": true
 }
 
-?? status == 204
+> {%
+  client.test("putComplete returns 204", function() {
+    client.assert(response.status === 204, "Response status is not 204");
+  });
+%}
