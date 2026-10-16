@@ -25,7 +25,7 @@
     <PackageReference Include="Scalar.AspNetCore" Version="2.18.0" />
 	  
 	<!-- Transitive dependency made explicit due to security vulnerability -->
-    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="9.0.21" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
   </ItemGroup>
 
   <ItemGroup>
