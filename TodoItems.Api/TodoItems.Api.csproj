@@ -22,7 +22,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.14" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.14" />
-    <PackageReference Include="Scalar.AspNetCore" Version="2.18.3" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.18.5" />
 	  
 	<!-- Transitive dependency made explicit due to security vulnerability -->
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="9.0.22" />
