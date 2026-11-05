@@ -5,7 +5,7 @@ param applicationname string
 var applicationInsightsName = 'insights-${applicationname}-${uniqueString(resourceGroup().id)}'
 var workspaceName = 'workspace-${applicationname}-${uniqueString(resourceGroup().id)}'
 
-resource workspace 'Microsoft.OperationalInsights/workspaces@2025-02-01' = {
+resource workspace 'Microsoft.OperationalInsights/workspaces@2026-03-01' = {
   name: workspaceName
   location: location
   properties: {
