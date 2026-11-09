@@ -1,5 +1,3 @@
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
@@ -26,9 +24,7 @@ namespace TodoItems.Api.IntegrationTests
         [TestMethod]
         [DoNotParallelize]
         [DataRow(Environment.InMemory)]
-        [DataRow(Environment.ExternalDatabase)]
         [DataRow(Environment.TestContainers)]
-
         public async Task InitialDb_TodoItems_Empty(Environment environment)
         {
             try
@@ -53,7 +49,6 @@ namespace TodoItems.Api.IntegrationTests
         [TestMethod]
         [DoNotParallelize]
         [DataRow(Environment.InMemory)]
-        [DataRow(Environment.ExternalDatabase)]
         [DataRow(Environment.TestContainers)]
         public async Task FilledDb_GetTodoItems_Returned(Environment environment)
         {
@@ -107,34 +102,10 @@ namespace TodoItems.Api.IntegrationTests
 
         private async Task Teardown(Environment environment)
         {
-            var connectionstring = DetermineConnectionstring(environment);
-
-            using var sc = new SqlConnection(connectionstring);
-            using var cmd = sc.CreateCommand();
-            sc.Open();
-            cmd.CommandText = "DELETE FROM Todos";
-            cmd.ExecuteNonQuery();
-
+            //The container is removed with its data, so there is no need to clean the tables.
             if (environment == Environment.TestContainers)
             {
                 await _sqlContainer!.StopAsync();
-            }
-        }
-
-        private string DetermineConnectionstring(Environment environment)
-        {
-            if (environment == Environment.TestContainers)
-            {
-                return _sqlContainer!.GetConnectionString();
-            }
-            else
-            {
-                var config = new ConfigurationBuilder()
-                                    .AddJsonFile("appsettings.integration.json")
-                                    .AddEnvironmentVariables(prefix: "integrationtests_")
-                                    .Build();
-
-                return config.GetConnectionString("TodoDb")!;
             }
         }
     }

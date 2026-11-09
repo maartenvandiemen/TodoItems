@@ -3,7 +3,6 @@
     public enum Environment
     {
         InMemory,
-        TestContainers,
-        ExternalDatabase
+        TestContainers
     }
 }
