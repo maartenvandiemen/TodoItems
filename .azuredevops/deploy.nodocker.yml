@@ -1,14 +1,14 @@
 jobs:
 - job: Deploy_App
-  dependsOn: [Create_Env, Determine_Names]
+  dependsOn: [Create_Env]
 
   variables:
   - group: AzureSecrets
   - name: appServiceAppName
     value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appServiceAppName'] ]
-  #The web app lives in the resourcegroup of the spokes.
+  #The web app lives in the resourcegroup of the first spoke.
   - name: resourceGroupName
-    value: $[ dependencies.Determine_Names.outputs['DetermineNames.spokesResourceGroup'] ]
+    value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appResourceGroup'] ]
 
   steps:
   - checkout: none
@@ -17,6 +17,8 @@ jobs:
     displayName: Download API
   - powershell: Compress-Archive -Path $(Pipeline.Workspace)/todoItemsAPI/* -DestinationPath $(Pipeline.Workspace)/todoItemsAPI/api.zip
     displayName: Make zip from API as prerequisite for deployment
+  #The code is deployed through the SCM (Kudu) site, which is closed by default (the web app is private).
+  #For the length of the deployment this agent gets its own allow rule, removed again afterwards.
   - task: AzureCLI@2
     displayName: Deploy API
     inputs:
@@ -24,5 +26,22 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        az webapp deploy --src-path $(Pipeline.Workspace)/todoItemsAPI/api.zip --name $(appServiceAppName) --resource-group $(resourceGroupName) --type zip
-        az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name $(appServiceAppName) --resource-group $(resourceGroupName)
+        rg='$(resourceGroupName)'
+        app='$(appServiceAppName)'
+
+        agentIp=$(curl -s https://api.ipify.org)
+        echo "Agent IP address: $agentIp"
+        az webapp config access-restriction add --resource-group "$rg" --name "$app" --scm-site true --rule-name agent --action Allow --ip-address "$agentIp/32" --priority 100 --output none
+        trap 'az webapp config access-restriction remove --resource-group "$rg" --name "$app" --scm-site true --rule-name agent --output none' EXIT
+
+        # A new rule takes a moment to apply: wait until the SCM site no longer answers 403.
+        scm=$(az webapp show --resource-group "$rg" --name "$app" --query "hostNameSslStates[?hostType=='Repository'].name | [0]" -o tsv)
+        for i in $(seq 1 18); do
+          code=$(curl -s -o /dev/null -w '%{http_code}' "https://$scm/api/deployments" || true)
+          echo "Attempt $i: https://$scm returned $code"
+          if [ "$code" != "403" ]; then break; fi
+          sleep 10
+        done
+
+        az webapp deploy --src-path $(Pipeline.Workspace)/todoItemsAPI/api.zip --name "$app" --resource-group "$rg" --type zip
+        az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name "$app" --resource-group "$rg"

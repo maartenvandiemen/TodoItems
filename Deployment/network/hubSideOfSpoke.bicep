@@ -4,7 +4,7 @@
 //  - a link between the private DNS zone of the hub and the spoke VNet, so that resources in the spoke
 //    (such as the Application Gateway) resolve private endpoints to their private IP.
 // Deploy into the hub resource group.
-import { webAppPrivateDnsZoneName } from 'addressPlan.bicep'
+import { webAppPrivateDnsZoneName, monitorPrivateDnsZoneNames } from 'addressPlan.bicep'
 
 param hubVnetName string
 
@@ -46,3 +46,21 @@ resource webAppDnsZoneSpokeLink 'Microsoft.Network/privateDnsZones/virtualNetwor
     }
   }
 }
+
+// The same for the zones of the Azure Monitor private link: the application in the spoke sends its telemetry to
+// the private endpoint in the hub, so the spoke has to resolve the Azure Monitor names to private addresses.
+resource monitorDnsZones 'Microsoft.Network/privateDnsZones@2024-06-01' existing = [for zoneName in monitorPrivateDnsZoneNames: {
+  name: zoneName
+}]
+
+resource monitorDnsZoneSpokeLinks 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = [for (zoneName, index) in monitorPrivateDnsZoneNames: {
+  parent: monitorDnsZones[index]
+  name: 'link-${spokeName}'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: spokeVnetId
+    }
+  }
+}]

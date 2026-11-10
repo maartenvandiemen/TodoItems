@@ -1,14 +1,10 @@
 on:
   workflow_call:
     inputs:
-      hubResourceGroup:
+      resourceGroupPrefix:
         type: string
         required: true
-        description: Name of the resource group of the hub
-      spokesResourceGroup:
-        type: string
-        required: true
-        description: Name of the resource group of the spokes and the web app
+        description: Unique name of the instance. Every resource group of the instance is tagged with it by main.bicep.
 defaults:
   run:
     shell: pwsh
@@ -27,15 +23,32 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # Also used to clean up after a failed run, so a resource group may not exist (yet): skip those.
+      # Also used to clean up after a failed run: only the resource groups that were created are found.
+      # The resource groups of an instance are found by their tag, so a new spoke needs no change here.
       # The spokes are deleted first, and waited for: they contain a private endpoint that registers its
       # record in the private DNS zone of the hub, and the peerings refer to the hub.
       - uses: Azure/cli@v3
         with:
           inlineScript: |
-            if [ "$(az group exists --name '${{ inputs.spokesResourceGroup }}')" = "true" ]; then
-              az group delete --name '${{ inputs.spokesResourceGroup }}' --yes
-            fi
-            if [ "$(az group exists --name '${{ inputs.hubResourceGroup }}')" = "true" ]; then
-              az group delete --name '${{ inputs.hubResourceGroup }}' --yes --no-wait
-            fi
+            prefix='${{ inputs.resourceGroupPrefix }}'
+            spokes=$(az group list --query "[?tags.instance=='$prefix' && tags.role=='spoke'].name" -o tsv)
+            hubs=$(az group list --query "[?tags.instance=='$prefix' && tags.role=='hub'].name" -o tsv)
+            # A resource that is connected to an Azure Monitor private link scope cannot be deleted: disconnect
+            # the connected resources (Application Insights in a spoke, the workspace in the hub) first.
+            sub=$(az account show --query id -o tsv)
+            for hub in $hubs; do
+              for scope in $(az resource list --resource-group "$hub" --resource-type Microsoft.Insights/privateLinkScopes --query "[].name" -o tsv); do
+                url="https://management.azure.com/subscriptions/$sub/resourceGroups/$hub/providers/Microsoft.Insights/privateLinkScopes/$scope/scopedResources"
+                for connection in $(az rest --method get --url "$url?api-version=2021-09-01" --query "value[].name" -o tsv); do
+                  az rest --method delete --url "$url/$connection?api-version=2021-09-01" --output none
+                done
+                for i in $(seq 1 30); do
+                  left=$(az rest --method get --url "$url?api-version=2021-09-01" --query "length(value)" -o tsv)
+                  if [ "$left" = "0" ]; then break; fi
+                  sleep 10
+                done
+              done
+            done
+            for rg in $spokes; do az group delete --name "$rg" --yes --no-wait; done
+            for rg in $spokes; do az group wait --name "$rg" --deleted; done
+            for rg in $hubs; do az group delete --name "$rg" --yes --no-wait; done

@@ -1,4 +1,4 @@
-// Single source of truth for the IP plan. Both hub.bicep and spokes.bicep import from here,
+// Single source of truth for the IP plan. The orchestrator (main.bicep) and hub.bicep import from here,
 // so the firewall rule (hub) and the spoke networks can never drift apart.
 //
 // Every instance (hub + spokes) deploys into its own resource groups and is never peered with
@@ -32,6 +32,9 @@ var hub = {
   sharedServicesSubnetPrefix: '10.0.1.0/24'
   // Azure Firewall requires a subnet named AzureFirewallSubnet of at least /26.
   firewallSubnetPrefix: '10.0.2.0/26'
+  // Private endpoints of the hub (for now: the Azure Monitor private link scope, which needs at least
+  // 11 free addresses, /27 is the smallest supported size).
+  privateEndpointSubnetPrefix: '10.0.3.0/27'
 }
 
 // Private DNS zone for private endpoints of App Service. It lives in the hub and is linked to every
@@ -39,6 +42,17 @@ var hub = {
 @export()
 #disable-next-line no-hardcoded-env-urls
 var webAppPrivateDnsZoneName = 'privatelink.azurewebsites.net'
+
+// Private DNS zones of the Azure Monitor private link (AMPLS). Same rule as the zone above: they live in
+// the hub and are linked to the hub itself and to each spoke.
+@export()
+var monitorPrivateDnsZoneNames = [
+  'privatelink.monitor.azure.com'
+  'privatelink.oms.opinsights.azure.com'
+  'privatelink.ods.opinsights.azure.com'
+  'privatelink.agentsvc.azure-automation.net'
+  'privatelink.blob.${environment().suffixes.storage}'
+]
 
 // The web app is deployed into the FIRST spoke (spokes[0]).
 @export()

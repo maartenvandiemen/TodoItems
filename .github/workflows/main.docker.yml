@@ -129,8 +129,7 @@ jobs:
     with:
       region: ${{ vars.AZURE_REGION }}
       template: /artifacts/bicep/main.bicep
-      hubResourceGroup: ${{ needs.determine_names.outputs.hubResourceGroup }}
-      spokesResourceGroup: ${{ needs.determine_names.outputs.spokesResourceGroup }}
+      resourceGroupPrefix: ${{ needs.determine_names.outputs.resourceGroupPrefix }}
       additionalParameters: |
         applicationname: todoitems
         dockerImageNameAndTag: ${{needs.push_docker_image.outputs.dockerTag}}
@@ -164,6 +163,5 @@ jobs:
     needs: [determine_names, create_env, smoketests]
     uses: ./.github/workflows/delete_env.yml
     with:
-      hubResourceGroup: ${{ needs.determine_names.outputs.hubResourceGroup }}
-      spokesResourceGroup: ${{ needs.determine_names.outputs.spokesResourceGroup }}
+      resourceGroupPrefix: ${{ needs.determine_names.outputs.resourceGroupPrefix }}
     secrets: inherit

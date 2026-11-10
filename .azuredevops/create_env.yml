@@ -7,17 +7,17 @@ parameters:
   default: ''
 
 jobs:
-#Seperate job for generating the names of the resourcegroups.
+#Seperate job for generating the unique name of the instance.
 #In case the deployment fails, the Create_Env job can be executed again and the same resourcegroups are used as in the previous attempt.
+#main.bicep names the resourcegroups <prefix>-hub and <prefix>-<spoke name>.
 - job: Determine_Names
   steps:
   - checkout: none
   - powershell: |
       $instanceId = Get-Random -Minimum 10000000000 -Maximum 99999999999
-      Write-Host "##vso[task.setvariable variable=hubResourceGroup;isoutput=true]todoItems-$instanceId-hub"
-      Write-Host "##vso[task.setvariable variable=spokesResourceGroup;isoutput=true]todoItems-$instanceId"
+      Write-Host "##vso[task.setvariable variable=resourceGroupPrefix;isoutput=true]todoItems-$instanceId"
     name: DetermineNames
-    displayName: Determine names of the resourcegroups
+    displayName: Determine unique name of the instance
 
 #Deploys the hub, the spokes and the web app (see Deployment/main.bicep).
 #The template runs at subscription scope and creates the resourcegroups itself.
@@ -25,10 +25,8 @@ jobs:
   dependsOn: [Determine_Names]
   variables:
   - group: AzureSecrets
-  - name: hubResourceGroup
-    value: $[ dependencies.Determine_Names.outputs['DetermineNames.hubResourceGroup'] ]
-  - name: spokesResourceGroup
-    value: $[ dependencies.Determine_Names.outputs['DetermineNames.spokesResourceGroup'] ]
+  - name: resourceGroupPrefix
+    value: $[ dependencies.Determine_Names.outputs['DetermineNames.resourceGroupPrefix'] ]
   steps:
   - checkout: none
   - download: current
@@ -42,10 +40,11 @@ jobs:
       location: '$(azure_region)'
       templateLocation: 'Linked artifact'
       csmFile: '$(Pipeline.Workspace)/infraCode/${{ parameters.template }}'
-      overrideParameters: '-location $(azure_region) -hubResourceGroupName $(hubResourceGroup) -spokesResourceGroupName $(spokesResourceGroup) -applicationname todoitems -sqlAdministratorLoginUser $(todoItemsSqlAdminUser) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
+      overrideParameters: '-location $(azure_region) -resourceGroupPrefix $(resourceGroupPrefix) -applicationname todoitems -sqlAdministratorLoginUser $(todoItemsSqlAdminUser) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
       deploymentMode: 'Incremental'
       deploymentOutputs: deploymentOutputs
   - bash: |
+        echo "##vso[task.setvariable variable=appResourceGroup;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.appResourceGroupName.value')"
         echo "##vso[task.setvariable variable=appServiceAppUrl;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.webAppUrl.value')"
         echo "##vso[task.setvariable variable=appServiceAppName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.webAppName.value')"
         echo "##vso[task.setvariable variable=gatewayUrl;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.gatewayUrl.value')"

@@ -4,33 +4,28 @@ on:
       instanceId:
         description: Random id that makes this instance unique
         value: ${{ jobs.determine_names.outputs.instanceId }}
-      hubResourceGroup:
-        description: Name of the resource group of the hub
-        value: ${{ jobs.determine_names.outputs.hubResourceGroup }}
-      spokesResourceGroup:
-        description: Name of the resource group of the spokes and the web app
-        value: ${{ jobs.determine_names.outputs.spokesResourceGroup }}
+      resourceGroupPrefix:
+        description: Unique name of this instance. main.bicep names the resource groups <prefix>-hub and <prefix>-<spoke name>.
+        value: ${{ jobs.determine_names.outputs.resourceGroupPrefix }}
 
 defaults:
   run:
     shell: pwsh
 
 jobs:
-  # Separate job for generating the names. When a later job fails and only the failed jobs are
-  # re-run, the same names (and therefore the same resource groups) are used again.
+  # Separate job for generating the name. When a later job fails and only the failed jobs are
+  # re-run, the same name (and therefore the same resource groups) is used again.
   determine_names:
     permissions:
       contents: read
     runs-on: ubuntu-latest
     outputs:
       instanceId: ${{ steps.names.outputs.instanceId }}
-      hubResourceGroup: ${{ steps.names.outputs.hubResourceGroup }}
-      spokesResourceGroup: ${{ steps.names.outputs.spokesResourceGroup }}
+      resourceGroupPrefix: ${{ steps.names.outputs.resourceGroupPrefix }}
     steps:
       - name: Determine names
         id: names
         run: |
           $instanceId = Get-Random -Minimum 10000000000 -Maximum 99999999999
           echo "instanceId=$instanceId" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
-          echo "hubResourceGroup=todoItems-$instanceId-hub" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
-          echo "spokesResourceGroup=todoItems-$instanceId" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+          echo "resourceGroupPrefix=todoItems-$instanceId" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append

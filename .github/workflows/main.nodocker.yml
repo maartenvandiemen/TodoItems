@@ -64,14 +64,13 @@ jobs:
     with:
       region: ${{ vars.AZURE_REGION }}
       template: /artifacts/bicep/main.bicep
-      hubResourceGroup: ${{ needs.determine_names.outputs.hubResourceGroup }}
-      spokesResourceGroup: ${{ needs.determine_names.outputs.spokesResourceGroup }}
+      resourceGroupPrefix: ${{ needs.determine_names.outputs.resourceGroupPrefix }}
       additionalParameters: |
         applicationname: todoitems
     secrets: inherit
 
   deploy_app:
-    needs: [determine_names, build, create_env]
+    needs: [build, create_env]
     runs-on: ubuntu-latest
     environment: AzureDeploy
     permissions:
@@ -91,14 +90,31 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - run: Compress-Archive -Path ${{github.workspace}}/artifacts/api/* -DestinationPath ${{github.workspace}}/artifacts/api/api.zip
-      # The code is deployed through the public SCM (Kudu) site, which stays open on purpose.
-      # Only the site itself is private.
+      # The code is deployed through the SCM (Kudu) site, which is closed by default (the web app is private).
+      # For the length of the deployment this runner gets its own allow rule, removed again afterwards.
       - uses: Azure/cli@v3
         name: Azure Deploy WebApp
         with:
           inlineScript: |
-             az webapp deploy --src-path ${{github.workspace}}/artifacts/api/api.zip --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.determine_names.outputs.spokesResourceGroup }} --type zip
-             az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.determine_names.outputs.spokesResourceGroup }}
+             rg='${{ needs.create_env.outputs.appResourceGroup }}'
+             app='${{ needs.create_env.outputs.webAppName }}'
+
+             runnerIp=$(curl -s https://api.ipify.org)
+             echo "Runner IP address: $runnerIp"
+             az webapp config access-restriction add --resource-group "$rg" --name "$app" --scm-site true --rule-name runner --action Allow --ip-address "$runnerIp/32" --priority 100 --output none
+             trap 'az webapp config access-restriction remove --resource-group "$rg" --name "$app" --scm-site true --rule-name runner --output none' EXIT
+
+             # A new rule takes a moment to apply: wait until the SCM site no longer answers 403.
+             scm=$(az webapp show --resource-group "$rg" --name "$app" --query "hostNameSslStates[?hostType=='Repository'].name | [0]" -o tsv)
+             for i in $(seq 1 18); do
+               code=$(curl -s -o /dev/null -w '%{http_code}' "https://$scm/api/deployments" || true)
+               echo "Attempt $i: https://$scm returned $code"
+               if [ "$code" != "403" ]; then break; fi
+               sleep 10
+             done
+
+             az webapp deploy --src-path ${{github.workspace}}/artifacts/api/api.zip --name "$app" --resource-group "$rg" --type zip
+             az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name "$app" --resource-group "$rg"
 
   deploy_db:
     needs: [build, create_env]
@@ -128,6 +144,5 @@ jobs:
     needs: [determine_names, create_env, smoketests]
     uses: ./.github/workflows/delete_env.yml
     with:
-      hubResourceGroup: ${{ needs.determine_names.outputs.hubResourceGroup }}
-      spokesResourceGroup: ${{ needs.determine_names.outputs.spokesResourceGroup }}
+      resourceGroupPrefix: ${{ needs.determine_names.outputs.resourceGroupPrefix }}
     secrets: inherit

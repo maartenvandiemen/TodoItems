@@ -72,16 +72,15 @@ stages:
       - deployment: Delete
         environment: todoItems-teardown
         variables:
-          - name: hubResourceGroup
-            value: $[ stageDependencies.Deploy.Determine_Names.outputs['DetermineNames.hubResourceGroup'] ]
-          - name: spokesResourceGroup
-            value: $[ stageDependencies.Deploy.Determine_Names.outputs['DetermineNames.spokesResourceGroup'] ]
+          - name: resourceGroupPrefix
+            value: $[ stageDependencies.Deploy.Determine_Names.outputs['DetermineNames.resourceGroupPrefix'] ]
         strategy:
           runOnce:
             deploy:
               steps:
               - download: none
-              #A resourcegroup may not exist (yet) after a failed deployment: skip those.
+              #The resourcegroups of the instance are found by their tag (set by main.bicep), so a new spoke needs no
+              #change here. After a failed deployment only the resourcegroups that were created are found.
               #The spokes are deleted first, and waited for: they contain a private endpoint that registers its
               #record in the private DNS zone of the hub, and the peerings refer to the hub.
               - task: AzureCLI@2
@@ -91,9 +90,26 @@ stages:
                   scriptType: 'bash'
                   scriptLocation: 'inlineScript'
                   inlineScript: |
-                    if [ -n "$(spokesResourceGroup)" ] && [ "$(az group exists --name '$(spokesResourceGroup)')" = "true" ]; then
-                      az group delete --name '$(spokesResourceGroup)' --yes
-                    fi
-                    if [ -n "$(hubResourceGroup)" ] && [ "$(az group exists --name '$(hubResourceGroup)')" = "true" ]; then
-                      az group delete --name '$(hubResourceGroup)' --yes --no-wait
-                    fi
+                    prefix='$(resourceGroupPrefix)'
+                    if [ -z "$prefix" ]; then echo "No instance name known, nothing to delete."; exit 0; fi
+                    spokes=$(az group list --query "[?tags.instance=='$prefix' && tags.role=='spoke'].name" -o tsv)
+                    hubs=$(az group list --query "[?tags.instance=='$prefix' && tags.role=='hub'].name" -o tsv)
+                    # A resource that is connected to an Azure Monitor private link scope cannot be deleted: disconnect
+                    # the connected resources (Application Insights in a spoke, the workspace in the hub) first.
+                    sub=$(az account show --query id -o tsv)
+                    for hub in $hubs; do
+                      for scope in $(az resource list --resource-group "$hub" --resource-type Microsoft.Insights/privateLinkScopes --query "[].name" -o tsv); do
+                        url="https://management.azure.com/subscriptions/$sub/resourceGroups/$hub/providers/Microsoft.Insights/privateLinkScopes/$scope/scopedResources"
+                        for connection in $(az rest --method get --url "$url?api-version=2021-09-01" --query "value[].name" -o tsv); do
+                          az rest --method delete --url "$url/$connection?api-version=2021-09-01" --output none
+                        done
+                        for i in $(seq 1 30); do
+                          left=$(az rest --method get --url "$url?api-version=2021-09-01" --query "length(value)" -o tsv)
+                          if [ "$left" = "0" ]; then break; fi
+                          sleep 10
+                        done
+                      done
+                    done
+                    for rg in $spokes; do az group delete --name "$rg" --yes --no-wait; done
+                    for rg in $spokes; do az group wait --name "$rg" --deleted; done
+                    for rg in $hubs; do az group delete --name "$rg" --yes --no-wait; done

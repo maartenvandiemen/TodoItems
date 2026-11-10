@@ -45,12 +45,21 @@ var appsettingsValues = concat(defaultAppsettings, empty(dockerImageNameAndTag) 
               value: 8080
           }])  
 
+// Public network access has to be set explicitly. 'Disabled' blocks the main site AND the SCM (Kudu) site for
+// everything but the private endpoint, and the access restrictions below cannot override that.
+//  - zip deploy (no docker image): the pipeline pushes the code through the public SCM site, so public network
+//    access stays 'Enabled'. The access restrictions below keep the main site private, and the SCM site closed
+//    except for the temporary rule the pipeline adds for its own IP address during the deployment.
+//  - docker image: App Service pulls the image itself (outbound), nothing has to reach the app from the
+//    internet, so public network access can be 'Disabled' when there is a private endpoint.
+var webAppPublicNetworkAccess = usePrivateEndpoint && !empty(dockerImageNameAndTag) ? 'Disabled' : 'Enabled'
+
 // With a private endpoint the main site only accepts traffic that comes through the private endpoint
-// (access restrictions do not apply to private endpoint traffic). Public access stays enabled on purpose:
-// the pipeline deploys the code through the public SCM (Kudu) site, which keeps its own, open, rule set.
+// (access restrictions do not apply to private endpoint traffic). The SCM site has its own rule set: also
+// denied by default. A pipeline that deploys a zip adds a rule for its own IP address and removes it afterwards.
 var privateEndpointSiteConfig = usePrivateEndpoint ? {
   ipSecurityRestrictionsDefaultAction: 'Deny'
-  scmIpSecurityRestrictionsDefaultAction: 'Allow'
+  scmIpSecurityRestrictionsDefaultAction: 'Deny'
   scmIpSecurityRestrictionsUseMain: false
 } : {}
 
@@ -60,6 +69,7 @@ resource appServiceApp 'Microsoft.Web/sites@2025-03-01' = {
   properties: {
     serverFarmId: appServicePlan.id
     httpsOnly: true
+    publicNetworkAccess: webAppPublicNetworkAccess
     virtualNetworkSubnetId: empty(integrationSubnetId) ? null : integrationSubnetId
     siteConfig: union({
      acrUseManagedIdentityCreds: false
