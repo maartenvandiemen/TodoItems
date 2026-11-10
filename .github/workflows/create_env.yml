@@ -1,66 +1,57 @@
 on:
-  workflow_call: 
+  workflow_call:
     inputs:
       region:
         type: string
         required: true
-        description: Azure region where the resource should be deployed
+        description: Azure region where the resources should be deployed
       template:
         type: string
         required: true
-        description: location of the ARM or BICEP template
+        description: Location of the orchestrator (main.bicep), relative to the workspace
+      hubResourceGroup:
+        type: string
+        required: true
+        description: Name of the resource group of the hub. Created by the template.
+      spokesResourceGroup:
+        type: string
+        required: true
+        description: Name of the resource group of the spokes and the web app. Created by the template.
       additionalParameters:
         type: string
         required: false
-        description: "Additional parameters for the ARM or BICEP template, as YAML (key: value per line)"
-      deploy:
-        type: boolean
-        required: true
-        default: true
-        description: Specify if a deployment should be done or a validation should be performed
+        description: "Additional parameters for the BICEP template, as YAML (key: value per line)"
     outputs:
       webAppName:
         description: "Created webApp"
         value: ${{jobs.create_env.outputs.webAppName}}
-      sqlServerFQDN: 
+      sqlServerFQDN:
          description: Fully Qualified DomainName of the created Azure SQL Server
          value: ${{jobs.create_env.outputs.sqlServerFQDN}}
       databaseName:
          description: Created database
          value: ${{jobs.create_env.outputs.databaseName}}
       webAppUrl:
-        description: "Created webApp url"
+        description: "Created webApp url. The web app is private, use gatewayUrl to reach it."
         value: ${{jobs.create_env.outputs.webAppUrl}}
-      resourcegroup:
-        description: "Random generated resource group name"
-        value: ${{jobs.determine_resourcegroup.outputs.resourcegroup}}
+      gatewayUrl:
+        description: "Url of the Application Gateway in front of the webApp"
+        value: ${{jobs.create_env.outputs.gatewayUrl}}
 
 defaults:
   run:
     shell: pwsh
 jobs:
-  determine_resourcegroup:
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    outputs:
-      resourcegroup: ${{ steps.setupResourcegroup.outputs.resourcegroup }}
-    steps:
-      - name: Setup variables
-        id: setupResourcegroup
-        run: |
-          $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
-          echo "resourcegroup=todoItems-$randomNumber" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
   create_env:
-    permissions: 
+    permissions:
       id-token: write
       contents: read
       deployments: write
     runs-on: ubuntu-latest
-    needs: determine_resourcegroup
     outputs:
       webAppUrl: ${{ steps.arm.outputs.webAppUrl }}
       webAppName: ${{ steps.arm.outputs.webAppName }}
+      gatewayUrl: ${{ steps.arm.outputs.gatewayUrl }}
       sqlServerFQDN: ${{ steps.arm.outputs.sqlServerFQDN }}
       databaseName: ${{ steps.arm.outputs.databaseName }}
     environment: AzureDeploy
@@ -78,44 +69,21 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Create resourcegroup ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
-        uses: Azure/cli@v3
-        with:
-          inlineScript: az group create --location ${{ inputs.region }} --name ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
-
+      # The template runs at subscription scope and creates the resource groups itself.
       - name: Deploy Azure infrastructure
-        if: ${{inputs.deploy == true}}
         uses: azure/bicep-deploy@v2
         id: arm
         with:
           type: deployment
           operation: create
-          scope: resourceGroup
+          scope: subscription
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resource-group-name: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
+          location: ${{ inputs.region }}
           template-file: ${{github.workspace}}${{ inputs.template }}
           parameters: |
+            location: ${{ inputs.region }}
+            hubResourceGroupName: ${{ inputs.hubResourceGroup }}
+            spokesResourceGroupName: ${{ inputs.spokesResourceGroup }}
             ${{ inputs.additionalParameters }}
             sqlAdministratorLoginPassword: ${{ secrets.SA_PASSWORD }}
             sqlAdministratorLoginUser: ${{ secrets.AZURE_SQL_USER }}
-
-      - name: Validate Azure infrastructure
-        if: ${{inputs.deploy != true}}
-        uses: azure/bicep-deploy@v2
-        with:
-          type: deployment
-          operation: validate
-          scope: resourceGroup
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resource-group-name: ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
-          template-file: ${{github.workspace}}${{ inputs.template }}
-          parameters: |
-            ${{ inputs.additionalParameters }}
-            sqlAdministratorLoginPassword: ${{ secrets.SA_PASSWORD }}
-            sqlAdministratorLoginUser: ${{ secrets.AZURE_SQL_USER }}
-    
-      - name: Delete resourcegroup ${{ needs.determine_resourcegroup.outputs.resourcegroup }}
-        if: ${{inputs.deploy != true}}
-        uses: Azure/cli@v3
-        with:
-          inlineScript: az group delete --name ${{ needs.determine_resourcegroup.outputs.resourcegroup }} --yes --no-wait 

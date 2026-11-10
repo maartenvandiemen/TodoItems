@@ -1,5 +1,5 @@
 name: Build TodoItems No Docker
-on: 
+on:
   schedule:
     - cron:  '0 0 * * 3'
   push:
@@ -13,11 +13,16 @@ on:
       buildConfiguration:
         description: 'Build configuration'
         required: true
-        default: 'Release' 
+        default: 'Release'
         type: choice
         options:
         - Debug
         - Release
+      keepEnvironment:
+        description: 'Keep the Azure resources after the run, also when it fails (for debugging)'
+        required: true
+        default: false
+        type: boolean
 
 defaults:
   run:
@@ -39,42 +44,37 @@ jobs:
         else{
           echo "buildConfiguration=Release" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
-  
+
+  determine_names:
+    uses: ./.github/workflows/determine_names.yml
+
   build:
     needs: [determine_variables_build]
     uses: ./.github/workflows/build.yml
     with:
       buildConfiguration: ${{needs.determine_variables_build.outputs.buildConfiguration}}
     secrets: inherit
-  
-  validate:
-    needs: [build]
-    uses: ./.github/workflows/create_env.yml
-    with:
-      region: ${{ vars.AZURE_REGION }}
-      template: /artifacts/bicep/main.nodocker.webapp.bicep
-      additionalParameters: |
-        applicationname: todoitems
-      deploy: false
-    secrets: inherit
 
+  # Deploys the hub, the spokes and the web app (see Deployment/main.bicep).
+  # Only on a manual run (inputs are empty on a push or schedule).
   create_env:
     if: inputs.buildConfiguration != ''
-    needs: [validate]
+    needs: [determine_names, build]
     uses: ./.github/workflows/create_env.yml
     with:
       region: ${{ vars.AZURE_REGION }}
-      template: /artifacts/bicep/main.nodocker.webapp.bicep
+      template: /artifacts/bicep/main.bicep
+      hubResourceGroup: ${{ needs.determine_names.outputs.hubResourceGroup }}
+      spokesResourceGroup: ${{ needs.determine_names.outputs.spokesResourceGroup }}
       additionalParameters: |
         applicationname: todoitems
-      deploy: true
     secrets: inherit
 
   deploy_app:
-    needs: [build, create_env]
+    needs: [determine_names, build, create_env]
     runs-on: ubuntu-latest
     environment: AzureDeploy
-    permissions: 
+    permissions:
       id-token: write
       contents: read
       deployments: write
@@ -91,13 +91,15 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - run: Compress-Archive -Path ${{github.workspace}}/artifacts/api/* -DestinationPath ${{github.workspace}}/artifacts/api/api.zip
+      # The code is deployed through the public SCM (Kudu) site, which stays open on purpose.
+      # Only the site itself is private.
       - uses: Azure/cli@v3
         name: Azure Deploy WebApp
         with:
           inlineScript: |
-             az webapp deploy --src-path ${{github.workspace}}/artifacts/api/api.zip --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.create_env.outputs.resourcegroup }} --type zip
-             az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.create_env.outputs.resourcegroup }}
-  
+             az webapp deploy --src-path ${{github.workspace}}/artifacts/api/api.zip --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.determine_names.outputs.spokesResourceGroup }} --type zip
+             az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.determine_names.outputs.spokesResourceGroup }}
+
   deploy_db:
     needs: [build, create_env]
     uses: ./.github/workflows/deploy_db.yml
@@ -105,16 +107,27 @@ jobs:
       sqlServerFQDN: ${{needs.create_env.outputs.sqlServerFQDN}}
       databaseName: ${{needs.create_env.outputs.databaseName}}
     secrets: inherit
-    
+
+  verify_gateway:
+    needs: [create_env, deploy_app, deploy_db]
+    uses: ./.github/workflows/verify_gateway.yml
+    with:
+      gatewayUrl: ${{needs.create_env.outputs.gatewayUrl}}
+      webAppUrl: ${{needs.create_env.outputs.webAppUrl}}
+
   smoketests:
-    needs: [deploy_app, create_env, deploy_db]
+    needs: [create_env, verify_gateway]
     uses: ./.github/workflows/smoketests.yml
     with:
-      webAppUrl: ${{needs.create_env.outputs.webAppUrl}}
-  
+      webAppUrl: ${{needs.create_env.outputs.gatewayUrl}}
+
+  # Always cleans up, also after a failed run, so nothing keeps costing money.
+  # Not when nothing was deployed (push/schedule), and not when 'keepEnvironment' was ticked.
   delete_env:
-    needs: [create_env, smoketests]
+    if: ${{ always() && needs.determine_names.result == 'success' && needs.create_env.result != 'skipped' && !inputs.keepEnvironment }}
+    needs: [determine_names, create_env, smoketests]
     uses: ./.github/workflows/delete_env.yml
     with:
-      resourcegroupName: ${{ needs.create_env.outputs.resourcegroup }}
+      hubResourceGroup: ${{ needs.determine_names.outputs.hubResourceGroup }}
+      spokesResourceGroup: ${{ needs.determine_names.outputs.spokesResourceGroup }}
     secrets: inherit

@@ -88,15 +88,17 @@ jobs:
     
     - name: Bicep Lint
       run: |
-        az bicep build --file main.docker.webapp.bicep
-        az bicep build --file main.nodocker.webapp.bicep
+        az bicep build --file main.bicep
       working-directory: Deployment
 
     - name: Publish Bicep artifact
       uses: actions/upload-artifact@v7
       with:
         name: infraCode
-        path: '${{github.workspace}}/Deployment/*.bicep'
+        # main.bicep refers to the modules in the network folder: keep that folder structure.
+        path: |
+          ${{github.workspace}}/Deployment/*.bicep
+          ${{github.workspace}}/Deployment/network/*.bicep
         if-no-files-found: error
 
     - name: Publish Smoketests artifact

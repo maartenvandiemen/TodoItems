@@ -8,6 +8,19 @@
 Demo project of an ASP.NET Core 10 minimal API's. Inspired by the demo from [Daniel Roth](https://twitter.com/danroth27) that has been given at [dotnetconf](https://www.dotnetconf.net). See the original presentation below:<br>
 [![YoutubePreview](http://img.youtube.com/vi/gNyEpkJMmcM/0.jpg)](http://www.youtube.com/watch?v=gNyEpkJMmcM)
 
+# Running locally with Aspire
+The `TodoItems.AppHost` project is an [Aspire](https://aspire.dev) AppHost. It starts a SQL Server 2025 container and the API (connected to it) and gives you the Aspire dashboard with logs, traces and health status.
+
+Requirements: Docker (or Podman) and the .NET SDK from `global.json`.
+
+```powershell
+aspire run   # or: dotnet run --project TodoItems.AppHost, or F5 on TodoItems.AppHost in Visual Studio
+```
+
+The API applies its EF Core migrations to this local database on startup. Starting `TodoItems.Api` on its own (without Aspire) still uses the in-memory database, see `UseInMemoryDatabase` in `appsettings.Development.json`.
+
+Aspire is only used for local development. The integration tests keep using `WebApplicationFactory` and Testcontainers, and deployment keeps using the Bicep templates in `Deployment/`.
+
 # Prerequisites
 ## Prerequisites Github
 The following prerequisites are required before executing the pipelines:

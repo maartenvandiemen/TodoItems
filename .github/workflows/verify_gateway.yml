@@ -1,0 +1,53 @@
+on:
+  workflow_call:
+    inputs:
+      gatewayUrl:
+        type: string
+        required: true
+        description: Url of the Application Gateway in front of the web app
+      webAppUrl:
+        type: string
+        required: true
+        description: Own (azurewebsites.net) url of the web app
+
+defaults:
+  run:
+    shell: pwsh
+
+# Proves the network path before the smoke tests run:
+#  - through the Application Gateway the web app answers (gateway -> private endpoint works, DNS zone is linked)
+#  - directly on the azurewebsites.net url the web app does NOT answer (it is private)
+jobs:
+  verify_gateway:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Verify gateway and private web app
+        env:
+          GATEWAY_URL: ${{ inputs.gatewayUrl }}
+          WEBAPP_URL: ${{ inputs.webAppUrl }}
+        run: |
+          # The gateway needs a moment to mark the backend healthy after the code was deployed.
+          $healthy = $false
+          for ($i = 1; $i -le 30; $i++) {
+            try {
+              $response = Invoke-WebRequest -Uri "$Env:GATEWAY_URL/health" -SkipHttpErrorCheck -TimeoutSec 20
+              $status = [int]$response.StatusCode
+            }
+            catch {
+              $status = 0
+            }
+            Write-Host "Attempt ${i}: $Env:GATEWAY_URL/health returned $status"
+            if ($status -eq 200) { $healthy = $true; break }
+            Start-Sleep -Seconds 20
+          }
+          if (-not $healthy) {
+            throw "The gateway did not return 200. 502 means the backend is unhealthy: check the DNS zone link of the spoke VNet, the private endpoint and the backend health of the gateway."
+          }
+
+          $direct = Invoke-WebRequest -Uri "$Env:WEBAPP_URL/health" -SkipHttpErrorCheck -TimeoutSec 20
+          Write-Host "Direct request to $Env:WEBAPP_URL/health returned $([int]$direct.StatusCode)"
+          if ([int]$direct.StatusCode -ne 403) {
+            throw "The web app should not be reachable directly (expected 403) but returned $([int]$direct.StatusCode)."
+          }

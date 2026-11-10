@@ -7,9 +7,13 @@ parameters:
   default: []
 - name: bicepTemplate
   type: string
+  default: main.bicep
 - name: bicepAdditionalParameters
   type: string
   default: ''
+- name: keepEnvironment
+  type: boolean
+  default: false
 
 resources:
   containers:
@@ -20,7 +24,7 @@ resources:
       #SA_PASSWORD defined in Build stage
       SA_PASSWORD: $(SA_PASSWORD)
       MSSQL_PID: Developer
-    ports: 
+    ports:
       - 1433:1433
     options: --name mssql
 
@@ -34,53 +38,62 @@ stages:
       buildConfiguration: ${{parameters.buildConfiguration}}
       serviceContainerName: mssql
 
-- stage: Validate_Bicep
-  dependsOn: [Build]
-  jobs:
-  - template: create_env.yml
-    parameters:
-      template: ${{parameters.bicepTemplate}}
-      additionalParameters: ${{parameters.bicepAdditionalParameters}}
-      modus: validation
-      
+#Only on a manual run. The environment is deployed by Deployment/main.bicep: hub, spokes and web app.
 - ${{ if eq(variables['Build.Reason'], 'Manual') }}:
   - stage: Deploy
-    dependsOn: [Build, Validate_Bicep]
+    dependsOn: [Build]
     jobs:
     - template: create_env.yml
       parameters:
         template: ${{parameters.bicepTemplate}}
         additionalParameters: ${{parameters.bicepAdditionalParameters}}
-        modus: deploy
     #bicepAdditionalParameters are only passed for Docker
     #https://stackoverflow.com/questions/60098737/checking-for-null-object-type-parameter-in-azure-yaml
     - ${{if not(parameters.bicepAdditionalParameters)}}:
       - template: deploy.nodocker.yml
     - template: deploy.sql.yml
-    - template: smoketests.yml
+    - template: verify_gateway.yml
       parameters:
         ${{if not(parameters.bicepAdditionalParameters)}}:
           dependsOn: [Create_Env, Deploy_DB, Deploy_App]
         ${{else }}:
           dependsOn: [Create_Env, Deploy_DB]
+    - template: smoketests.yml
+      parameters:
+        dependsOn: [Create_Env, Verify_Gateway]
 
-  - stage: Delete
-    dependsOn: [Deploy]
-    jobs:
-    - deployment: Delete
-      environment: todoItems-teardown
-      variables:
-        - name: resourcegroupName
-          value: $[ stageDependencies.Deploy.Generate_ResourcegroupName.outputs['DetermineResourcegroupName.resourcegroupName'] ]
-      strategy:
-        runOnce:
-          deploy:
-            steps:
-            - download: none
-            - task: AzureCLI@2
-              displayName: Delete resourcegroup
-              inputs:
-                azureSubscription: 'Azure'
-                scriptType: 'bash'
-                scriptLocation: 'inlineScript'
-                inlineScript: 'az group delete --resource-group $(resourcegroupName) --yes --no-wait'
+  #Always cleans up, also after a failed deployment, so nothing keeps costing money.
+  #Not when 'keepEnvironment' was ticked (for debugging).
+  - ${{ if not(parameters.keepEnvironment) }}:
+    - stage: Delete
+      dependsOn: [Deploy]
+      condition: succeededOrFailed()
+      jobs:
+      - deployment: Delete
+        environment: todoItems-teardown
+        variables:
+          - name: hubResourceGroup
+            value: $[ stageDependencies.Deploy.Determine_Names.outputs['DetermineNames.hubResourceGroup'] ]
+          - name: spokesResourceGroup
+            value: $[ stageDependencies.Deploy.Determine_Names.outputs['DetermineNames.spokesResourceGroup'] ]
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+              - download: none
+              #A resourcegroup may not exist (yet) after a failed deployment: skip those.
+              #The spokes are deleted first, and waited for: they contain a private endpoint that registers its
+              #record in the private DNS zone of the hub, and the peerings refer to the hub.
+              - task: AzureCLI@2
+                displayName: Delete resourcegroups
+                inputs:
+                  azureSubscription: 'Azure'
+                  scriptType: 'bash'
+                  scriptLocation: 'inlineScript'
+                  inlineScript: |
+                    if [ -n "$(spokesResourceGroup)" ] && [ "$(az group exists --name '$(spokesResourceGroup)')" = "true" ]; then
+                      az group delete --name '$(spokesResourceGroup)' --yes
+                    fi
+                    if [ -n "$(hubResourceGroup)" ] && [ "$(az group exists --name '$(hubResourceGroup)')" = "true" ]; then
+                      az group delete --name '$(hubResourceGroup)' --yes --no-wait
+                    fi

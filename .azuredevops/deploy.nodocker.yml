@@ -1,13 +1,14 @@
 jobs:
 - job: Deploy_App
-  dependsOn: [Create_Env, Generate_ResourcegroupName]
-  
-  variables: 
+  dependsOn: [Create_Env, Determine_Names]
+
+  variables:
   - group: AzureSecrets
   - name: appServiceAppName
     value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appServiceAppName'] ]
+  #The web app lives in the resourcegroup of the spokes.
   - name: resourceGroupName
-    value: $[ dependencies.Generate_ResourcegroupName.outputs['DetermineResourcegroupName.resourcegroupName'] ]
+    value: $[ dependencies.Determine_Names.outputs['DetermineNames.spokesResourceGroup'] ]
 
   steps:
   - checkout: none

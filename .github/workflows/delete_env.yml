@@ -1,16 +1,20 @@
 on:
   workflow_call:
     inputs:
-      resourcegroupName:
+      hubResourceGroup:
         type: string
         required: true
-        description: Name of the resourcegroup where the information should be deployed to
+        description: Name of the resource group of the hub
+      spokesResourceGroup:
+        type: string
+        required: true
+        description: Name of the resource group of the spokes and the web app
 defaults:
   run:
     shell: pwsh
 jobs:
   delete_env:
-    permissions: 
+    permissions:
       id-token: write
       contents: read
       deployments: write
@@ -22,7 +26,16 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          
+
+      # Also used to clean up after a failed run, so a resource group may not exist (yet): skip those.
+      # The spokes are deleted first, and waited for: they contain a private endpoint that registers its
+      # record in the private DNS zone of the hub, and the peerings refer to the hub.
       - uses: Azure/cli@v3
         with:
-          inlineScript: az group delete --name ${{ inputs.resourcegroupName }} --yes --no-wait
+          inlineScript: |
+            if [ "$(az group exists --name '${{ inputs.spokesResourceGroup }}')" = "true" ]; then
+              az group delete --name '${{ inputs.spokesResourceGroup }}' --yes
+            fi
+            if [ "$(az group exists --name '${{ inputs.hubResourceGroup }}')" = "true" ]; then
+              az group delete --name '${{ inputs.hubResourceGroup }}' --yes --no-wait
+            fi
