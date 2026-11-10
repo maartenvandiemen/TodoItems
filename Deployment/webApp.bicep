@@ -1,5 +1,5 @@
-// The web application and everything it needs: sql, application insights, key vault, the web app itself
-// and (optionally) an Application Gateway in front of it.
+// The web application and everything it needs: sql, key vault, the web app itself and (optionally) an
+// Application Gateway in front of it. Application Insights is deployed by main.bicep, into the hub.
 // Deploy into the resource group of the spoke that hosts the app. Called by main.bicep.
 //
 // dockerImageNameAndTag empty: the web app runs the .NET runtime stack and the pipeline deploys a zip.
@@ -17,15 +17,8 @@ param sqlAdministratorLoginPassword string
 @description('Full docker image name, including tag. Example: ghcr.io/mvdiemen/todoitems:docker. Empty: no container, the pipeline deploys a zip.')
 param dockerImageNameAndTag string = ''
 
-@description('Resource id of the central Log Analytics workspace (in the hub). Application Insights sends its telemetry there.')
-param logAnalyticsWorkspaceId string
-
-@description('Who may query the telemetry: Open also allows queries from public networks (the Azure portal, authenticated), PrivateOnly only from the connected private networks.')
-@allowed([
-  'Open'
-  'PrivateOnly'
-])
-param monitorQueryAccessMode string = 'Open'
+@description('Connection string of the Application Insights component of this instance (in the hub).')
+param applicationInsightsConnectionString string
 
 @description('Optional. Subnet for VNet integration of the web app (outbound).')
 param integrationSubnetId string = ''
@@ -51,23 +44,13 @@ module sql 'sql.bicep' = {
   }
 }
 
-module appInsights 'applicationInsights.bicep' = {
-  name: 'appInsights'
-  params: {
-    location: location
-    applicationname: applicationname
-    workspaceResourceId: logAnalyticsWorkspaceId
-    monitorQueryAccessMode: monitorQueryAccessMode
-  }
-}
-
 module appService 'appService.bicep' = {
   name: 'appService'
   params: {
     keyVaultName: keyVaultName
     location: location
     applicationname: applicationname
-    applicationInsightsConnectionString: appInsights.outputs.connectionString
+    applicationInsightsConnectionString: applicationInsightsConnectionString
     dockerImageNameAndTag: dockerImageNameAndTag
     integrationSubnetId: integrationSubnetId
     privateEndpointSubnetId: privateEndpointSubnetId
@@ -100,7 +83,6 @@ module keyVault 'keyVault.bicep' = {
   }
 }
 
-output appInsightsId string = appInsights.outputs.id
 output webAppUrl string = appService.outputs.webAppUrl
 output webAppName string = appService.outputs.webAppName
 output gatewayUrl string = appGateway.?outputs.gatewayUrl ?? ''

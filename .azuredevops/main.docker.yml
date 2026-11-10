@@ -19,17 +19,10 @@ schedules:
 pool:
   vmImage: ubuntu-latest
 
-parameters:
-- name: keepEnvironment
-  displayName: Keep the Azure resources after the run, also when it fails (for debugging)
-  type: boolean
-  default: false
-
 extends:
    template: generic.yml
    parameters:
      bicepTemplate: main.bicep
-     keepEnvironment: ${{ parameters.keepEnvironment }}
      bicepAdditionalParameters: '-dockerImageNameAndTag ghcr.io/maartenvandiemen/todoitems:$(Build.SourceVersion)'
      postBuildSteps: 
        - task: Docker@2

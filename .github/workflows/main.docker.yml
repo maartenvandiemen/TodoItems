@@ -18,11 +18,6 @@ on:
         options:
         - Debug
         - Release
-      keepEnvironment:
-        description: 'Keep the Azure resources after the run, also when it fails (for debugging)'
-        required: true
-        default: false
-        type: boolean
 
 defaults:
   run:
@@ -157,9 +152,9 @@ jobs:
       webAppUrl: ${{needs.create_env.outputs.gatewayUrl}}
 
   # Always cleans up, also after a failed run, so nothing keeps costing money.
-  # Not when nothing was deployed (push/schedule), and not when 'keepEnvironment' was ticked.
+  # Not when nothing was deployed (push/schedule).
   delete_env:
-    if: ${{ always() && needs.determine_names.result == 'success' && needs.create_env.result != 'skipped' && !inputs.keepEnvironment }}
+    if: ${{ always() && needs.determine_names.result == 'success' && needs.create_env.result != 'skipped' }}
     needs: [determine_names, create_env, smoketests]
     uses: ./.github/workflows/delete_env.yml
     with:

@@ -2,6 +2,7 @@
 //
 //   <prefix>-hub       hub.bicep      VNet, firewall, private DNS zones, Log Analytics workspace and the
 //                                     Azure Monitor private link scope (private endpoint in the hub)
+//                      applicationInsights.bicep   Application Insights, connected to that scope
 //   <prefix>-<spoke>   spoke.bicep    one resource group per spoke: VNet, route table, peering to the hub
 //                      webApp.bicep   in the resource group of the first spoke: web app (private endpoint),
 //                                     sql, key vault, application gateway
@@ -63,6 +64,20 @@ module hub 'network/hub.bicep' = {
   }
 }
 
+// Application Insights lives in the hub, next to the workspace and the Azure Monitor private link scope it is
+// connected to: everything that is connected to the scope is deleted together with the hub resource group.
+module appInsights 'applicationInsights.bicep' = {
+  name: 'appInsights'
+  scope: hubResourceGroup
+  params: {
+    location: location
+    applicationname: applicationname
+    workspaceResourceId: hub.outputs.logAnalyticsWorkspaceId
+    monitorPrivateLinkScopeName: hub.outputs.monitorPrivateLinkScopeName
+    monitorQueryAccessMode: monitorQueryAccessMode
+  }
+}
+
 // Peerings are created one at a time (batchSize 1). Creating several peerings against the same
 // virtual network in parallel can fail with 'AnotherOperationInProgress'.
 @batchSize(1)
@@ -101,8 +116,7 @@ module webApp 'webApp.bicep' = {
     sqlAdministratorLoginUser: sqlAdministratorLoginUser
     sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
     dockerImageNameAndTag: dockerImageNameAndTag
-    logAnalyticsWorkspaceId: hub.outputs.logAnalyticsWorkspaceId
-    monitorQueryAccessMode: monitorQueryAccessMode
+    applicationInsightsConnectionString: appInsights.outputs.connectionString
     integrationSubnetId: spokeNetworks[0].outputs.appServiceSubnetId
     privateEndpointSubnetId: spokeNetworks[0].outputs.privateEndpointSubnetId
     privateDnsZoneId: hub.outputs.webAppPrivateDnsZoneId
@@ -113,18 +127,6 @@ module webApp 'webApp.bicep' = {
   dependsOn: [
     hubSides
   ]
-}
-
-// Application Insights is added to the Azure Monitor private link scope of the hub, which lives in the
-// hub resource group. That can only happen now that the component exists.
-module appInsightsPrivateLink 'network/monitorScopedResource.bicep' = {
-  name: 'appInsightsPrivateLink'
-  scope: hubResourceGroup
-  params: {
-    monitorPrivateLinkScopeName: hub.outputs.monitorPrivateLinkScopeName
-    name: 'appinsights-connection'
-    linkedResourceId: webApp.outputs.appInsightsId
-  }
 }
 
 output appResourceGroupName string = spokeResourceGroups[0].name

@@ -186,7 +186,8 @@ resource workspace 'Microsoft.OperationalInsights/workspaces@2026-03-01' = {
 // Azure Monitor Private Link Scope (AMPLS): makes the workspace (and Application Insights) reachable through a
 // private endpoint. A hub-and-spoke network uses ONE scope with ONE private endpoint in the hub, not one per
 // spoke: a second endpoint for the same zones would override the DNS records of the first.
-// Application Insights is added to the scope by monitorScopedResource.bicep, as soon as it exists.
+// Application Insights is added to the scope by applicationInsights.bicep, which is deployed into this
+// resource group too: everything that is connected to the scope is deleted together with the resource group.
 resource monitorPrivateLinkScope 'Microsoft.Insights/privateLinkScopes@2021-09-01' = {
   name: 'ampls-${hub.name}'
   location: 'global'
