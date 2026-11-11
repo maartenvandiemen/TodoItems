@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:11.0.0-rc.3
+FROM mcr.microsoft.com/dotnet/aspnet:11.0.0
 COPY . /app
 WORKDIR /app
 ENTRYPOINT ["dotnet", "TodoItems.Api.dll"]
