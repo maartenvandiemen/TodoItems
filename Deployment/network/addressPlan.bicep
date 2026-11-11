@@ -23,6 +23,9 @@ type Spoke = {
 
   @description('Prefix of the subnet for the Application Gateway. v2 needs a subnet of its own; /24 is the recommended size so the gateway can scale out.')
   appGatewaySubnetPrefix: string
+
+  @description('The build agent (a self-hosted runner) lives in the workload subnet of this spoke. The subnet gets a default route (0.0.0.0/0) to the hub firewall for its internet access, and may reach the private endpoints of the other spokes.')
+  hostsBuildAgent: bool?
 }
 
 @export()
@@ -81,5 +84,17 @@ var spokes Spoke[] = [
     appServiceSubnetPrefix: '10.2.2.0/26'
     privateEndpointSubnetPrefix: '10.2.3.0/27'
     appGatewaySubnetPrefix: '10.2.4.0/24'
+  }
+  // Third spoke: the build agent. Its own spoke so the agent, with the rights of the pipeline, is not part of the
+  // hub (platform services) or of the application. It reaches the private endpoints of the application through
+  // the firewall, and the internet through the firewall too.
+  {
+    name: 'spoke-3'
+    addressPrefix: '10.3.0.0/16'
+    workloadSubnetPrefix: '10.3.1.0/24'
+    appServiceSubnetPrefix: '10.3.2.0/26'
+    privateEndpointSubnetPrefix: '10.3.3.0/27'
+    appGatewaySubnetPrefix: '10.3.4.0/24'
+    hostsBuildAgent: true
   }
 ]

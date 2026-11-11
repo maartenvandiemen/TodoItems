@@ -162,6 +162,50 @@ resource spokeToSpokeRules 'Microsoft.Network/firewallPolicies/ruleCollectionGro
   }
 }
 
+// Internet access of the build agent, which has a default route (0.0.0.0/0) to this firewall (spoke.bicep).
+// For now everything is allowed: the firewall logs show what the agent actually connects to (table
+// AZFWNetworkRule in the workspace). Replace this rule by an application rule with the names (FQDNs) that
+// show up in the logs, to restrict the agent to those.
+var buildAgentSubnetPrefixes = map(filter(spokes, spoke => spoke.?hostsBuildAgent ?? false), spoke => spoke.workloadSubnetPrefix)
+
+resource buildAgentEgressRules 'Microsoft.Network/firewallPolicies/ruleCollectionGroups@2026-03-01' = if (!empty(buildAgentSubnetPrefixes)) {
+  parent: firewallPolicy
+  name: 'rcg-build-agent-egress'
+  properties: {
+    priority: 300
+    ruleCollections: [
+      {
+        ruleCollectionType: 'FirewallPolicyFilterRuleCollection'
+        name: 'build-agent-egress'
+        priority: 300
+        action: {
+          type: 'Allow'
+        }
+        rules: [
+          {
+            ruleType: 'NetworkRule'
+            name: 'allow-all-internet'
+            ipProtocols: [
+              'Any'
+            ]
+            sourceAddresses: buildAgentSubnetPrefixes
+            destinationAddresses: [
+              '*'
+            ]
+            destinationPorts: [
+              '*'
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  // Rule collection groups of one policy are created one at a time: in parallel they fail with 'update in progress'.
+  dependsOn: [
+    spokeToSpokeRules
+  ]
+}
+
 resource firewall 'Microsoft.Network/azureFirewalls@2026-03-01' = {
   name: 'fw-${hub.name}'
   location: location
@@ -191,6 +235,7 @@ resource firewall 'Microsoft.Network/azureFirewalls@2026-03-01' = {
   // Changing a policy while it is attached can fail with 'update in progress' errors.
   dependsOn: [
     spokeToSpokeRules
+    buildAgentEgressRules
   ]
 }
 
@@ -360,29 +405,13 @@ resource monitorDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneG
   }
 }
 
-// Storage account for the virtual network flow logs (network/flowLogs.bicep). Flow logs are written here by
-// Network Watcher: a standard storage account in the same region as the VNets.
-resource flowLogStorage 'Microsoft.Storage/storageAccounts@2025-01-01' = {
-  name: 'stflow${uniqueString(resourceGroup().id)}'
-  location: location
-  sku: {
-    name: 'Standard_LRS'
-  }
-  kind: 'StorageV2'
-  properties: {
-    allowBlobPublicAccess: false
-    minimumTlsVersion: 'TLS1_2'
-    supportsHttpsTrafficOnly: true
-  }
-}
-
 output monitorPrivateLinkScopeName string = monitorPrivateLinkScope.name
 output hubVnetName string = hubVnet.name
 output logAnalyticsWorkspaceId string = workspace.id
-output flowLogStorageId string = flowLogStorage.id
 output hubVnetId string = hubVnet.id
 output webAppPrivateDnsZoneId string = webAppDnsZone.id
 // In the order of dataPrivateDnsZoneNames (addressPlan.bicep).
 output sqlPrivateDnsZoneId string = dataDnsZones[0].id
 output keyVaultPrivateDnsZoneId string = dataDnsZones[1].id
+output buildAgentSubnetPrefixes string[] = buildAgentSubnetPrefixes
 output firewallPrivateIp string = firewall.properties.ipConfigurations[0].properties.privateIPAddress

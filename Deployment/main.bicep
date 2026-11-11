@@ -30,8 +30,12 @@ param sqlAdministratorLoginPassword string
 @description('Full docker image name, including tag. Example: ghcr.io/mvdiemen/todoitems:docker. Empty: no container, the pipeline deploys a zip.')
 param dockerImageNameAndTag string = ''
 
-@description('Record the IP traffic of the VNets (virtual network flow logs) to a storage account. The flow logs are created in the Network Watcher of the subscription (resource group NetworkWatcherRG), which has to exist in the region: Azure creates it automatically with the first VNet in a region. Switch off when it does not exist.')
-param enableFlowLogs bool = true
+@description('Optional. Password of the administrator (user azureuser) of the virtual machine of the build agent (in the agent spoke). Empty: no virtual machine, only the network of the spoke.')
+@secure()
+param buildAgentAdminPassword string = ''
+
+// The spoke that hosts the build agent (hostsBuildAgent in addressPlan.bicep).
+var agentSpokeIndex = indexOf(map(spokes, spoke => spoke.?hostsBuildAgent ?? false), true)
 
 resource hubResourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' = {
   name: '${resourceGroupPrefix}-hub'
@@ -85,6 +89,7 @@ module spokeNetworks 'network/spoke.bicep' = [for (spoke, index) in spokes: {
     hubVnetId: hub.outputs.hubVnetId
     firewallPrivateIp: hub.outputs.firewallPrivateIp
     workspaceId: hub.outputs.logAnalyticsWorkspaceId
+    buildAgentSubnetPrefixes: hub.outputs.buildAgentSubnetPrefixes
   }
 }]
 
@@ -127,24 +132,22 @@ module webApp 'webApp.bicep' = {
   ]
 }
 
-// Flow logs of the hub and the spokes. They are children of the Network Watcher of the subscription, which lives
-// in its own resource group: NOT deleted with the resource groups of this instance. The pipelines delete them
-// by name (fl-<prefix>-...) when the instance is cleaned up.
-module flowLogs 'network/flowLogs.bicep' = if (enableFlowLogs) {
-  name: 'flowLogs'
-  scope: resourceGroup('NetworkWatcherRG')
+// The virtual machine of the build agent, in the workload subnet of the agent spoke. Only with a password.
+// After the hub sides: the DNS zones must be linked to the spoke, and the peering must exist.
+module buildAgent 'agent.bicep' = if (!empty(buildAgentAdminPassword)) {
+  name: 'buildAgent'
+  scope: spokeResourceGroups[agentSpokeIndex]
   params: {
     location: location
-    resourceGroupPrefix: resourceGroupPrefix
-    storageId: hub.outputs.flowLogStorageId
-    hubVnetId: hub.outputs.hubVnetId
-    spokeVnets: [for (spoke, index) in spokes: {
-      name: spoke.name
-      vnetId: spokeNetworks[index].outputs.vnetId
-    }]
+    subnetId: spokeNetworks[agentSpokeIndex].outputs.workloadSubnetId
+    adminPassword: buildAgentAdminPassword
   }
+  dependsOn: [
+    hubSides
+  ]
 }
 
+output agentResourceGroupName string = spokeResourceGroups[agentSpokeIndex].name
 output appResourceGroupName string = spokeResourceGroups[0].name
 output webAppUrl string = webApp.outputs.webAppUrl
 output webAppName string = webApp.outputs.webAppName
