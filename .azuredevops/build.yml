@@ -62,7 +62,6 @@ jobs:
     inputs:
       packageType: 'sdk'
       version: '${{variables.DOTNET_VERSION}}.x'
-      includePreviewVersions: true
   
   - task: Cache@2
     displayName: 'Restore cache for NuGet'
