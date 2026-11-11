@@ -1,6 +1,6 @@
 // Application Gateway (layer 7 load balancer): the public entry point of the web app.
 //
-//   Internet -> public IP -> Application Gateway (own subnet in the spoke) -> backend (App Service)
+//   Internet -> public IP -> Application Gateway (own subnet) -> backend (App Service)
 //
 // It is deployed together with the web app (webApp.bicep), so it can use the hostname of the web
 // app directly. It is created after the private endpoint of the web app, because the module that creates
@@ -31,9 +31,6 @@ param subnetId string
 
 @description('Default hostname of the web app, for example site-todoitems-abc123.azurewebsites.net.')
 param backendHostName string
-
-@description('Path of the health endpoint of the web app.')
-param healthProbePath string = '/health'
 
 @description('Resource id of the Log Analytics workspace that receives the access log of the gateway.')
 param workspaceId string
@@ -132,7 +129,7 @@ resource gateway 'Microsoft.Network/applicationGateways@2026-03-01' = {
         name: probeName
         properties: {
           protocol: 'Https'
-          path: healthProbePath
+          path: '/health'
           interval: 30
           timeout: 30
           unhealthyThreshold: 3

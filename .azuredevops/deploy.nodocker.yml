@@ -6,7 +6,7 @@ jobs:
   - group: AzureSecrets
   - name: appServiceAppName
     value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appServiceAppName'] ]
-  #The web app lives in the resourcegroup of the first spoke.
+  #The web app lives in the resourcegroup of the instance (<prefix>-app).
   - name: resourceGroupName
     value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appResourceGroup'] ]
 

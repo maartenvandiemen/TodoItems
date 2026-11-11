@@ -12,14 +12,14 @@ on:
       resourceGroupPrefix:
         type: string
         required: true
-        description: Unique name of the instance. The template creates the resource groups <prefix>-hub and <prefix>-<spoke name>.
+        description: Unique name of the instance. The template creates the resource group <prefix>-app.
       additionalParameters:
         type: string
         required: false
         description: "Additional parameters for the BICEP template, as YAML (key: value per line)"
     outputs:
       appResourceGroup:
-        description: "Resource group that contains the webApp (the resource group of the first spoke)"
+        description: "Resource group that contains the webApp (<prefix>-app)"
         value: ${{jobs.create_env.outputs.appResourceGroup}}
       webAppName:
         description: "Created webApp"

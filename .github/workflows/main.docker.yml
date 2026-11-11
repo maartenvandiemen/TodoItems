@@ -117,7 +117,7 @@ jobs:
           push: false
           tags: ${{ steps.createTag.outputs.dockerTag }}
 
-  # Deploys the hub, the spokes and the web app (see Deployment/main.bicep).
+  # Deploys the network and the web app (see Deployment/main.bicep).
   create_env:
     needs: [determine_names, build, push_docker_image]
     uses: ./.github/workflows/create_env.yml

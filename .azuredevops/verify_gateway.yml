@@ -34,7 +34,7 @@ jobs:
         Start-Sleep -Seconds 20
       }
       if (-not $healthy) {
-        throw "The gateway did not return 200. 502 means the backend is unhealthy: check the DNS zone link of the spoke VNet, the private endpoint and the backend health of the gateway."
+        throw "The gateway did not return 200. 502 means the backend is unhealthy: check the DNS zone link of the VNet, the private endpoint and the backend health of the gateway."
       }
 
       $direct = Invoke-WebRequest -Uri "$Env:WEBAPP_URL/health" -SkipHttpErrorCheck -TimeoutSec 20

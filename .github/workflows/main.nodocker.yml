@@ -50,7 +50,7 @@ jobs:
       buildConfiguration: ${{needs.determine_variables_build.outputs.buildConfiguration}}
     secrets: inherit
 
-  # Deploys the hub, the spokes and the web app (see Deployment/main.bicep).
+  # Deploys the network and the web app (see Deployment/main.bicep).
   # Only on a manual run (inputs are empty on a push or schedule).
   create_env:
     if: inputs.buildConfiguration != ''

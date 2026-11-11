@@ -5,7 +5,7 @@ on:
         description: Random id that makes this instance unique
         value: ${{ jobs.determine_names.outputs.instanceId }}
       resourceGroupPrefix:
-        description: Unique name of this instance. main.bicep names the resource groups <prefix>-hub and <prefix>-<spoke name>.
+        description: Unique name of this instance. main.bicep names the resource group <prefix>-app.
         value: ${{ jobs.determine_names.outputs.resourceGroupPrefix }}
 
 defaults:

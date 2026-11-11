@@ -1,6 +1,6 @@
 // The web application and everything it needs: sql, key vault, the web app itself and (optionally) an
-// Application Gateway in front of it. Application Insights is deployed by main.bicep, into the hub.
-// Deploy into the resource group of the spoke that hosts the app. Called by main.bicep.
+// Application Gateway in front of it. Application Insights is deployed by main.bicep.
+// Deploy into the resource group of the instance. Called by main.bicep.
 //
 // dockerImageNameAndTag empty: the web app runs the .NET runtime stack and the pipeline deploys a zip.
 // dockerImageNameAndTag set:   the web app runs that container image.
@@ -17,10 +17,10 @@ param sqlAdministratorLoginPassword string
 @description('Full docker image name, including tag. Example: ghcr.io/mvdiemen/todoitems:docker. Empty: no container, the pipeline deploys a zip.')
 param dockerImageNameAndTag string = ''
 
-@description('Connection string of the Application Insights component of this instance (in the hub).')
+@description('Connection string of the Application Insights component of this instance.')
 param applicationInsightsConnectionString string
 
-@description('Resource id of the central Log Analytics workspace (in the hub). The diagnostic logs of the resources are sent there.')
+@description('Resource id of the Log Analytics workspace of this instance. The diagnostic logs of the resources are sent there.')
 param logAnalyticsWorkspaceId string
 
 @description('Optional. Private DNS zone for SQL (privatelink.database.windows.net). Required with privateEndpointSubnetId.')

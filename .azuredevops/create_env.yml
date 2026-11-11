@@ -9,7 +9,7 @@ parameters:
 jobs:
 #Seperate job for generating the unique name of the instance.
 #In case the deployment fails, the Create_Env job can be executed again and the same resourcegroups are used as in the previous attempt.
-#main.bicep names the resourcegroups <prefix>-hub and <prefix>-<spoke name>.
+#main.bicep names the resourcegroup <prefix>-app.
 - job: Determine_Names
   steps:
   - checkout: none
@@ -19,8 +19,8 @@ jobs:
     name: DetermineNames
     displayName: Determine unique name of the instance
 
-#Deploys the hub, the spokes and the web app (see Deployment/main.bicep).
-#The template runs at subscription scope and creates the resourcegroups itself.
+#Deploys the network and the web app (see Deployment/main.bicep).
+#The template runs at subscription scope and creates the resourcegroup itself.
 - job: Create_Env
   dependsOn: [Determine_Names]
   variables:

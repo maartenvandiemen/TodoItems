@@ -24,15 +24,10 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       # Also used to clean up after a failed run: only the resource groups that were created are found.
-      # The resource groups of an instance are found by their tag, so a new spoke needs no change here.
-      # The spokes are deleted first, and waited for: they contain a private endpoint that registers its
-      # record in the private DNS zone of the hub, and the peerings refer to the hub.
+      # The instance is one resource group, named <prefix>-app by main.bicep. It may not exist (the deployment
+      # can fail before it is created), so check first.
       - uses: Azure/cli@v3
         with:
           inlineScript: |
-            prefix='${{ inputs.resourceGroupPrefix }}'
-            spokes=$(az group list --query "[?tags.instance=='$prefix' && tags.role=='spoke'].name" -o tsv)
-            hubs=$(az group list --query "[?tags.instance=='$prefix' && tags.role=='hub'].name" -o tsv)
-            for rg in $spokes; do az group delete --name "$rg" --yes --no-wait; done
-            for rg in $spokes; do az group wait --name "$rg" --deleted; done
-            for rg in $hubs; do az group delete --name "$rg" --yes --no-wait; done
+            rg='${{ inputs.resourceGroupPrefix }}-app'
+            if [ "$(az group exists --name "$rg")" = "true" ]; then az group delete --name "$rg" --yes --no-wait; fi

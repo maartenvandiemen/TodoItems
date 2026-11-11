@@ -35,7 +35,7 @@ stages:
       buildConfiguration: ${{parameters.buildConfiguration}}
       serviceContainerName: mssql
 
-#Only on a manual run. The environment is deployed by Deployment/main.bicep: hub, spokes and web app.
+#Only on a manual run. The environment is deployed by Deployment/main.bicep: network and web app.
 - ${{ if eq(variables['Build.Reason'], 'Manual') }}:
   - stage: Deploy
     dependsOn: [Build]
@@ -74,9 +74,10 @@ stages:
           deploy:
             steps:
             - download: none
-            #Remove first the spokes, then the hub.
+            #The instance is one resourcegroup, named <prefix>-app by main.bicep. It may not exist (the deployment
+            #can fail before it is created), so check first.
             - task: AzureCLI@2
-              displayName: Delete resourcegroups
+              displayName: Delete resourcegroup
               inputs:
                 azureSubscription: 'Azure'
                 scriptType: 'bash'
@@ -84,8 +85,5 @@ stages:
                 inlineScript: |
                   prefix='$(resourceGroupPrefix)'
                   if [ -z "$prefix" ]; then echo "No instance name known, nothing to delete."; exit 0; fi
-                  spokes=$(az group list --query "[?tags.instance=='$prefix' && tags.role=='spoke'].name" -o tsv)
-                  hubs=$(az group list --query "[?tags.instance=='$prefix' && tags.role=='hub'].name" -o tsv)
-                  for rg in $spokes; do az group delete --name "$rg" --yes --no-wait; done
-                  for rg in $spokes; do az group wait --name "$rg" --deleted; done
-                  for rg in $hubs; do az group delete --name "$rg" --yes --no-wait; done
+                  rg="$prefix-app"
+                  if [ "$(az group exists --name "$rg")" = "true" ]; then az group delete --name "$rg" --yes --no-wait; fi
