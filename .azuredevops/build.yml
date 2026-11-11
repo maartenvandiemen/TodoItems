@@ -31,7 +31,7 @@ jobs:
     value: '$(Pipeline.Workspace)/.nuget/packages/'
     readonly: true
   - name: DOTNET_VERSION 
-    value: 10
+    value: 11
     readonly: true
     
   services:
@@ -62,7 +62,6 @@ jobs:
     inputs:
       packageType: 'sdk'
       version: '${{variables.DOTNET_VERSION}}.x'
-      includePreviewVersions: true
   
   - task: Cache@2
     displayName: 'Restore cache for NuGet'

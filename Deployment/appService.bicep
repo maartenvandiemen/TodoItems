@@ -42,7 +42,7 @@ resource appServiceApp 'Microsoft.Web/sites@2025-03-01' = {
     httpsOnly: true
     siteConfig: {
      acrUseManagedIdentityCreds: false
-     linuxFxVersion: empty(dockerImageNameAndTag) ? 'DOTNETCORE|10.0' : 'DOCKER|${dockerImageNameAndTag}'
+     linuxFxVersion: empty(dockerImageNameAndTag) ? 'DOTNET|11' : 'DOCKER|${dockerImageNameAndTag}'
      healthCheckPath: '/health'
      connectionStrings: [
       { 
