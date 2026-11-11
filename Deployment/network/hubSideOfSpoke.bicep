@@ -4,7 +4,7 @@
 //  - a link between the private DNS zone of the hub and the spoke VNet, so that resources in the spoke
 //    (such as the Application Gateway) resolve private endpoints to their private IP.
 // Deploy into the hub resource group.
-import { webAppPrivateDnsZoneName, monitorPrivateDnsZoneNames } from 'addressPlan.bicep'
+import { webAppPrivateDnsZoneName, monitorPrivateDnsZoneNames, dataPrivateDnsZoneNames } from 'addressPlan.bicep'
 
 param hubVnetName string
 
@@ -55,6 +55,23 @@ resource monitorDnsZones 'Microsoft.Network/privateDnsZones@2024-06-01' existing
 
 resource monitorDnsZoneSpokeLinks 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = [for (zoneName, index) in monitorPrivateDnsZoneNames: {
   parent: monitorDnsZones[index]
+  name: 'link-${spokeName}'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: spokeVnetId
+    }
+  }
+}]
+
+// The same for the data services: the app resolves the SQL server and the Key Vault to their private endpoints.
+resource dataDnsZones 'Microsoft.Network/privateDnsZones@2024-06-01' existing = [for zoneName in dataPrivateDnsZoneNames: {
+  name: zoneName
+}]
+
+resource dataDnsZoneSpokeLinks 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = [for (zoneName, index) in dataPrivateDnsZoneNames: {
+  parent: dataDnsZones[index]
   name: 'link-${spokeName}'
   location: 'global'
   properties: {

@@ -20,6 +20,15 @@ param dockerImageNameAndTag string = ''
 @description('Connection string of the Application Insights component of this instance (in the hub).')
 param applicationInsightsConnectionString string
 
+@description('Resource id of the central Log Analytics workspace (in the hub). The diagnostic logs of the resources are sent there.')
+param logAnalyticsWorkspaceId string
+
+@description('Optional. Private DNS zone for SQL (privatelink.database.windows.net). Required with privateEndpointSubnetId.')
+param sqlPrivateDnsZoneId string = ''
+
+@description('Optional. Private DNS zone for Key Vault (privatelink.vaultcore.azure.net). Required with privateEndpointSubnetId.')
+param keyVaultPrivateDnsZoneId string = ''
+
 @description('Optional. Subnet for VNet integration of the web app (outbound).')
 param integrationSubnetId string = ''
 
@@ -41,6 +50,9 @@ module sql 'sql.bicep' = {
     sqlAdministratorLoginUser: sqlAdministratorLoginUser
     sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
     applicationname: applicationname
+    privateEndpointSubnetId: privateEndpointSubnetId
+    privateDnsZoneId: sqlPrivateDnsZoneId
+    workspaceId: logAnalyticsWorkspaceId
   }
 }
 
@@ -55,6 +67,7 @@ module appService 'appService.bicep' = {
     integrationSubnetId: integrationSubnetId
     privateEndpointSubnetId: privateEndpointSubnetId
     privateDnsZoneId: privateDnsZoneId
+    workspaceId: logAnalyticsWorkspaceId
   }
 }
 
@@ -68,6 +81,7 @@ module appGateway 'appGateway.bicep' = if (!empty(appGatewaySubnetId)) {
     applicationname: applicationname
     subnetId: appGatewaySubnetId
     backendHostName: appService.outputs.webAppHostName
+    workspaceId: logAnalyticsWorkspaceId
   }
 }
 
@@ -80,6 +94,9 @@ module keyVault 'keyVault.bicep' = {
     sqlServerData: sql.outputs.sqlServerDatabase
     sqlAdministratorLoginUser: sqlAdministratorLoginUser
     sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
+    privateEndpointSubnetId: privateEndpointSubnetId
+    privateDnsZoneId: keyVaultPrivateDnsZoneId
+    workspaceId: logAnalyticsWorkspaceId
   }
 }
 

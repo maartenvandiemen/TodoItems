@@ -1,6 +1,6 @@
-// One spoke: virtual network, a workload subnet and a route table that sends all traffic
-// destined for the other spokes to the hub firewall. Also creates the spoke -> hub peering.
-// The hub -> spoke peering and the DNS zone link are created by hubSideOfSpoke.bicep (they live in the hub resource group).
+// One spoke: virtual network, its subnets with a network security group each, and a route table that sends all
+// traffic destined for the other spokes to the hub firewall. Also creates the spoke -> hub peering.
+// The hub -> spoke peering and the DNS zone links are created by hubSideOfSpoke.bicep (they live in the hub resource group).
 import { Spoke } from 'addressPlan.bicep'
 
 param location string
@@ -14,6 +14,149 @@ param hubVnetId string
 
 @description('Private IP address of the hub firewall. Next hop for traffic between spokes.')
 param firewallPrivateIp string
+
+@description('Resource id of the central Log Analytics workspace (in the hub). The NSG logs are sent there.')
+param workspaceId string
+
+// Closes the subnet for everything that is not allowed by a rule with a lower number.
+// Without it the default rule AllowVnetInBound (priority 65000) lets every resource in the VNet in.
+var denyAllInbound = {
+  name: 'deny-all-inbound'
+  properties: {
+    priority: 4096
+    direction: 'Inbound'
+    access: 'Deny'
+    protocol: '*'
+    sourceAddressPrefix: '*'
+    sourcePortRange: '*'
+    destinationAddressPrefix: '*'
+    destinationPortRange: '*'
+  }
+}
+
+// Application Gateway subnet. Application Gateway v2 REQUIRES these inbound rules: the GatewayManager ports for
+// its own management, and the load balancer probes. The deny rule has a lower number than the default rule
+// that allows the load balancer (65001), so the load balancer has to be allowed explicitly.
+module nsgAppGateway 'nsg.bicep' = {
+  name: 'nsg-${spoke.name}-appgateway'
+  params: {
+    location: location
+    name: 'nsg-${spoke.name}-appgateway'
+    workspaceId: workspaceId
+    securityRules: [
+      {
+        name: 'allow-web-from-internet'
+        properties: {
+          priority: 100
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourceAddressPrefix: 'Internet'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRanges: [
+            '80'
+            '443'
+          ]
+        }
+      }
+      {
+        name: 'allow-gateway-manager'
+        properties: {
+          priority: 110
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourceAddressPrefix: 'GatewayManager'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '65200-65535'
+        }
+      }
+      {
+        name: 'allow-load-balancer'
+        properties: {
+          priority: 120
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourceAddressPrefix: 'AzureLoadBalancer'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+        }
+      }
+      denyAllInbound
+    ]
+  }
+}
+
+// App Service VNet integration subnet: only used for OUTBOUND traffic of the app, nothing has to come in.
+module nsgAppService 'nsg.bicep' = {
+  name: 'nsg-${spoke.name}-appservice'
+  params: {
+    location: location
+    name: 'nsg-${spoke.name}-appservice'
+    workspaceId: workspaceId
+    securityRules: [
+      denyAllInbound
+    ]
+  }
+}
+
+// Private endpoints (web app, SQL, Key Vault). Only the gateway may reach the web app, and only the app
+// may reach SQL (1433) and Key Vault (443). These rules only apply because the subnet has
+// privateEndpointNetworkPolicies enabled (see below).
+module nsgPrivateEndpoints 'nsg.bicep' = {
+  name: 'nsg-${spoke.name}-privateendpoints'
+  params: {
+    location: location
+    name: 'nsg-${spoke.name}-privateendpoints'
+    workspaceId: workspaceId
+    securityRules: [
+      {
+        name: 'allow-gateway-to-webapp'
+        properties: {
+          priority: 100
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourceAddressPrefix: spoke.appGatewaySubnetPrefix
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '443'
+        }
+      }
+      {
+        name: 'allow-app-to-sql-and-keyvault'
+        properties: {
+          priority: 110
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourceAddressPrefix: spoke.appServiceSubnetPrefix
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRanges: [
+            '443'
+            '1433'
+          ]
+        }
+      }
+      denyAllInbound
+    ]
+  }
+}
+
+// Workload subnet (lab VMs, clients). No custom rules yet: the default rules apply, and the NSG logs.
+module nsgWorkload 'nsg.bicep' = {
+  name: 'nsg-${spoke.name}-workload'
+  params: {
+    location: location
+    name: 'nsg-${spoke.name}-workload'
+    workspaceId: workspaceId
+  }
+}
 
 resource routeTable 'Microsoft.Network/routeTables@2026-03-01' = {
   name: 'rt-${spoke.name}'
@@ -48,6 +191,9 @@ resource spokeVnet 'Microsoft.Network/virtualNetworks@2026-03-01' = {
             id: routeTable.id
           }
           defaultOutboundAccess: false
+          networkSecurityGroup: {
+            id: nsgWorkload.outputs.id
+          }
         }
       }
       {
@@ -63,6 +209,9 @@ resource spokeVnet 'Microsoft.Network/virtualNetworks@2026-03-01' = {
               }
             }
           ]
+          networkSecurityGroup: {
+            id: nsgAppService.outputs.id
+          }
         }
       }
       {
@@ -70,6 +219,11 @@ resource spokeVnet 'Microsoft.Network/virtualNetworks@2026-03-01' = {
         properties: {
           addressPrefix: spoke.privateEndpointSubnetPrefix
           defaultOutboundAccess: false
+          // Without this the NSG rules are not applied to private endpoints in this subnet.
+          privateEndpointNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: nsgPrivateEndpoints.outputs.id
+          }
         }
       }
       {
@@ -78,6 +232,9 @@ resource spokeVnet 'Microsoft.Network/virtualNetworks@2026-03-01' = {
         name: 'snet-appgateway'
         properties: {
           addressPrefix: spoke.appGatewaySubnetPrefix
+          networkSecurityGroup: {
+            id: nsgAppGateway.outputs.id
+          }
         }
       }
     ]

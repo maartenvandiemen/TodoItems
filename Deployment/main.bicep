@@ -30,12 +30,8 @@ param sqlAdministratorLoginPassword string
 @description('Full docker image name, including tag. Example: ghcr.io/mvdiemen/todoitems:docker. Empty: no container, the pipeline deploys a zip.')
 param dockerImageNameAndTag string = ''
 
-@description('Who may query logs and telemetry (Log Analytics workspace, Application Insights). Open: also from public networks, for example the Azure portal (authenticated). PrivateOnly: only from connected private networks, the portal then cannot show the logs from outside the network. Ingestion is always private only.')
-@allowed([
-  'Open'
-  'PrivateOnly'
-])
-param monitorQueryAccessMode string = 'Open'
+@description('Record the IP traffic of the VNets (virtual network flow logs) to a storage account. The flow logs are created in the Network Watcher of the subscription (resource group NetworkWatcherRG), which has to exist in the region: Azure creates it automatically with the first VNet in a region. Switch off when it does not exist.')
+param enableFlowLogs bool = true
 
 resource hubResourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' = {
   name: '${resourceGroupPrefix}-hub'
@@ -60,7 +56,6 @@ module hub 'network/hub.bicep' = {
   scope: hubResourceGroup
   params: {
     location: location
-    monitorQueryAccessMode: monitorQueryAccessMode
   }
 }
 
@@ -74,7 +69,6 @@ module appInsights 'applicationInsights.bicep' = {
     applicationname: applicationname
     workspaceResourceId: hub.outputs.logAnalyticsWorkspaceId
     monitorPrivateLinkScopeName: hub.outputs.monitorPrivateLinkScopeName
-    monitorQueryAccessMode: monitorQueryAccessMode
   }
 }
 
@@ -90,6 +84,7 @@ module spokeNetworks 'network/spoke.bicep' = [for (spoke, index) in spokes: {
     otherSpokes: filter(spokes, other => other.name != spoke.name)
     hubVnetId: hub.outputs.hubVnetId
     firewallPrivateIp: hub.outputs.firewallPrivateIp
+    workspaceId: hub.outputs.logAnalyticsWorkspaceId
   }
 }]
 
@@ -117,6 +112,9 @@ module webApp 'webApp.bicep' = {
     sqlAdministratorLoginPassword: sqlAdministratorLoginPassword
     dockerImageNameAndTag: dockerImageNameAndTag
     applicationInsightsConnectionString: appInsights.outputs.connectionString
+    logAnalyticsWorkspaceId: hub.outputs.logAnalyticsWorkspaceId
+    sqlPrivateDnsZoneId: hub.outputs.sqlPrivateDnsZoneId
+    keyVaultPrivateDnsZoneId: hub.outputs.keyVaultPrivateDnsZoneId
     integrationSubnetId: spokeNetworks[0].outputs.appServiceSubnetId
     privateEndpointSubnetId: spokeNetworks[0].outputs.privateEndpointSubnetId
     privateDnsZoneId: hub.outputs.webAppPrivateDnsZoneId
@@ -127,6 +125,24 @@ module webApp 'webApp.bicep' = {
   dependsOn: [
     hubSides
   ]
+}
+
+// Flow logs of the hub and the spokes. They are children of the Network Watcher of the subscription, which lives
+// in its own resource group: NOT deleted with the resource groups of this instance. The pipelines delete them
+// by name (fl-<prefix>-...) when the instance is cleaned up.
+module flowLogs 'network/flowLogs.bicep' = if (enableFlowLogs) {
+  name: 'flowLogs'
+  scope: resourceGroup('NetworkWatcherRG')
+  params: {
+    location: location
+    resourceGroupPrefix: resourceGroupPrefix
+    storageId: hub.outputs.flowLogStorageId
+    hubVnetId: hub.outputs.hubVnetId
+    spokeVnets: [for (spoke, index) in spokes: {
+      name: spoke.name
+      vnetId: spokeNetworks[index].outputs.vnetId
+    }]
+  }
 }
 
 output appResourceGroupName string = spokeResourceGroups[0].name

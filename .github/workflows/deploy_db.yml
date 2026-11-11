@@ -9,6 +9,10 @@ on:
         type: string
         required: true
         description: Databasename
+      resourceGroup:
+        type: string
+        required: true
+        description: Resource group of the SQL server
     secrets:
       AZURE_SQL_USER:
         required: true
@@ -40,8 +44,28 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           
+      # The SQL server has no public access (only a private endpoint), and this runner is outside the network.
+      # For the length of the migration the server is opened for the internet; the action adds a firewall rule
+      # for this runner on its own. It is closed again afterwards, also when the migration fails.
+      - name: Open SQL server for the migration
+        uses: Azure/cli@v3
+        with:
+          inlineScript: |
+            fqdn='${{ inputs.sqlServerFQDN }}'
+            az sql server update --resource-group '${{ inputs.resourceGroup }}' --name "${fqdn%%.*}" --enable-public-network true --output none
+            # The change takes a moment to apply.
+            sleep 30
+
       - name: Azure SQL Deploy
         uses: Azure/sql-action@v2.4
         with:
           connection-string: 'Data Source=tcp:${{ inputs.sqlServerFQDN }},1433;Initial Catalog=${{ inputs.databaseName }};Persist Security Info=False;User Id=${{secrets.AZURE_SQL_USER}};Password=${{secrets.SA_PASSWORD}};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
           path: ${{github.workspace}}/artifacts/database/*.sql
+
+      - name: Close SQL server again
+        if: always()
+        uses: Azure/cli@v3
+        with:
+          inlineScript: |
+            fqdn='${{ inputs.sqlServerFQDN }}'
+            az sql server update --resource-group '${{ inputs.resourceGroup }}' --name "${fqdn%%.*}" --enable-public-network false --output none

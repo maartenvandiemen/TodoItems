@@ -86,6 +86,14 @@ stages:
                   if [ -z "$prefix" ]; then echo "No instance name known, nothing to delete."; exit 0; fi
                   spokes=$(az group list --query "[?tags.instance=='$prefix' && tags.role=='spoke'].name" -o tsv)
                   hubs=$(az group list --query "[?tags.instance=='$prefix' && tags.role=='hub'].name" -o tsv)
+                  # The VNet flow logs live in the Network Watcher resource group of the subscription, not in the resource
+                  # groups of this instance: they are not deleted with those, so delete them first (by name, fl-<prefix>-...).
+                  location=$(az group list --query "[?tags.instance=='$prefix'] | [0].location" -o tsv)
+                  if [ -n "$location" ]; then
+                    for flowlog in $(az network watcher flow-log list --location "$location" --query "[?starts_with(name,'fl-$prefix-')].name" -o tsv); do
+                      az network watcher flow-log delete --location "$location" --name "$flowlog"
+                    done
+                  fi
                   for rg in $spokes; do az group delete --name "$rg" --yes --no-wait; done
                   for rg in $spokes; do az group wait --name "$rg" --deleted; done
                   for rg in $hubs; do az group delete --name "$rg" --yes --no-wait; done

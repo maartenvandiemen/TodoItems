@@ -12,6 +12,15 @@
 //  - public App Service: the hostname resolves to a public IP.
 //  - App Service with a private endpoint: the hostname resolves to the private endpoint, as long as the
 //    privatelink.azurewebsites.net private DNS zone is linked to the VNet of the gateway.
+//
+// HOW THE PARTS FIT TOGETHER (an Application Gateway is built from small named parts that refer to each other):
+//
+//   frontend IP  +  frontend port  +  protocol          ->  LISTENER      "where and how clients connect"
+//   listener  ->  ROUTING RULE  ->  backend pool         "which application receives the request"
+//                                   + backend settings   "how to talk to it (port, protocol, host header, health probe)"
+//
+// There is one of each here (one IP, one port, one listener, one rule, one pool), because it serves one API.
+// The structure is still required: the gateway is designed for many sites, where listeners share IPs and ports.
 
 param location string
 
@@ -25,6 +34,9 @@ param backendHostName string
 
 @description('Path of the health endpoint of the web app.')
 param healthProbePath string = '/health'
+
+@description('Resource id of the Log Analytics workspace that receives the access log of the gateway.')
+param workspaceId string
 
 var gatewayName = 'agw-${applicationname}'
 var publicIpName = 'pip-agw-${applicationname}'
@@ -66,8 +78,8 @@ resource gateway 'Microsoft.Network/applicationGateways@2026-03-01' = {
     }
     autoscaleConfiguration: {
       minCapacity: 1
-      maxCapacity: 2
     }
+    // The subnet the gateway itself lives in (its instances get their private addresses from it).
     gatewayIPConfigurations: [
       {
         name: gatewayIpConfigName
@@ -78,6 +90,8 @@ resource gateway 'Microsoft.Network/applicationGateways@2026-03-01' = {
         }
       }
     ]
+    // FRONTEND IP: the address clients connect to. A gateway can have a public one, a private one, or both.
+    // Here: the public IP above.
     frontendIPConfigurations: [
       {
         name: frontendIpConfigName
@@ -88,6 +102,8 @@ resource gateway 'Microsoft.Network/applicationGateways@2026-03-01' = {
         }
       }
     ]
+    // FRONTEND PORT: a port number the gateway listens on. It is declared on its own so that several listeners
+    // can share it. HTTPS later: add a port 443 here, and a listener with a certificate.
     frontendPorts: [
       {
         name: frontendPortName
@@ -96,6 +112,8 @@ resource gateway 'Microsoft.Network/applicationGateways@2026-03-01' = {
         }
       }
     ]
+    // BACKEND POOL: where requests are sent to. Here: the hostname of the web app, which resolves to its
+    // private endpoint through the private DNS zone.
     backendAddressPools: [
       {
         name: backendPoolName
@@ -108,6 +126,7 @@ resource gateway 'Microsoft.Network/applicationGateways@2026-03-01' = {
         }
       }
     ]
+    // HEALTH PROBE: how the gateway checks that the web app is up. It only sends requests to a healthy backend.
     probes: [
       {
         name: probeName
@@ -127,6 +146,8 @@ resource gateway 'Microsoft.Network/applicationGateways@2026-03-01' = {
         }
       }
     ]
+    // BACKEND SETTINGS: how the gateway talks to the backend: HTTPS on port 443, with the web app's own hostname
+    // as Host header, and the health probe above.
     backendHttpSettingsCollection: [
       {
         name: backendSettingsName
@@ -143,6 +164,7 @@ resource gateway 'Microsoft.Network/applicationGateways@2026-03-01' = {
         }
       }
     ]
+    // LISTENER: "accept HTTP requests that arrive on this frontend IP and this frontend port".
     httpListeners: [
       {
         name: listenerName
@@ -157,6 +179,8 @@ resource gateway 'Microsoft.Network/applicationGateways@2026-03-01' = {
         }
       }
     ]
+    // ROUTING RULE: ties it together. Requests that arrive on the listener go to the backend pool, using the
+    // backend settings. (With several sites, there would be one listener and one rule per site.)
     requestRoutingRules: [
       {
         name: routingRuleName
@@ -174,6 +198,22 @@ resource gateway 'Microsoft.Network/applicationGateways@2026-03-01' = {
             id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', gatewayName, backendSettingsName)
           }
         }
+      }
+    ]
+  }
+}
+
+// Access log: every request that went through the gateway, with the response code and the backend it went to.
+#disable-next-line use-recent-api-versions
+resource gatewayDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'to-log-analytics'
+  scope: gateway
+  properties: {
+    workspaceId: workspaceId
+    logs: [
+      {
+        category: 'ApplicationGatewayAccessLog'
+        enabled: true
       }
     ]
   }

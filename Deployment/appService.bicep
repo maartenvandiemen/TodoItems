@@ -16,6 +16,9 @@ param privateEndpointSubnetId string = ''
 @description('Resource id of the privatelink.azurewebsites.net private DNS zone. Required when privateEndpointSubnetId is set.')
 param privateDnsZoneId string = ''
 
+@description('Resource id of the Log Analytics workspace that receives the logs of the web app.')
+param workspaceId string
+
 var usePrivateEndpoint = !empty(privateEndpointSubnetId)
 
 var appServiceAppName = 'site-${applicationname}-${uniqueString(resourceGroup().id)}'
@@ -75,6 +78,9 @@ resource appServiceApp 'Microsoft.Web/sites@2025-03-01' = {
      acrUseManagedIdentityCreds: false
      linuxFxVersion: empty(dockerImageNameAndTag) ? 'DOTNET|11' : 'DOCKER|${dockerImageNameAndTag}'
      healthCheckPath: '/health'
+     // Send ALL outbound traffic through the VNet. A Linux app that resolves Key Vault references of a vault with
+     // a private endpoint (and talks to SQL through its private endpoint) must be set to this explicitly.
+     vnetRouteAllEnabled: !empty(integrationSubnetId)
      connectionStrings: [
       {
         name: 'TodoDb'
@@ -123,6 +129,30 @@ resource webAppDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGr
         properties: {
           privateDnsZoneId: privateDnsZoneId
         }
+      }
+    ]
+  }
+}
+
+// HTTP requests, the console output of the container, and the audit of the access restrictions (who was refused).
+#disable-next-line use-recent-api-versions
+resource appServiceDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'to-log-analytics'
+  scope: appServiceApp
+  properties: {
+    workspaceId: workspaceId
+    logs: [
+      {
+        category: 'AppServiceHTTPLogs'
+        enabled: true
+      }
+      {
+        category: 'AppServiceConsoleLogs'
+        enabled: true
+      }
+      {
+        category: 'AppServiceIPSecAuditLogs'
+        enabled: true
       }
     ]
   }

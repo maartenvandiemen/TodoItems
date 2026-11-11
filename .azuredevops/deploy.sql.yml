@@ -10,12 +10,28 @@ jobs:
     value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.sqlServerFQDN'] ]
   - name: databaseName
     value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.databaseName'] ]
-    
+  - name: appResourceGroup
+    value: $[ dependencies.Create_Env.outputs['SaveDeploymentOutputs.appResourceGroup'] ]
+
   steps:
   - checkout: none
   - download: current
     artifact: database
     displayName: Download database
+  #The SQL server has no public access (only a private endpoint), and this agent is outside the network.
+  #For the length of the migration the server is opened for the internet; the deploy task adds a firewall rule for
+  #this agent on its own (IpDetectionMethod). It is closed again afterwards, also when the migration fails.
+  - task: AzureCLI@2
+    displayName: Open SQL server for the migration
+    inputs:
+      azureSubscription: 'Azure'
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        $serverName = '$(sqlServerFQDN)'.Split('.')[0]
+        az sql server update --resource-group '$(appResourceGroup)' --name $serverName --enable-public-network true --output none
+        # The change takes a moment to apply.
+        Start-Sleep -Seconds 30
   - task: SqlAzureDacpacDeployment@1
     displayName: Deploy database
     inputs:
@@ -28,3 +44,13 @@ jobs:
       deployType: 'SqlTask'
       SqlFile: '$(Pipeline.Workspace)/database/db.sql'
       IpDetectionMethod: 'AutoDetect'
+  - task: AzureCLI@2
+    displayName: Close SQL server again
+    condition: always()
+    inputs:
+      azureSubscription: 'Azure'
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        $serverName = '$(sqlServerFQDN)'.Split('.')[0]
+        az sql server update --resource-group '$(appResourceGroup)' --name $serverName --enable-public-network false --output none

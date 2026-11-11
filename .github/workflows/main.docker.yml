@@ -136,6 +136,7 @@ jobs:
     with:
       sqlServerFQDN: ${{needs.create_env.outputs.sqlServerFQDN}}
       databaseName: ${{needs.create_env.outputs.databaseName}}
+      resourceGroup: ${{needs.create_env.outputs.appResourceGroup}}
     secrets: inherit
 
   verify_gateway:

@@ -54,6 +54,14 @@ var monitorPrivateDnsZoneNames = [
   'privatelink.blob.${environment().suffixes.storage}'
 ]
 
+// Private DNS zones of the data services. Same rule: in the hub, linked to the hub and each spoke.
+// The ORDER matters: hub.bicep outputs the zone ids by position (0 = SQL, 1 = Key Vault).
+@export()
+var dataPrivateDnsZoneNames = [
+  'privatelink${environment().suffixes.sqlServerHostname}'
+  'privatelink.vaultcore.azure.net'
+]
+
 // The web app is deployed into the FIRST spoke (spokes[0]).
 @export()
 var spokes Spoke[] = [
@@ -65,6 +73,7 @@ var spokes Spoke[] = [
     privateEndpointSubnetPrefix: '10.1.3.0/27'
     appGatewaySubnetPrefix: '10.1.4.0/24'
   }
+  // Second spoke is for demo purposes
   {
     name: 'spoke-2'
     addressPrefix: '10.2.0.0/16'

@@ -1,17 +1,58 @@
 // Hub: shared network + Azure Firewall that routes traffic between the spokes.
 // Deploy into the hub resource group. The spokes are deployed afterwards (spoke.bicep, one resource group per spoke).
-import { hub, spokes, webAppPrivateDnsZoneName, monitorPrivateDnsZoneNames } from 'addressPlan.bicep'
+import { hub, spokes, webAppPrivateDnsZoneName, monitorPrivateDnsZoneNames, dataPrivateDnsZoneNames } from 'addressPlan.bicep'
 
 param location string = resourceGroup().location
 
-@description('Who may query the Log Analytics workspace: Open also allows queries from public networks (the Azure portal, authenticated), PrivateOnly only from the connected private networks. Ingestion is always private only.')
-@allowed([
-  'Open'
-  'PrivateOnly'
-])
-param monitorQueryAccessMode string = 'Open'
-
 var spokePrefixes = map(spokes, spoke => spoke.addressPrefix)
+
+// Network security groups of the hub subnets. The firewall subnet gets none: Azure Firewall manages its own subnet.
+module nsgSharedServices 'nsg.bicep' = {
+  name: 'nsg-${hub.name}-shared-services'
+  params: {
+    location: location
+    name: 'nsg-${hub.name}-shared-services'
+    workspaceId: workspace.id
+  }
+}
+
+module nsgPrivateEndpoints 'nsg.bicep' = {
+  name: 'nsg-${hub.name}-privateendpoints'
+  params: {
+    location: location
+    name: 'nsg-${hub.name}-privateendpoints'
+    workspaceId: workspace.id
+    securityRules: [
+      {
+        // The Azure Monitor private link scope: the spokes (and the hub) send their telemetry to it over HTTPS.
+        name: 'allow-https-from-vnet'
+        properties: {
+          priority: 100
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourceAddressPrefix: 'VirtualNetwork'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '443'
+        }
+      }
+      {
+        name: 'deny-all-inbound'
+        properties: {
+          priority: 4096
+          direction: 'Inbound'
+          access: 'Deny'
+          protocol: '*'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+        }
+      }
+    ]
+  }
+}
 
 resource hubVnet 'Microsoft.Network/virtualNetworks@2026-03-01' = {
   name: 'vnet-${hub.name}'
@@ -28,6 +69,9 @@ resource hubVnet 'Microsoft.Network/virtualNetworks@2026-03-01' = {
         properties: {
           addressPrefix: hub.sharedServicesSubnetPrefix
           defaultOutboundAccess: false
+          networkSecurityGroup: {
+            id: nsgSharedServices.outputs.id
+          }
         }
       }
       {
@@ -41,6 +85,11 @@ resource hubVnet 'Microsoft.Network/virtualNetworks@2026-03-01' = {
         properties: {
           addressPrefix: hub.privateEndpointSubnetPrefix
           defaultOutboundAccess: false
+          // Without this the NSG rules are not applied to private endpoints in this subnet.
+          privateEndpointNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: nsgPrivateEndpoints.outputs.id
+          }
         }
       }
     ]
@@ -77,7 +126,7 @@ resource firewallPolicy 'Microsoft.Network/firewallPolicies@2026-03-01' = {
     sku: {
       tier: 'Standard'
     }
-    threatIntelMode: 'Alert'
+    threatIntelMode: 'Off'
   }
 }
 
@@ -145,6 +194,36 @@ resource firewall 'Microsoft.Network/azureFirewalls@2026-03-01' = {
   ]
 }
 
+// Firewall logs to the central workspace. The AZFW* categories are the structured logs: they need
+// 'Dedicated' (resource specific tables).
+#disable-next-line use-recent-api-versions
+resource firewallDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'to-log-analytics'
+  scope: firewall
+  properties: {
+    workspaceId: workspace.id
+    logAnalyticsDestinationType: 'Dedicated'
+    logs: [
+      {
+        category: 'AZFWNetworkRule'
+        enabled: true
+      }
+      {
+        category: 'AZFWApplicationRule'
+        enabled: true
+      }
+      {
+        category: 'AZFWNatRule'
+        enabled: true
+      }
+      {
+        category: 'AZFWThreatIntel'
+        enabled: true
+      }
+    ]
+  }
+}
+
 // Private DNS zone for private endpoints of App Service, shared by the whole instance.
 // Each VNet that has to resolve the private endpoint needs a link to it: this one links the hub,
 // the spokes get their link in hubSideOfSpoke.bicep. The zone must exist (and be linked) before the
@@ -166,8 +245,26 @@ resource webAppDnsZoneHubLink 'Microsoft.Network/privateDnsZones/virtualNetworkL
   }
 }
 
+// The same for the data services (SQL, Key Vault).
+resource dataDnsZones 'Microsoft.Network/privateDnsZones@2024-06-01' = [for zoneName in dataPrivateDnsZoneNames: {
+  name: zoneName
+  location: 'global'
+}]
+
+resource dataDnsZoneHubLinks 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = [for (zoneName, index) in dataPrivateDnsZoneNames: {
+  parent: dataDnsZones[index]
+  name: 'link-${hubVnet.name}'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: hubVnet.id
+    }
+  }
+}]
+
 // Central Log Analytics workspace of the instance. Everything that writes logs or telemetry (the application,
-// later also the firewall, gateway and network flow logs) sends it here, so it can be queried and
+// the firewall, the gateway, the NSGs, SQL and Key Vault) sends it here, so it can be queried and
 // correlated in one place. It lives in the hub because the hub outlives the spokes within an instance:
 // the spokes are deleted first.
 resource workspace 'Microsoft.OperationalInsights/workspaces@2026-03-01' = {
@@ -179,7 +276,7 @@ resource workspace 'Microsoft.OperationalInsights/workspaces@2026-03-01' = {
     // Logs that Azure resources send through a diagnostic setting are not affected by this: they use a
     // private Microsoft channel.
     publicNetworkAccessForIngestion: 'Disabled'
-    publicNetworkAccessForQuery: monitorQueryAccessMode == 'Open' ? 'Enabled' : 'Disabled'
+    publicNetworkAccessForQuery: 'Enabled'
   }
 }
 
@@ -194,7 +291,7 @@ resource monitorPrivateLinkScope 'Microsoft.Insights/privateLinkScopes@2021-09-0
   properties: {
     accessModeSettings: {
       ingestionAccessMode: 'PrivateOnly'
-      queryAccessMode: monitorQueryAccessMode
+      queryAccessMode: 'Open'
     }
   }
 }
@@ -263,9 +360,29 @@ resource monitorDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneG
   }
 }
 
+// Storage account for the virtual network flow logs (network/flowLogs.bicep). Flow logs are written here by
+// Network Watcher: a standard storage account in the same region as the VNets.
+resource flowLogStorage 'Microsoft.Storage/storageAccounts@2025-01-01' = {
+  name: 'stflow${uniqueString(resourceGroup().id)}'
+  location: location
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    allowBlobPublicAccess: false
+    minimumTlsVersion: 'TLS1_2'
+    supportsHttpsTrafficOnly: true
+  }
+}
+
 output monitorPrivateLinkScopeName string = monitorPrivateLinkScope.name
 output hubVnetName string = hubVnet.name
 output logAnalyticsWorkspaceId string = workspace.id
+output flowLogStorageId string = flowLogStorage.id
 output hubVnetId string = hubVnet.id
 output webAppPrivateDnsZoneId string = webAppDnsZone.id
+// In the order of dataPrivateDnsZoneNames (addressPlan.bicep).
+output sqlPrivateDnsZoneId string = dataDnsZones[0].id
+output keyVaultPrivateDnsZoneId string = dataDnsZones[1].id
 output firewallPrivateIp string = firewall.properties.ipConfigurations[0].properties.privateIPAddress
