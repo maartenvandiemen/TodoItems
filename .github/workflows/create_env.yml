@@ -57,13 +57,13 @@ jobs:
     environment: AzureDeploy
     steps:
       - name: Download a bicep templates
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.2
         with:
           name: infraCode
           path: ${{github.workspace}}/artifacts/bicep
 
       - name: Azure login
-        uses: Azure/login@v3
+        uses: Azure/login@v3.1.0
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -71,12 +71,12 @@ jobs:
 
       # The instance is one resource group. Creating it again (a re-run of a failed job) is no problem.
       - name: Create resourcegroup ${{ inputs.resourceGroupName }}
-        uses: Azure/cli@v3
+        uses: Azure/cli@v3.0.0
         with:
           inlineScript: az group create --location '${{ inputs.region }}' --name '${{ inputs.resourceGroupName }}' --output none
 
       - name: Deploy Azure infrastructure
-        uses: azure/bicep-deploy@v2
+        uses: azure/bicep-deploy@v2.5.0
         id: arm
         with:
           type: deployment

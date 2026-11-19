@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: AzureRemove
     steps:
-      - uses: Azure/login@v3
+      - uses: Azure/login@v3.1.0
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -26,7 +26,7 @@ jobs:
       # Also used to clean up after a failed run: the resource group may not exist if the run failed early.
       # The instance is one resource group. It may not exist (the deployment
       # can fail before it is created), so check first.
-      - uses: Azure/cli@v3
+      - uses: Azure/cli@v3.0.0
         with:
           inlineScript: |
             rg='${{ inputs.resourceGroupName }}'

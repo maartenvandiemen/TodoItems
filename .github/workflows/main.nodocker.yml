@@ -72,11 +72,11 @@ jobs:
       deployments: write
     steps:
       - name: Download a Build Artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.2
         with:
           name: todoItemsApi
           path: ${{github.workspace}}/artifacts/api
-      - uses: Azure/login@v3
+      - uses: Azure/login@v3.1.0
         name: Azure Login
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -85,7 +85,7 @@ jobs:
       - run: Compress-Archive -Path ${{github.workspace}}/artifacts/api/* -DestinationPath ${{github.workspace}}/artifacts/api/api.zip
       # The code is deployed through the SCM (Kudu) site, which is closed by default (the web app is private).
       # For the length of the deployment this runner gets its own allow rule, removed again afterwards.
-      - uses: Azure/cli@v3
+      - uses: Azure/cli@v3.0.0
         name: Azure Deploy WebApp
         with:
           inlineScript: |
