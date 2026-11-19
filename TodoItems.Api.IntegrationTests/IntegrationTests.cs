@@ -15,7 +15,7 @@ namespace TodoItems.Api.IntegrationTests
         [TestInitialize]
         public void TestInitialize()
         {
-            _sqlContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2025-latest")
+            _sqlContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/azure-sql-db-server:latest")
                 //Will remove the image automatically after all tests have been run.
                 .WithCleanUp(true)
                 .Build();            

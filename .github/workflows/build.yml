@@ -16,11 +16,10 @@ jobs:
       contents: read
     services:
       mssql:
-        image: mcr.microsoft.com/mssql/server:2025-latest
+        image: mcr.microsoft.com/mssql/azure-sql-db-server:latest
         env:
           ACCEPT_EULA: Y
-          SA_PASSWORD: ${{secrets.SA_PASSWORD}}
-          MSSQL_PID: Developer
+          MSSQL_SA_PASSWORD: ${{secrets.SA_PASSWORD}}
         options: --name mssql
         ports:
           - 1433:1433

@@ -9,7 +9,10 @@ builder.Logging.AddConsole();
 
 builder.Services.AddOpenApi();
 
-if (builder.Environment.IsDevelopment())
+// In Development the in-memory database is the default, unless e.g. the Aspire AppHost sets UseInMemoryDatabase=false.
+var useInMemoryDatabase = builder.Environment.IsDevelopment() && builder.Configuration.GetValue<bool>("UseInMemoryDatabase");
+
+if (useInMemoryDatabase)
 {
     builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TodoDb"));
 }
@@ -29,6 +32,13 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    if (!useInMemoryDatabase)
+    {
+        // Local SQL Server (e.g. started by Aspire): create/update the schema. Deployed environments apply the idempotent SQL script from the pipeline instead.
+        using var scope = app.Services.CreateScope();
+        await scope.ServiceProvider.GetRequiredService<TodoDb>().Database.MigrateAsync();
+    }
+
     app.MapOpenApi();
     app.MapScalarApiReference();
 }

@@ -1,0 +1,8 @@
+{
+  "appHost": {
+    "path": "TodoItems.AppHost/TodoItems.AppHost.csproj"
+  },
+  "sdk": {
+    "version": "17.0.0"
+  }
+}
