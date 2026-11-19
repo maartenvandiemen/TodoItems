@@ -1,87 +1,62 @@
 parameters:
 - name: template
   type: string
+  default: main.bicep
 - name: additionalParameters
   type: string
   default: ''
-- name: modus
-  type: string
-  default: validation
-  values:
-  - validation
-  - deploy
 
 jobs:
-#Seperate job for generating resourcegroupName. 
+#Seperate job for generating the unique name of the instance.
 #In case the deployment fails, the Create_Env job can be executed again and the same resourcegroup is used as in the previous attempt.
-- job: Generate_ResourcegroupName
+- job: Determine_Names
   steps:
   - checkout: none
   - powershell: |
-      $randomNumber = Get-Random -Minimum 10000000000 -Maximum 99999999999
-      $resourcegroupname="todoItems-$randomNumber"
-      Write-Host "##vso[task.setvariable variable=resourcegroupName;isoutput=true]$resourcegroupname"
-    name: DetermineResourcegroupName
-    displayName: Determine resourcegroup name
+      $instanceId = Get-Random -Minimum 10000000000 -Maximum 99999999999
+      Write-Host "##vso[task.setvariable variable=resourceGroupName;isoutput=true]todoItems-$instanceId"
+    name: DetermineNames
+    displayName: Determine unique name of the instance
 
+#Deploys the network and the web app (see Deployment/main.bicep).
+#The resourcegroup is created first, the template is deployed into that resourcegroup.
 - job: Create_Env
-  dependsOn: [Generate_ResourcegroupName]
-  variables: 
+  dependsOn: [Determine_Names]
+  variables:
   - group: AzureSecrets
-  - name: resourcegroupName
-    value: $[ dependencies.Generate_ResourcegroupName.outputs['DetermineResourcegroupName.resourcegroupName'] ]
+  - name: resourceGroupName
+    value: $[ dependencies.Determine_Names.outputs['DetermineNames.resourceGroupName'] ]
   steps:
   - checkout: none
   - download: current
     artifact: infraCode
     displayName: Download Bicep files
+  #Creating the resourcegroup again (a re-run of a failed job) is no problem.
   - task: AzureCLI@2
     displayName: Create resourcegroup
     inputs:
       azureSubscription: 'Azure'
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
-      inlineScript: az group create --location '$(azure_region)' --name $(resourcegroupName)
+      inlineScript: az group create --location '$(azure_region)' --name '$(resourceGroupName)' --output none
   - task: AzureResourceManagerTemplateDeployment@3
     inputs:
       deploymentScope: 'Resource Group'
       azureResourceManagerConnection: 'Azure'
       subscriptionId: $(subscriptionId)
       action: 'Create Or Update Resource Group'
-      resourceGroupName: $(resourcegroupName)
+      resourceGroupName: $(resourceGroupName)
       location: '$(azure_region)'
       templateLocation: 'Linked artifact'
       csmFile: '$(Pipeline.Workspace)/infraCode/${{ parameters.template }}'
-      overrideParameters: '-applicationname todoitems -sqlAdministratorLoginUser $(todoItemsSqlAdminUser) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
-      ${{ if eq( parameters.modus, 'deploy') }}:
-        deploymentMode: 'Incremental'
-      ${{ else }}:
-        deploymentMode: 'Validation'
+      overrideParameters: '-sqlAdministratorLoginUser $(todoItemsSqlAdminUser) -sqlAdministratorLoginPassword $(todoItemsSqlAdminpassword) ${{ parameters.additionalParameters }}'
+      deploymentMode: 'Incremental'
       deploymentOutputs: deploymentOutputs
-  - ${{ if eq( parameters.modus, 'deploy') }}:
-    - bash: |
-          echo "##vso[task.setvariable variable=appServiceAppUrl;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.webAppUrl.value')"
-          echo "##vso[task.setvariable variable=appServiceAppName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.webAppName.value')"
-          echo "##vso[task.setvariable variable=sqlServerFQDN;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.sqlServerFQDN.value')"
-          echo "##vso[task.setvariable variable=databaseName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.databaseName.value')"
-      name: SaveDeploymentOutputs
-      displayName: Save deployment outputs into variables
-      env:
-        DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
-
-- ${{ if ne( parameters.modus, 'deploy') }}:
-  - job: Delete_Resourcegroup
-    dependsOn: [Generate_ResourcegroupName, Create_Env]
-    variables: 
-    - group: AzureSecrets
-    - name: resourcegroupName
-      value: $[ dependencies.Generate_ResourcegroupName.outputs['DetermineResourcegroupName.resourcegroupName'] ]
-    steps:
-    - checkout: none
-    - task: AzureCLI@2
-      displayName: Delete resourcegroup
-      inputs:
-        azureSubscription: 'Azure'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: 'az group delete --name $(resourcegroupName) --no-wait --y'
+  #Every output of main.bicep becomes an output variable with the same name: webAppUrl, webAppName, gatewayUrl,
+  #sqlServerName, sqlServerFQDN and databaseName. A new output of the template needs no change here.
+  - bash: |
+        echo "$DEPLOYMENT_OUTPUTS" | jq -r 'to_entries[] | "##vso[task.setvariable variable=\(.key);isOutput=true]\(.value.value)"'
+    name: SaveDeploymentOutputs
+    displayName: Save deployment outputs into variables
+    env:
+      DEPLOYMENT_OUTPUTS: $(deploymentOutputs)

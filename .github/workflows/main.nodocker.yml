@@ -1,5 +1,5 @@
 name: Build TodoItems No Docker
-on: 
+on:
   schedule:
     - cron:  '0 0 * * 3'
   push:
@@ -13,7 +13,7 @@ on:
       buildConfiguration:
         description: 'Build configuration'
         required: true
-        default: 'Release' 
+        default: 'Release'
         type: choice
         options:
         - Debug
@@ -39,42 +39,34 @@ jobs:
         else{
           echo "buildConfiguration=Release" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
         }
-  
+
+  determine_names:
+    uses: ./.github/workflows/determine_names.yml
+
   build:
     needs: [determine_variables_build]
     uses: ./.github/workflows/build.yml
     with:
       buildConfiguration: ${{needs.determine_variables_build.outputs.buildConfiguration}}
     secrets: inherit
-  
-  validate:
-    needs: [build]
-    uses: ./.github/workflows/create_env.yml
-    with:
-      region: ${{ vars.AZURE_REGION }}
-      template: /artifacts/bicep/main.nodocker.webapp.bicep
-      additionalParameters: |
-        applicationname: todoitems
-      deploy: false
-    secrets: inherit
 
+  # Deploys the network and the web app (see Deployment/main.bicep).
+  # Only on a manual run (inputs are empty on a push or schedule).
   create_env:
     if: inputs.buildConfiguration != ''
-    needs: [validate]
+    needs: [determine_names, build]
     uses: ./.github/workflows/create_env.yml
     with:
       region: ${{ vars.AZURE_REGION }}
-      template: /artifacts/bicep/main.nodocker.webapp.bicep
-      additionalParameters: |
-        applicationname: todoitems
-      deploy: true
+      template: /artifacts/bicep/main.bicep
+      resourceGroupName: ${{ needs.determine_names.outputs.resourceGroupName }}
     secrets: inherit
 
   deploy_app:
-    needs: [build, create_env]
+    needs: [determine_names, build, create_env]
     runs-on: ubuntu-latest
     environment: AzureDeploy
-    permissions: 
+    permissions:
       id-token: write
       contents: read
       deployments: write
@@ -91,30 +83,61 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - run: Compress-Archive -Path ${{github.workspace}}/artifacts/api/* -DestinationPath ${{github.workspace}}/artifacts/api/api.zip
+      # The code is deployed through the SCM (Kudu) site, which is closed by default (the web app is private).
+      # For the length of the deployment this runner gets its own allow rule, removed again afterwards.
       - uses: Azure/cli@v3
         name: Azure Deploy WebApp
         with:
           inlineScript: |
-             az webapp deploy --src-path ${{github.workspace}}/artifacts/api/api.zip --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.create_env.outputs.resourcegroup }} --type zip
-             az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name ${{ needs.create_env.outputs.webAppName }} --resource-group ${{ needs.create_env.outputs.resourcegroup }}
-  
+             rg='${{ needs.determine_names.outputs.resourceGroupName }}'
+             app='${{ needs.create_env.outputs.webAppName }}'
+
+             runnerIp=$(curl -s https://api.ipify.org)
+             echo "Runner IP address: $runnerIp"
+             az webapp config access-restriction add --resource-group "$rg" --name "$app" --scm-site true --rule-name runner --action Allow --ip-address "$runnerIp/32" --priority 100 --output none
+             trap 'az webapp config access-restriction remove --resource-group "$rg" --name "$app" --scm-site true --rule-name runner --output none' EXIT
+
+             # A new rule takes a moment to apply: wait until the SCM site no longer answers 403.
+             scm=$(az webapp show --resource-group "$rg" --name "$app" --query "hostNameSslStates[?hostType=='Repository'].name | [0]" -o tsv)
+             for i in $(seq 1 18); do
+               code=$(curl -s -o /dev/null -w '%{http_code}' "https://$scm/api/deployments" || true)
+               echo "Attempt $i: https://$scm returned $code"
+               if [ "$code" != "403" ]; then break; fi
+               sleep 10
+             done
+
+             az webapp deploy --src-path ${{github.workspace}}/artifacts/api/api.zip --name "$app" --resource-group "$rg" --type zip
+             az webapp config set --startup-file="dotnet TodoItems.Api.dll" --name "$app" --resource-group "$rg"
+
   deploy_db:
-    needs: [build, create_env]
+    needs: [determine_names, build, create_env]
     uses: ./.github/workflows/deploy_db.yml
     with:
+      sqlServerName: ${{needs.create_env.outputs.sqlServerName}}
       sqlServerFQDN: ${{needs.create_env.outputs.sqlServerFQDN}}
       databaseName: ${{needs.create_env.outputs.databaseName}}
+      resourceGroup: ${{needs.determine_names.outputs.resourceGroupName}}
     secrets: inherit
-    
+
+  verify_gateway:
+    needs: [create_env, deploy_app, deploy_db]
+    uses: ./.github/workflows/verify_gateway.yml
+    with:
+      gatewayUrl: ${{needs.create_env.outputs.gatewayUrl}}
+      webAppUrl: ${{needs.create_env.outputs.webAppUrl}}
+
   smoketests:
-    needs: [deploy_app, create_env, deploy_db]
+    needs: [create_env, verify_gateway]
     uses: ./.github/workflows/smoketests.yml
     with:
-      webAppUrl: ${{needs.create_env.outputs.webAppUrl}}
-  
+      baseUrl: ${{needs.create_env.outputs.gatewayUrl}}
+
+  # Always cleans up, also after a failed run, so nothing keeps costing money.
+  # Not when nothing was deployed (push/schedule).
   delete_env:
-    needs: [create_env, smoketests]
+    if: ${{ always() && needs.determine_names.result == 'success' && needs.create_env.result != 'skipped' }}
+    needs: [determine_names, create_env, smoketests]
     uses: ./.github/workflows/delete_env.yml
     with:
-      resourcegroupName: ${{ needs.create_env.outputs.resourcegroup }}
+      resourceGroupName: ${{ needs.determine_names.outputs.resourceGroupName }}
     secrets: inherit

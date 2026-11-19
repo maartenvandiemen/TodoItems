@@ -49,17 +49,8 @@ jobs:
       buildConfiguration: ${{needs.determine_variables.outputs.buildConfiguration}}
     secrets: inherit
 
-  validate_env:
-    needs: [build]
-    uses: ./.github/workflows/create_env.yml
-    with:
-      region: ${{ vars.AZURE_REGION }}
-      template: /artifacts/bicep/main.docker.webapp.bicep
-      additionalParameters: |
-        applicationname: todoitems
-        dockerImageNameAndTag: DUMMY
-      deploy: false
-    secrets: inherit
+  determine_names:
+    uses: ./.github/workflows/determine_names.yml
 
   dockerfile_artifact:
     permissions:
@@ -87,7 +78,7 @@ jobs:
       REGISTRY: ghcr.io
       DOCKER_BUILD_SUMMARY: false
       DOCKER_BUILD_RECORD_UPLOAD: false
-    needs: [validate_env, dockerfile_artifact, determine_variables]
+    needs: [build, dockerfile_artifact, determine_variables]
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -126,35 +117,47 @@ jobs:
           push: false
           tags: ${{ steps.createTag.outputs.dockerTag }}
 
+  # Deploys the network and the web app (see Deployment/main.bicep).
   create_env:
-    needs: [build, push_docker_image]
+    needs: [determine_names, build, push_docker_image]
     uses: ./.github/workflows/create_env.yml
     with:
       region: ${{ vars.AZURE_REGION }}
-      template: /artifacts/bicep/main.docker.webapp.bicep
+      template: /artifacts/bicep/main.bicep
+      resourceGroupName: ${{ needs.determine_names.outputs.resourceGroupName }}
       additionalParameters: |
-        applicationname: todoitems
         dockerImageNameAndTag: ${{needs.push_docker_image.outputs.dockerTag}}
-      deploy: true
     secrets: inherit
 
   deploy_db:
-    needs: [build, create_env]
+    needs: [determine_names, build, create_env]
     uses: ./.github/workflows/deploy_db.yml
     with:
+      sqlServerName: ${{needs.create_env.outputs.sqlServerName}}
       sqlServerFQDN: ${{needs.create_env.outputs.sqlServerFQDN}}
       databaseName: ${{needs.create_env.outputs.databaseName}}
+      resourceGroup: ${{needs.determine_names.outputs.resourceGroupName}}
     secrets: inherit
 
-  smoketests:
-    needs: [deploy_db, create_env]
-    uses: ./.github/workflows/smoketests.yml
+  verify_gateway:
+    needs: [create_env, deploy_db]
+    uses: ./.github/workflows/verify_gateway.yml
     with:
+      gatewayUrl: ${{needs.create_env.outputs.gatewayUrl}}
       webAppUrl: ${{needs.create_env.outputs.webAppUrl}}
 
+  smoketests:
+    needs: [create_env, verify_gateway]
+    uses: ./.github/workflows/smoketests.yml
+    with:
+      baseUrl: ${{needs.create_env.outputs.gatewayUrl}}
+
+  # Always cleans up, also after a failed run, so nothing keeps costing money.
+  # Not when nothing was deployed (push/schedule).
   delete_env:
-    needs: [create_env, smoketests]
+    if: ${{ always() && needs.determine_names.result == 'success' && needs.create_env.result != 'skipped' }}
+    needs: [determine_names, create_env, smoketests]
     uses: ./.github/workflows/delete_env.yml
     with:
-      resourcegroupName: ${{ needs.create_env.outputs.resourcegroup }}
+      resourceGroupName: ${{ needs.determine_names.outputs.resourceGroupName }}
     secrets: inherit

@@ -1,10 +1,10 @@
 on:
   workflow_call: 
     inputs:
-      webAppUrl:
+      baseUrl:
         type: string
         required: true
-        description: Name of the webbApp on which the tests need to be executed
+        description: Url on which the tests need to be executed (the Application Gateway in front of the web app)
 defaults:
   run:
     shell: pwsh
@@ -23,4 +23,4 @@ jobs:
           path: ${{github.workspace}}/artifacts/smoketests
 
       - name: Execute IntelliJ HTTP Client tests
-        run: docker run --rm -v ${{github.workspace}}/artifacts/smoketests:/workdir jetbrains/intellij-http-client:latest test.http -V host=${{inputs.webAppUrl}}
+        run: docker run --rm -v ${{github.workspace}}/artifacts/smoketests:/workdir jetbrains/intellij-http-client:latest test.http -V host=${{inputs.baseUrl}}

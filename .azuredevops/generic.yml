@@ -7,6 +7,7 @@ parameters:
   default: []
 - name: bicepTemplate
   type: string
+  default: main.bicep
 - name: bicepAdditionalParameters
   type: string
   default: ''
@@ -19,7 +20,7 @@ resources:
       ACCEPT_EULA: Y
       #SA_PASSWORD defined in Build stage
       MSSQL_SA_PASSWORD: $(SA_PASSWORD)
-    ports: 
+    ports:
       - 1433:1433
     options: --name mssql
 
@@ -33,53 +34,54 @@ stages:
       buildConfiguration: ${{parameters.buildConfiguration}}
       serviceContainerName: mssql
 
-- stage: Validate_Bicep
-  dependsOn: [Build]
-  jobs:
-  - template: create_env.yml
-    parameters:
-      template: ${{parameters.bicepTemplate}}
-      additionalParameters: ${{parameters.bicepAdditionalParameters}}
-      modus: validation
-      
+#Only on a manual run. The environment is deployed by Deployment/main.bicep: network and web app.
 - ${{ if eq(variables['Build.Reason'], 'Manual') }}:
   - stage: Deploy
-    dependsOn: [Build, Validate_Bicep]
+    dependsOn: [Build]
     jobs:
     - template: create_env.yml
       parameters:
         template: ${{parameters.bicepTemplate}}
         additionalParameters: ${{parameters.bicepAdditionalParameters}}
-        modus: deploy
     #bicepAdditionalParameters are only passed for Docker
     #https://stackoverflow.com/questions/60098737/checking-for-null-object-type-parameter-in-azure-yaml
     - ${{if not(parameters.bicepAdditionalParameters)}}:
       - template: deploy.nodocker.yml
     - template: deploy.sql.yml
-    - template: smoketests.yml
+    - template: verify_gateway.yml
       parameters:
         ${{if not(parameters.bicepAdditionalParameters)}}:
           dependsOn: [Create_Env, Deploy_DB, Deploy_App]
         ${{else }}:
           dependsOn: [Create_Env, Deploy_DB]
+    - template: smoketests.yml
+      parameters:
+        dependsOn: [Create_Env, Verify_Gateway]
 
+  #Always cleans up, also after a failed deployment, so nothing keeps costing money.
   - stage: Delete
     dependsOn: [Deploy]
+    condition: succeededOrFailed()
     jobs:
     - deployment: Delete
       environment: todoItems-teardown
       variables:
-        - name: resourcegroupName
-          value: $[ stageDependencies.Deploy.Generate_ResourcegroupName.outputs['DetermineResourcegroupName.resourcegroupName'] ]
+        - name: resourceGroupName
+          value: $[ stageDependencies.Deploy.Determine_Names.outputs['DetermineNames.resourceGroupName'] ]
       strategy:
         runOnce:
           deploy:
             steps:
             - download: none
+            #The instance is one resourcegroup. It may not exist (the deployment
+            #can fail before it is created), so check first.
             - task: AzureCLI@2
               displayName: Delete resourcegroup
               inputs:
                 azureSubscription: 'Azure'
                 scriptType: 'bash'
                 scriptLocation: 'inlineScript'
-                inlineScript: 'az group delete --resource-group $(resourcegroupName) --yes --no-wait'
+                inlineScript: |
+                  rg='$(resourceGroupName)'
+                  if [ -z "$rg" ]; then echo "No instance name known, nothing to delete."; exit 0; fi
+                  if [ "$(az group exists --name "$rg")" = "true" ]; then az group delete --name "$rg" --yes --no-wait; fi

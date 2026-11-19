@@ -1,0 +1,31 @@
+on:
+  workflow_call:
+    outputs:
+      instanceId:
+        description: Random id that makes this instance unique
+        value: ${{ jobs.determine_names.outputs.instanceId }}
+      resourceGroupName:
+        description: Unique name of this instance, also the name of its resource group.
+        value: ${{ jobs.determine_names.outputs.resourceGroupName }}
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  # Separate job for generating the name. When a later job fails and only the failed jobs are
+  # re-run, the same name (and therefore the same resource group) is used again.
+  determine_names:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      instanceId: ${{ steps.names.outputs.instanceId }}
+      resourceGroupName: ${{ steps.names.outputs.resourceGroupName }}
+    steps:
+      - name: Determine names
+        id: names
+        run: |
+          $instanceId = Get-Random -Minimum 10000000000 -Maximum 99999999999
+          echo "instanceId=$instanceId" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
+          echo "resourceGroupName=todoItems-$instanceId" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append
