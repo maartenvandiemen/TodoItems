@@ -5,23 +5,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using Testcontainers.MsSql;
 
 namespace TodoItems.Api.IntegrationTests
 {
     internal class TodoItemsApiApplication : WebApplicationFactory<Program>
     {
-        private readonly MsSqlContainer? _container;
+        private readonly string? _connectionString;
 
         private readonly Environment _environment;
 
-        public TodoItemsApiApplication(Environment environment, MsSqlContainer? container) : base()
+        public TodoItemsApiApplication(Environment environment, string? connectionString) : base()
         {
             _environment = environment;
 
             if (_environment == Environment.TestContainers)
             {
-                _container = container ?? throw new ArgumentNullException(nameof(environment));
+                _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
             }
         }
 
@@ -43,7 +42,7 @@ namespace TodoItems.Api.IntegrationTests
                 }
                 if (_environment == Environment.TestContainers)
                 {
-                    services.AddDbContext<TodoDb>(options => options.UseSqlServer(_container!.GetConnectionString()), ServiceLifetime.Scoped, ServiceLifetime.Singleton);
+                    services.AddDbContext<TodoDb>(options => options.UseSqlServer(_connectionString!), ServiceLifetime.Scoped, ServiceLifetime.Singleton);
                 }
             });
 

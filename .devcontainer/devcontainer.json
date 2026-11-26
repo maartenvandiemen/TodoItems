@@ -34,6 +34,12 @@
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "moby": false
     },
+    // Claude Code, so it works on the case-sensitive clone in the volume. It needs Node.js and npm;
+    // Ubuntu 26.04's own nodejs package comes without npm, so install Node.js through its feature.
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
     // main.bicep is linted in the pipeline.
     "ghcr.io/devcontainers/features/azure-cli:1": {
       "installBicep": true
@@ -42,14 +48,24 @@
 
   "remoteUser": "vscode",
 
+  // Claude Code login and settings survive a rebuild. One volume per dev container (${devcontainerId}),
+  // so another repo's dev container cannot mount it and read the login token.
+  "mounts": [
+    "source=claude-code-config-${devcontainerId},target=/home/vscode/.claude,type=volume"
+  ],
+
   "containerEnv": {
     "DOTNET_NOLOGO": "true",
     "DOTNET_SKIP_FIRST_TIME_EXPERIENCE": "true",
-    "DOTNET_CLI_TELEMETRY_OPTOUT": "true"
+    "DOTNET_CLI_TELEMETRY_OPTOUT": "true",
+    // Aspire dashboard without a login token, so the forwarded port (15278) opens directly.
+    // Dev container only: the port is only forwarded to localhost on your own machine.
+    "ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS": "true"
   },
 
-  // Same restore as CI: --locked-mode fails when packages.lock.json is out of date.
-  "postCreateCommand": "dotnet restore TodoItems.slnx --locked-mode && dotnet tool restore --tool-manifest TodoItems.Api/.config/dotnet-tools.json",
+  // The Claude Code volume is created as root: give it to the 'vscode' user first.
+  // Then the same restore as CI: --locked-mode fails when packages.lock.json is out of date.
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude && dotnet restore TodoItems.slnx --locked-mode && dotnet tool restore --tool-manifest TodoItems.Api/.config/dotnet-tools.json",
 
   // .NET and OpenSSL inside the container trust the ASP.NET Core development certificate
   // (Aspire dashboard and resources over HTTPS). Same as Microsoft's Aspire dev container.
@@ -75,6 +91,7 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "anthropic.claude-code",
         "microsoft-aspire.aspire-vscode",
         "ms-dotnettools.csdevkit",
         "ms-azuretools.vscode-bicep"
