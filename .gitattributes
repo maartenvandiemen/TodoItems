@@ -1,0 +1,2 @@
+# Shell scripts run in Linux containers: keep LF, also on a Windows checkout (CRLF breaks bash).
+*.sh text eol=lf
