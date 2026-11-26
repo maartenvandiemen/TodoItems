@@ -1,0 +1,64 @@
+// Dev container for TodoItems.
+//
+// Open it with "Dev Containers: Clone Repository in Container Volume..." (Command Palette, F1),
+// NOT with "Reopen in Container" on a folder on your C: drive.
+//  - Clone in Volume: git clones into a Docker volume, a Linux (case-sensitive) filesystem.
+//    Casing bugs, CRLF in shell scripts and other Linux-only problems show up here, on your machine.
+//  - Reopen in Container on C:\...: the folder is bind-mounted from Windows, so file lookups stay
+//    case-insensitive and git on Windows can still merge Folder/ and folder/. check-case-sensitivity.sh
+//    warns you when that happens.
+{
+  "name": "TodoItems",
+
+  // The same SDK image the CI build uses (build.Dockerfile), so "works in the dev container" means
+  // "works in CI". global.json pins 11.0.100 (latestPatch).
+  "image": "mcr.microsoft.com/dotnet/sdk:11.0",
+
+  "features": {
+    // Non-root 'vscode' user, git, and the usual shell tools on top of the plain SDK image.
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "username": "vscode",
+      "installZsh": false,
+      "installOhMyZsh": false
+    },
+    // Docker inside the dev container, for Testcontainers (integration tests start SQL Server)
+    // and for Aspire (the AppHost starts SQL Server). Docker-in-docker instead of the host socket:
+    // containers started by the tests are reachable on localhost, and bind mounts resolve inside
+    // the dev container. The feature keeps /var/lib/docker in a volume, so pulled images survive a rebuild.
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    // main.bicep is linted in the pipeline.
+    "ghcr.io/devcontainers/features/azure-cli:1": {
+      "installBicep": true
+    }
+  },
+
+  "remoteUser": "vscode",
+
+  "containerEnv": {
+    "DOTNET_NOLOGO": "true",
+    "DOTNET_SKIP_FIRST_TIME_EXPERIENCE": "true",
+    "DOTNET_CLI_TELEMETRY_OPTOUT": "true"
+  },
+
+  // Same restore as CI: --locked-mode fails when packages.lock.json is out of date.
+  "postCreateCommand": "dotnet restore TodoItems.slnx --locked-mode && dotnet tool restore --tool-manifest TodoItems.Api/.config/dotnet-tools.json",
+
+  // Runs on every start: warns when the workspace is not on a case-sensitive filesystem.
+  "postStartCommand": "bash .devcontainer/check-case-sensitivity.sh",
+
+  // Aspire dashboard (TodoItems.AppHost/Properties/launchSettings.json). The API's ports are
+  // assigned by Aspire and forwarded automatically when they open.
+  "forwardPorts": [15278],
+  "portsAttributes": {
+    "15278": { "label": "Aspire dashboard", "onAutoForward": "openBrowser" }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "ms-azuretools.vscode-bicep"
+      ]
+    }
+  }
+}
