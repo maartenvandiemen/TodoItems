@@ -25,7 +25,11 @@
     // and for Aspire (the AppHost starts SQL Server). Docker-in-docker instead of the host socket:
     // containers started by the tests are reachable on localhost, and bind mounts resolve inside
     // the dev container. The feature keeps /var/lib/docker in a volume, so pulled images survive a rebuild.
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    // moby: false installs Docker CE instead of Moby: the SDK 11.0 image is Ubuntu 26.04 (resolute),
+    // and Microsoft does not publish Moby packages for it (yet).
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": false
+    },
     // main.bicep is linted in the pipeline.
     "ghcr.io/devcontainers/features/azure-cli:1": {
       "installBicep": true
