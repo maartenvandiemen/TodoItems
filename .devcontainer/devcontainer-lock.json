@@ -14,6 +14,11 @@
       "version": "2.17.0",
       "resolved": "ghcr.io/devcontainers/features/docker-in-docker@sha256:25b9f05705ffba7dbe503230ac76081419306f8c8bc88e0ce78c4ecd99a0c78c",
       "integrity": "sha256:25b9f05705ffba7dbe503230ac76081419306f8c8bc88e0ce78c4ecd99a0c78c"
+    },
+    "ghcr.io/microsoft/aspire-devcontainer-feature/aspire:2": {
+      "version": "2.0.0",
+      "resolved": "ghcr.io/microsoft/aspire-devcontainer-feature/aspire@sha256:85cef97f2de880d21a742f799120af2e53f69f4c9334d525381629f81c0409af",
+      "integrity": "sha256:85cef97f2de880d21a742f799120af2e53f69f4c9334d525381629f81c0409af"
     }
   }
 }

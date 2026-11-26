@@ -14,7 +14,11 @@
   // "works in CI". global.json pins 11.0.100 (latestPatch).
   "image": "mcr.microsoft.com/dotnet/sdk:11.0",
 
+  // Based on Microsoft's Aspire dev container (github.com/microsoft/aspire-devcontainer), without
+  // Node, Python, uv and PowerShell: the AppHost only runs .NET projects and SQL Server.
   "features": {
+    // The 'aspire' CLI: 'aspire run', 'aspire certs trust', and the MCP server in .mcp.json.
+    "ghcr.io/microsoft/aspire-devcontainer-feature/aspire:2": {},
     // Non-root 'vscode' user, git, and the usual shell tools on top of the plain SDK image.
     "ghcr.io/devcontainers/features/common-utils:2": {
       "username": "vscode",
@@ -47,8 +51,19 @@
   // Same restore as CI: --locked-mode fails when packages.lock.json is out of date.
   "postCreateCommand": "dotnet restore TodoItems.slnx --locked-mode && dotnet tool restore --tool-manifest TodoItems.Api/.config/dotnet-tools.json",
 
-  // Runs on every start: warns when the workspace is not on a case-sensitive filesystem.
-  "postStartCommand": "bash .devcontainer/check-case-sensitivity.sh",
+  // .NET and OpenSSL inside the container trust the ASP.NET Core development certificate
+  // (Aspire dashboard and resources over HTTPS). Same as Microsoft's Aspire dev container.
+  "remoteEnv": {
+    "SSL_CERT_DIR": "/usr/lib/ssl/certs:/home/vscode/.aspnet/dev-certs/trust"
+  },
+
+  // Runs on every start:
+  //  - certs: create and trust the HTTPS development certificate;
+  //  - case: warn when the workspace is not on a case-sensitive filesystem.
+  "postStartCommand": {
+    "certs": "aspire certs trust --non-interactive",
+    "case": "bash .devcontainer/check-case-sensitivity.sh"
+  },
 
   // Aspire dashboard (TodoItems.AppHost/Properties/launchSettings.json). The API's ports are
   // assigned by Aspire and forwarded automatically when they open.
@@ -60,6 +75,7 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "microsoft-aspire.aspire-vscode",
         "ms-dotnettools.csdevkit",
         "ms-azuretools.vscode-bicep"
       ]
